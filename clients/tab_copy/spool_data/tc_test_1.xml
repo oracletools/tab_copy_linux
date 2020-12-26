@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SPOOL_BK94994_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB1" value="%CSMARTBSER_SMARTQ1%"></param>
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_5min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	
+	
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d 
+     )d
+     ) d where rn=1
+     --and UPPER(SUBSTR(deal, 1, 2)) ='00'
+     --and rownum <100000
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+
+<worker1 name="INSERT_TEST">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+	
+      <sql_template>
+        <![CDATA[
+
+insert --+append
+     into dev_fin_1
+  select --+PARALLEL
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (  SELECT --+PARALLEL
+   rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select
+     d.rowid rid,d.* from CSMARTVOL.STG_OTC_CWM d,
+    (select * from dev_mmrid
+    ) r
+     where d.rowid between  r.mirid and r.marid and
+    d.deal=r.deal
+    ) d) d where rid=mrid;
+
+commit;
+	
+  
+  
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker1>
+
+
+
+<worker1 name="CTAS">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+	
+      <sql_template>
+        <![CDATA[
+
+ create table dev_fin_12 as
+  select --+PARALLEL
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (  SELECT --+PARALLEL
+   rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select
+     d.rowid rid,d.* from CSMARTVOL.STG_OTC_CWM d,
+    (select * from dev_mmrid_up_row --where up='23'
+    ) r
+     where d.rowid between  r.mirid and r.marid and
+    d.deal=r.deal
+    ) d) d where rid=mrid;		
+  
+  
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker1>
+<worker1 name="INSERT">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+	
+      <sql_template>
+        <![CDATA[
+insert --+APPEND
+ into DEV_FIN_11_f2 (deal,
+  transactionid,
+  affirmationperson,
+  affirmationteam,
+  businessline,
+  businessunitmanager,
+  confirmationstatus,
+  confirmationsubstatus,
+  age,
+  confirmcategory,
+  confirmid,
+  confirmstatlastmodified,
+  confirmstatlastmodifiedby,
+  createdtimestamp,
+  deskname,
+  earlyterminationdate,
+  generator,
+  generatorteam,
+  lasteconomicmodification,
+  linkedconfirmed,
+  matcher,
+  matcherteam,
+  middleofficehead,
+  modificationflag,
+  previousworkflowstep,
+  product,
+  productcontroller,
+  producttype,
+  reconstatus,
+  reviewer,
+  reviewerteam,
+  sentflag,
+  specialhandling,
+  state,
+  stateversionnumber,
+  strategy,
+  strategycode,
+  substrategy,
+  tradeterminationreason,
+  tradingdeskhead,
+  workflowstep,
+  verbalstatus,
+  typeofconfirm
+  ) select * from DEV_FIN_11 where 1=2;
+  
+  commit;
+  
+  
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker1>
+  
+  
+<worker1 name="CSMARTVOL.Q1.SPOOL_5min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+select * from (SELECT --+PARALLEL
+   rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select
+     d.rowid rid,d.* from DEV_FIN_11_f2 PARTITION (part_23) d --where rownum <5000000--where UPPER(SUBSTR(TRIM(d.deal), 1, 2))='00'
+     ) d )where rid=mrid
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_12min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+SELECT /*+PARALLEL*/A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT, TAGEBUSINESS,A.TRD_AGEBAND,A.UNIQ_ID,
+B.affirmationperson,B.affirmationteam,B.businessline,B.businessunitmanager,B.confirmationstatus,B.confirmationsubstatus,
+B.age,B.confirmcategory,B.confirmstatlastmodified,B.confirmstatlastmodifiedby,B.deskname,
+B.earlyterminationdate,B.generator,B.generatorteam,B.lasteconomicmodification,B.linkedconfirmed,B.matcher,B.matcherteam,
+B.middleofficehead,B.modificationflag,B.previousworkflowstep,B.product,B.productcontroller,B.reconstatus,B.reviewer,B.reviewerteam,
+B.sentflag,B.specialhandling,B.stateversionnumber,B.strategy,B.strategycode,B.substrategy,
+B.tradingdeskhead,B.workflowstep  --,C.goc
+from (select * from DEV_FIN_11_f2 --PARTITION (part_00)
+--where ROWID BETWEEN 'AAOWA1AApAAHBqpAAA' AND 'AAOWA1AApAAKn9zAAT'
+)  B,
+( select --+9PARALLEL
+ A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT,
+   TAGEBUSINESS ,A.TRD_AGEBAND,A.UNIQ_ID
+    from STG_OASYS_FEED_f2 --PARTITION (part_00)
+    A  --, v_del_trd trd  where  trd.cobdate =A.D_TRADEDATE
+) A --,
+--DEV_XREF C
+where A.deal=B.deal --(+)
+and A.transactionid=B.transactionid --(+)
+;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_test">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select --+PARALLEL
+ A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT,
+  11230 -  trd.agedbusinessdays TAGEBUSINESS ,A.TRD_AGEBAND,A.UNIQ_ID
+    from STG_OASYS_FEED A, v_del_trd trd  where  trd.cobdate =A.D_TRADEDATE and rownum <100000 --rowid between 'AAOWjnAApAACGDoAAA' and 'AAOWjnAArAAJpl+AAB'
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_17sec">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select --+PARALLEL
+ A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT,
+  11230 -- - (select agedbusinessdays from v_del_trd where cobdate =A.D_TRADEDATE) 
+  TAGEBUSINESS ,A.TRD_AGEBAND,A.UNIQ_ID
+    from STG_OASYS_FEED A where rownum <100000
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_35sec">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select --+PARALLEL
+ A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT,
+  11230  - (select agedbusinessdays from v_del_trd where cobdate =A.D_TRADEDATE) TAGEBUSINESS ,A.TRD_AGEBAND,A.UNIQ_ID
+    from STG_OASYS_FEED A where rownum <100000
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_5min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select * from STG_OASYS_FEED A --where rownum <10000 --rowid between 'AAOWjnAApAACGDoAAA' and 'AAOWjnAArAAJpl+AAB'
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+	
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_5min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select /*+ PARALLEL */
+ A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT,
+  (select agedbusinessdays from csmartbser.nostros_calendar where cobdate =A.D_FILE_DATE) - (select agedbusinessdays from csmartbser.nostros_calendar where cobdate =A.D_TRADEDATE) TAGEBUSINESS ,A.TRD_AGEBAND,A.UNIQ_ID
+    from STG_OASYS_FEED A where rownum <10000 --rowid between 'AAOWjnAApAACGDoAAA' and 'AAOWjnAArAAJpl+AAB'
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+  
+<worker1 name="CSMARTVOL.Q1.SPOOL_5min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+select * from (SELECT --+PARALLEL
+   rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select
+     d.rowid rid,d.* from DEV_FIN_11_f2 PARTITION (part_23) d --where rownum <5000000--where UPPER(SUBSTR(TRIM(d.deal), 1, 2))='00'
+     ) d )where rid=mrid
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_5min">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+  SELECT /*+_PARALLEL*/A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT, TAGEBUSINESS,A.TRD_AGEBAND,A.UNIQ_ID,
+B.affirmationperson,B.affirmationteam,B.businessline,B.businessunitmanager,B.confirmationstatus,B.confirmationsubstatus,
+B.age,B.confirmcategory,B.confirmstatlastmodified,B.confirmstatlastmodifiedby,B.deskname,
+B.earlyterminationdate,B.generator,B.generatorteam,B.lasteconomicmodification,B.linkedconfirmed,B.matcher,B.matcherteam,
+B.middleofficehead,B.modificationflag,B.previousworkflowstep,B.product,B.productcontroller,B.reconstatus,B.reviewer,B.reviewerteam,
+B.sentflag,B.specialhandling,B.stateversionnumber,B.strategy,B.strategycode,B.substrategy,
+B.tradingdeskhead,B.workflowstep  ,C.goc
+from ((SELECT --+PARALLEL
+   rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmatio	nperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select
+     d.rowid rid,d.* from DEV_FIN_11_f2 PARTITION (part_23) d --where rownum <5000000--where UPPER(SUBSTR(TRIM(d.deal), 1, 2))='00'
+     ) d )
+--where ROWID BETWEEN 'AAOWA1AApAAHBqpAAA' AND 'AAOWA1AApAAKn9zAAT'
+)  B,
+(SELECT * FROM CSMARTBSER.STG_OASYS_FEED_f2 PARTITION (part_23)
+) A ,
+DEV_XREF C
+where A.deal=B.deal (+)
+and A.transactionid=B.transactionid (+)
+and A.partyaccountnumber =C.firm_acct(+)
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="CSMARTVOL.Q1.SPOOL_slow">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+SELECT --+PARALLEL1
+   --rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select d.*,
+    ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn from CSMARTVOL.STG_OTC_CWM d
+     )d where      
+     --UPPER(SUBSTR(deal, 1, 2)) ='00'
+     rn=1
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+<worker1 name="CSMARTVOL.Q1.SPOOL">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+
+SELECT --+PARALLEL
+   rid,MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid,crtd_dt) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm
+    FROM  (select
+     d.rowid rid,d.* from CSMARTVOL.STG_OTC_CWM d where UPPER(SUBSTR(TRIM(d.deal), 1, 2))='00') d
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+  
+<worker1 name="CSMARTVOL.Q1.SPOOL">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+
+SELECT /*+_PARALLEL*/A.DEAL,A.TRANSACTIONID,A.CREDITDEFAULTSWAPREF,A.CONFIMATIONSTATUS,A.CONFIRMATIONSTATUSREASON,A.CONFIRMATIONSTATUSSUBTYPE,A.COUNTERPARTYACCOUNT,A.COUNTERPARTYACCOUNTNUMBER,A.COUNTERPARTYDESK,A.COUNTERPARTYLEGALENTITY,A.COUNTERPARTYNAME,A.CURRENCY,A.ENTRYDATE,A.EVENTTYPE,A.FIRMROLE,A.LOCATION,A.MASTERCONFAGREEMENTTYPE,A.MASTERAGRRMENTEXTENSION,A.MASTERAGREEMENTMNEMONIC,A.MASTERAGREEMENTSHELF,A.MTMVALUE,A.MTMVALUEDATE,A.NOTIONAL,A.NUMBEROFCONTRACTS,A.OPERATIONFILE,A.PARTYACCOUNT,A.PARTYACCOUNTNUMBER,A.PARTYDESK,A.PARTYLEGALENTITY,A.PARTYPOSITION,A.PARTYRELATIONSHIP,A.PAYSIDECURRENCY,A.PAYSIDENOTIONAL,A.PAYSIDENOTIONALCURRENCY,A.PRIMARYSYSTEM,A.PRIMARYTRANSACTIONID,A.PRODUCTCLASS,A.RECEIVINGSIDECURRENCY,A.RECEIVINGSIDENOTIONAL,A.RECEIVINGSIDENOTIONALCURRENCY,A.SECURITYAGREEMENT,A.SECURITYAGREEMENTSTATUS,A.SETTLEMENTDATE,A.SETTLEMENTMETHOD,A.SALESPERSON,A.STRIKERATE,A.TAXMNEMONIC,A.TERMINATIONDATE,A.ACTUALTERMINATIONDATE,A.TRADEDATE,A.TRADER,A.TRADESTATUS,A.TRADETERMINATIONREASON,A.TYPEOFDEAL,A.EXTERNALSYSTEM,A.EXTERNALTRADENUMBER,A.OWNERSHIP,A.VERBALSTATUS,A.TYPEOFCONFIRM,A.OPERATIONSCENTER,A.CONFIRMATIONSTATUS1,A.DEPOTCORPUNITGFCID,A.FIRMGFPID,A.GFCID,A.CUSTOMERGFPID,A.REFERENCEENTITY,A.MANAGERGROUPNAME,A.CALCULATIONAGENTCITY,A.CUSTOMERREFERENCE,A.ITEMCOUNT,A.UNDERLYINGCUSIP,A.UNDERLYING,A.COBDATE,A.STGYCODE,A.STGY,A.ATTACHMENTPOINTPERCENTAGE,A.EXHAUSTIONPOINTPERCENTAGE,A.CREDITEVENTONTHETRADE,A.OBLIGATIONACCELERATION,A.DOCUMENTATION,A.CONFIRMID,A.PRODUCTTYPE,A.STATE,A.PARENTCOUNTERPARTYNAME,A.PAYSIDEPRINMDL,A.RCVSIDEPRINMDL,A.PAYSIDEPRODCORP,A.RCVSIDEPRODCORP,A.PAYSIDEPRODCLAS,A.RCVSIDEPRODCLAS,A.TYPEOFOPT,A.SUBCLAS,A.STATENUM,A.STATEVERNUM,A.REFERENCESPOTRATE,A.CURRPRDPYMTDT,A.AMENDREASON,A.COB_CURRENCY,A.COB_PAYSIDENOTATIONALCURRENCY,A.COB_RECSIDENOTATIONALCURRENCY,A.FIX_RT,A.MARGININGFREQUENCY,A.TRIGGERAMOUNT,A.MINIUMAMOUNT,A.MTMCURRENCY,A.NETTINGID,A.NETTINGFLAG,A.INITIALMARGIN,A.COLLATERALMARGIN,A.PAY_NOTL_USD,A.RECEIVESIDENOTIONAL,A.CDXTRADETYPE,A.NOTIONALUSD,A.REDID,A.SOURCESYSTEMCODE,A.SOURCEFILEUID,A.CREATEDBY,A.CREATEDTIMESTAMP,A.DERIVEDOWNERSHIPCODE,A.LEGAL_ENTITY_KEY,A.COUNTERPARTY_UNIQUE_ID_GRD,A.LOGICALNAME,A.CEDISPLAYNAME,A.CDSSPREAD,A.SOURCESYSTEM,A.D_ENTRYDATE,A.D_MTMVALUEDATE,A.D_SETTLEMENTDATE,A.D_TERMINATIONDATE,A.D_ACTUALTERMINATIONDATE,A.D_TRADEDATE,A.D_FILE_DATE,A.D_CURPERIODPYMTDT,
+(select agedbusinessdays from csmartbser.nostros_calendar where cobdate =A.D_FILE_DATE) - (select agedbusinessdays from csmartbser.nostros_calendar where cobdate =A.D_TRADEDATE) TAGEBUSINESS,
+A.TRD_AGEBAND,A.UNIQ_ID,
+B.affirmationperson,B.affirmationteam,B.businessline,B.businessunitmanager,B.confirmationstatus,B.confirmationsubstatus,
+B.age,B.confirmcategory,B.confirmstatlastmodified,B.confirmstatlastmodifiedby,B.deskname,
+B.earlyterminationdate,B.generator,B.generatorteam,B.lasteconomicmodification,B.linkedconfirmed,B.matcher,B.matcherteam,
+B.middleofficehead,B.modificationflag,B.previousworkflowstep,B.product,B.productcontroller,B.reconstatus,B.reviewer,B.reviewerteam,
+B.sentflag,B.specialhandling,B.stateversionnumber,B.strategy,B.strategycode,B.substrategy,
+B.tradingdeskhead,B.workflowstep, C.goc from DEV_FIN_11  B,
+(SELECT * FROM CSMARTBSER.STG_OASYS_FEED) A,
+(select max(goc) as goc, firm_acct from CSMARTREF.REF_MNGD_SEG_XREF where firm_acct is not null group by firm_acct ORDER by firm_acct, goc desc) C
+where A.deal=B.deal(+) and A.transactionid=B.transactionid(+)
+and A.partyaccountnumber =C.firm_acct(+)
+;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+<worker1 name="CSMARTVOL.Q1.SPOOL">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+ select * FROM del_v_oafeed
+ A where  ROWID BETWEEN 'AAOWCxAApAAGE2CAAA' AND 'AAOWCxAApAAGpmpAAF';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+</etldataflow>

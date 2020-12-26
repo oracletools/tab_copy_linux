@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="5_TVU">
+<globals>
+
+	<param name="ETLFLOW_DESCR" value="Insert all recs record to TVU."></param>
+
+	<!-- PIPELINE execution type
+	 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>
+
+	<param name="FIELD_TERMINATOR" value="'|'"></param>
+	<param name="LINE_TERMINATOR" value="''"></param>
+
+	<param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	<param name="SCHEMA_NAME" value="PARACCEL"></param>
+	<!--will spool ALL records if LAME_DUCK=0-->
+	<param name="LAME_DUCK" value='0'></param>
+	<param name="ARRAYSIZE" value="5000"></param>
+	<param name="COPYCOMMIT" value="4"></param>
+	<!--sqlp attribute-->
+
+	<param name="SOURCE_TABLE" value="TRD_VOL_UNION"></param>
+	<param name="INS_TABLE" value="TVU_ALL_INSERT_TEST"></param>
+
+
+	<param name="IF_TOSS_CACHE" value="0"></param>
+	<param name="TRANSACTION" value="COMMIT;"></param>	 
+
+	<param name="IF_ASYNC_LOG" value="1"></param>		
+	
+</globals>
+
+
+
+<worker1 name="5_TVU_CR_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		 
+		 CREATE TABLE %INS_TABLE% (
+    trd_vol_sid character varying(20) NOT NULL distkey,
+    cob_dt timestamp without time zone NOT NULL,
+    src_file_cd character varying(30) NOT NULL encode runlength,
+    feed_src_sys character varying(30) encode runlength,
+    trd_tran_dt timestamp without time zone encode bytedict,
+    trd_eff_dt timestamp without time zone encode bytedict,
+    con_setl_dt timestamp without time zone encode bytedict,
+    con_setl_open_leg_dt timestamp without time zone encode bytedict,
+    con_setl_cls_leg_dt timestamp without time zone encode bytedict,
+    trd_entr_dtm timestamp without time zone encode bytedict,
+    src_sys_entr_ts timestamp without time zone,
+    ctp_acct_no character varying(30) encode runlength,
+    ctp_uid_pp character varying(30) encode runlength,
+    ctp_uid_grd character varying(30) encode runlength,
+    ctp_gfcid_pp character varying(30) encode runlength,
+    ctp_gfcid_grd character varying(30) encode runlength,
+    ctp_mnemonic character varying(30) encode runlength,
+    corp_vs_intbank character varying(30) encode runlength,
+    ctp_ims_acct_no character varying(30) encode runlength,
+    ctp_cpi_acct_no character varying(30) encode runlength,
+    ctp_baseno character varying(30) encode runlength,
+    ctp_inds_sect character varying(60) encode runlength,
+    salomon_6_dgt_no character varying(30) encode runlength,
+    ctp_nam character varying(500) encode deflate,
+    fo_goc character varying(30) encode runlength,
+    lgl_enty_id_pp character varying(60) encode runlength,
+    lgl_enty_nam_pp character varying(60) encode runlength,
+    lgl_enty_key character varying(60) encode runlength,
+    intl_prod_id character varying(120) encode runlength,
+    intl_prod_desc character varying(120) encode deflate,
+    scr_uid_pp character varying(30) encode runlength,
+    scr_uid_grd character varying(30) encode runlength,
+    cusip character varying(30) encode runlength,
+    isin character varying(30) encode runlength,
+    sedol character varying(30) encode runlength,
+    tkr_symb character varying(30) encode runlength,
+    phys_ind character(1) encode runlength,
+    aset_lvl_key character varying(180) encode deflate,
+    aset_lvl_one_cd character varying(60) encode runlength,
+    aset_lvl_one_desc character varying(120) encode deflate,
+    aset_lvl_two_cd character varying(60) encode runlength,
+    aset_lvl_two_desc character varying(120) encode deflate,
+    aset_lvl_thr_cd character varying(60) encode runlength,
+    aset_lvl_thr_desc character varying(120) encode deflate,
+    firm_acct_no character varying(30) encode runlength,
+    firm_acct_mnemonic character varying(30) encode runlength,
+    firm_uid_pp character varying(30) encode runlength,
+    firm_uid_grd character varying(30) encode runlength,
+    ims_firm_acct_no character varying(30) encode runlength,
+    cpi_firm_acct_no character varying(30) encode runlength,
+    expn_cd character varying(30) encode runlength,
+    mcrctrl_cd character varying(30) encode runlength,
+    fo_book_sys character varying(30) encode runlength,
+    elec_pltfrm character varying(30) encode runlength,
+    cfm_pltfrm character varying(30) encode runlength,
+    exch character varying(100) encode deflate,
+    ord_no character varying(60) encode runlength,
+    trd_entr_user_id character varying(30) encode runlength,
+    trdr_id character varying(30) encode runlength,
+    slsprsn_id character varying(60) encode runlength,
+    bltr_cd character(3) encode bytedict,
+    trd_entr_user_nam character varying(60) encode runlength,
+    trd_entr_user_desk_rgn character varying(30) encode runlength,
+    trdr_nam character varying(60) encode runlength,
+    trdr_rgn character varying(60) encode runlength,
+    slsprsn_nam character varying(60) encode runlength,
+    slsprsn_rgn character varying(60) encode runlength,
+    tran_exec_meth character varying(30) encode runlength,
+    tran_exec_cndt character varying(30) encode runlength,
+    lgl_cpty character varying(60) encode runlength,
+    trd_leg_val character varying(10) encode runlength,
+    buy_sell character varying(11) encode runlength,
+    jnt_vntr_firm_nam character varying(60) encode runlength,
+    trd_cfm_typ character varying(30) encode runlength,
+    setl_cmprsn_typ character varying(30) encode runlength,
+    cfm_cmprsn_typ character varying(30) encode runlength,
+    idx character varying(30) encode runlength,
+    mkt_of_setl_cd character varying(30) encode runlength,
+    actl_mkt_of_setl_cd character varying(200) encode deflate,
+    cust_serv_loca character varying(30) encode runlength,
+    setl_typ character varying(30) encode runlength,
+    setl_loca character varying(125) encode deflate,
+    firm_nos_cd character varying(30) encode runlength,
+    firm_nos_nam character varying(60) encode runlength,
+    firm_nos_acct_no character varying(60) encode runlength,
+    firm_dep_cd character varying(30) encode runlength,
+    firm_dep_nam character varying(60) encode runlength,
+    firm_dep_acct_no character varying(60) encode runlength,
+    ctp_nos_cd character varying(30) encode runlength,
+    ctp_nos_nam character varying(60) encode runlength,
+    ctp_nos_acct_no character varying(60) encode runlength,
+    ctp_dep_cd character varying(30) encode runlength,
+    ctp_dep_nam character varying(60) encode runlength,
+    ctp_dep_acct_no character varying(60) encode runlength,
+    vol_evnt_typ character varying(60) encode runlength,
+    deal_id character varying(30) encode runlength,
+    tran_id character varying(30) encode runlength,
+    blk_vs_aloc character varying(30) encode runlength,
+    afrm_sta_ind character varying(60) encode runlength,
+    as_of_ind character(1) encode runlength,
+    cfm_sta_ind character varying(60) encode runlength,
+    exec_vol_ind character(1) encode runlength,
+    lnkd_ind character(1) encode runlength,
+    safe_stld_ind character(1) encode runlength,
+    setl_vol_ind character(1) encode runlength,
+    stp_cfm_ind character(1) encode runlength,
+    stp_exec_ind character(1) encode runlength,
+    stp_setl_ind character(1) encode runlength,
+    stp_type character varying(30) encode runlength,
+    same_day_ind character(1) encode runlength,
+    tran_typ character varying(150) encode deflate,
+    own_cd character varying(60) encode runlength,
+    trd_sta character varying(60) encode runlength,
+    exec_typ character varying(30) encode runlength,
+    metrics_cat character varying(30) encode runlength,
+    trd_sta_resn character varying(250) encode runlength,
+    blk_trd_ref character varying(30) encode runlength,
+    ext_trd_ref character varying(150) encode deflate,
+    entp_trd_ref_no character varying(30) encode runlength,
+    ops_trd_ref character varying(120) encode deflate,
+    ops_setl_sys_trd_ref character varying(120) encode deflate,
+    fo_trd_ref character varying(30) encode runlength,
+    trd_ref_1 character varying(60) encode runlength,
+    trd_ref_2 character varying(60) encode runlength,
+    trd_ref_3 character varying(60) encode runlength,
+    trd_ref_4 character varying(60) encode runlength,
+    trd_ref_5 character varying(60) encode runlength,
+    trd_ref_sys_nam_1 character varying(30) encode runlength,
+    trd_ref_sys_nam_2 character varying(30) encode runlength,
+    trd_ref_sys_nam_3 character varying(30) encode runlength,
+    trd_ref_sys_nam_4 character varying(30) encode runlength,
+    trd_ref_sys_nam_5 character varying(30) encode runlength,
+    intl_trd_ver_no character varying(30) encode runlength,
+    intl_trd_pri_ver_no character varying(30) encode runlength,
+    fo_trd_ver_no character varying(30) encode runlength,
+    fo_trd_pri_ver_no character varying(30) encode runlength,
+    setl_brkr_nam character varying(60) encode runlength,
+    setl_brkr_exch_no character varying(120) encode deflate,
+    trd_brkr_nam character varying(60) encode runlength,
+    trd_brkr_exch_no character varying(30) encode runlength,
+    novtn_cnst_meth character varying(60) encode runlength,
+    ta_oa character(2) encode runlength,
+    lcl_ccy character varying(60) encode runlength,
+    no_of_lots numeric(19,8),
+    no_of_ordrs numeric(19,0),
+    lcl_ccy_amt numeric(19,8),
+    con_lcl_ccy_amt numeric(19,8),
+    usd_amt numeric(19,8),
+    con_usd_amt numeric(19,8),
+    qty numeric(19,0) encode mostly32,
+    con_qty numeric(19,0) encode mostly16,
+    prc numeric(19,8) encode mostly32,
+    curr_face_amt numeric(19,8),
+    curr_mv numeric(19,8),
+    curr_mkt_prc numeric(19,8),
+    cmsn_lcl_ccy_amt numeric(19,8) encode runlength,
+    cmsn_usd_amt numeric(19,8),
+    notl_amt numeric(19,8),
+    opt_prem_amt numeric(19,8),
+    trig_optn_pyot numeric(19,8),
+    xpct_val numeric(19,8),
+    calc_usd_amt numeric(19,8),
+    trd_cnt numeric(19,0) encode delta,
+    item_cnt numeric(19,0) encode runlength,
+    new_item_cnt numeric(19,0) encode delta,
+    late_entr_item_cnt numeric(19,0) encode runlength,
+    late_entr_age numeric(19,0) encode runlength,
+    src_file_uid character varying(30) NOT NULL encode runlength,
+    jrules_rule_id character varying(60) encode runlength,
+    crtd_by character varying(60) NOT NULL encode runlength,
+    crtd_ts timestamp without time zone NOT NULL encode bytedict,
+    setl_bank_loc character varying(100) encode deflate,
+  abm_drv_xref_key   character    varying(60)  NULL encode runlength,
+  ftb_ind         character       varying(5)   NULL encode runlength,
+  cmprsn_ind      character       varying(5)   NULL encode runlength	
+)
+DISTSTYLE KEY
+SORTKEY ( cob_dt, con_setl_dt );
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="5_TVU_TRUNC_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		TRUNCATE TABLE  %INS_TABLE%;
+		;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="5_TVU_ALL_INS_1">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		BEGIN;
+		 INSERT INTO %INS_TABLE%  SELECT * FROM %SOURCE_TABLE%;
+		 %TRANSACTION%;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+</etldataflow>

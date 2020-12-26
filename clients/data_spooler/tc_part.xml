@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PART_DELTA_TEST">
+<globals>
+	  <!--chr(9) or | -->
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="TO_DB" value="%AB95022_GMAD1%"></param>
+	  <param name="TO_SCHEMA" value="AB95022"></param>
+	  
+	  <param name="TO_DB2" value="%CSMARTREF_SMARTD1%"></param>
+
+	  <param name="LAME_DUCK" value='1000'></param>
+
+	  <!--sql COPY attributes -->
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table before inserting -->
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  <!--Create COPY view before inserting -->
+	  <param name="IF_CREATE_VIEW" value="0"></param>	  
+	  <!--INSERT/APPEND -->
+	  <param name="INSERT_MODE" value="APPEND"></param>
+
+</globals>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.JUL_101">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+	<!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+	<param name="DATE_RANGE_DELTA" value="45"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+
+</etldataflow>

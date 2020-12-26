@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PARACCELL_POC">
+<globals>
+
+      <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+
+	  <param name="FROM_DB" value="%AB95022_SMARTP1B%"></param>
+	  <!--will spool ~81 mil records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='1000'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.APR_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="APR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+</etldataflow>

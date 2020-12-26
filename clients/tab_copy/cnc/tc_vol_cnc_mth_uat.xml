@@ -1,0 +1,33 @@
+<etldataflow name="COPY-CSMARTVOL.DLY_TRD_METRICS">
+<globals>
+          <param name="FLOW_TYPE" value="ASYNC"></param>
+	  <param name="FIELD_TERMINATOR" value='|^'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CVOL_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+
+</globals>
+
+<worker name="CSMARTVOL.CNC_DLY_TREND_METRICS">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[CSMARTVOL.CNC_DLY_TREND_METRICS]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="CSMARTVOL.CNC_DESK_AVG_MTH">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[CSMARTVOL.CNC_DESK_AVG_MTH]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+</etldataflow>

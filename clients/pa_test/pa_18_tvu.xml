@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="18_TVU_SELECT_OFFSET">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Without filter or sort - Retrieve specific subset of data from query using limit and offset "></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION"></param>
+	  <param name="OFFSET" value="49408248"></param>
+	  <param name="LIMIT" value="500"></param>
+	   <param name="IF_TOSS_CACHE" value="1"></param>
+	   
+	  <param name="OFFSET_0" value="0"></param>	  
+	  <param name="OFFSET_500" value="500"></param>	 
+	  <param name="OFFSET_5k" value="5000"></param>	 
+	  <param name="OFFSET_50k" value="50000"></param>	 
+	  <param name="OFFSET_500k" value="500000"></param>	 	  
+	  <param name="OFFSET_5M" value="5000000"></param>	 	  
+	  <param name="OFFSET_50M" value="50000000"></param>
+	  <param name="LIMIT" value="500"></param>	   
+	   
+
+</globals>
+
+<worker name="18_TVU_SELECT_OFFSET_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_0% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="18_TVU_SELECT_OFFSET_500">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_500% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="18_TVU_SELECT_OFFSET_5k">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_5k% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+<worker name="18_TVU_SELECT_OFFSET_50k">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_50k% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="18_TVU_SELECT_OFFSET_500k">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_500k% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="18_TVU_SELECT_OFFSET_5M">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_5M% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="18_TVU_SELECT_OFFSET_50M">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% OFFSET %OFFSET_50M% LIMIT %LIMIT%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+</etldataflow>

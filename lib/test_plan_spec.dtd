@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- A DTD that describes the etl_drivr mapreduce spec XML file. -->
+
+<!-- The root element of the spec definition. -->
+<!-- The root element of the assembler definition. -->
+<!ELEMENT etl_driver_spec (process_spec?, mapreduce_spec? )>
+
+<!ELEMENT process_spec (description?)>
+<!ATTLIST process_spec
+          gfs_timeout CDATA "20"
+          base_output_directory CDATA #IMPLIED
+          max_etl_waiting_hours CDATA "2"
+          waiting_interval_minutes CDATA "5"
+>
+
+
+<!ELEMENT mapreduce_spec (description?, param*)>
+
+<!ELEMENT param EMPTY>
+<!ATTLIST param
+          name CDATA #REQUIRED
+          value CDATA #REQUIRED
+>

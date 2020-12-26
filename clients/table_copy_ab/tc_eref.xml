@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ORA_TABLE_COPY pipeline
+-->
+<etldataflow name="EREF_TABLE_COPY">
+
+
+<worker name="EREF_BATCH">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="VR_MDWP"></param>
+	  <param name="TO_DB" value="EREF_MDWD"></param>
+	  <param name="EMAIL_TO" value="EMAIL_TO"></param>
+	  <param name="ARRAYSIZE" value="2500"></param>
+	  <param name="COPYCOMMIT" value="2"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+E155817REF.REF_CDMS
+E155817REF.REF_CPI
+E155817REF.REF_CTP_MSTR
+E155817REF.REF_SLSPRSN_HIER
+E155817REF.REF_PRSNL_MSTR
+E155817REF.REF_PRSNL_MGR_HIER
+E155817REF.REF_PRSNL_DEPT_HIER
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+<worker1 name="EREF_COUNTS">
+  <exec_dml>
+    <sqlp method="sql_plus_shell" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="DB_CONNECTOR" value="MDW_MDWD"></param>
+	  <param name="EMAIL_TO" value="EMAIL_TO"></param>
+      <sql_template>
+        <![CDATA[
+SELECT COUNT(*) FROM E155817REF.REF_CDMS;
+SELECT COUNT(*) FROM E155817REF.REF_CPI;
+SELECT COUNT(*) FROM E155817REF.REF_CTP_MSTR;
+SELECT COUNT(*) FROM E155817REF.REF_SLSPRSN_HIER;
+SELECT COUNT(*) FROM E155817REF.REF_PRSNL_MSTR;
+SELECT COUNT(*) FROM E155817REF.REF_PRSNL_MGR_HIER;
+SELECT COUNT(*) FROM E155817REF.REF_PRSNL_DEPT_HIER;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+
+</etldataflow>

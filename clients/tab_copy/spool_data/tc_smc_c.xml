@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="ins_P_hash_rev_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_0)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_0)
+ p , SMC_INCOME_INFORMATION partition(rev_0)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_0) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_0) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker name="ins_P_hash_rev_1">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_1)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_1)
+ p , SMC_INCOME_INFORMATION partition(rev_1)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_0) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_1) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+<worker name="ins_P_hash_rev_2">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_2)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_2)
+ p , SMC_INCOME_INFORMATION partition(rev_2)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_0) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_2) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+<worker name="ins_P_hash_rev_3">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_3)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_3)
+ p , SMC_INCOME_INFORMATION partition(rev_3)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_3) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_3) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ins_P_hash_rev_4">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_4)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_4)
+ p , SMC_INCOME_INFORMATION partition(rev_4)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_4) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_4) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker name="ins_P_hash_rev_5">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_5)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_5)
+ p , SMC_INCOME_INFORMATION partition(rev_5)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_5) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_5) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ins_P_hash_rev_6">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_6)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_6)
+ p , SMC_INCOME_INFORMATION partition(rev_6)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_6) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_6) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker name="ins_P_hash_rev_7">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_7)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_7)
+ p , SMC_INCOME_INFORMATION partition(rev_7)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_7) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_7) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker name="ins_P_hash_rev_8">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_8)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_8)
+ p , SMC_INCOME_INFORMATION partition(rev_8)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_8) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_8) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker name="ins_P_hash_rev_9">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert /*+APPEND*/ into del_rev_hash_c partition(rev_9)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY, C.CONTRACTTYPE
+from del_rev_hash partition(rev_9)
+ p , SMC_INCOME_INFORMATION partition(rev_9)
+II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_9) E,
+SMC_CONTRACT_INFORMATION_S partition(rev_9) C
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+and p.SMC_PROD_ID = C.smcp(+)
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker1 name="ins_P_hash_rev_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+drop table SMC_CONTRACT_INFORMATION_S
+/
+		
+create table SMC_CONTRACT_INFORMATION_S(
+SMCP, CONTRACTTYPE,rev
+)
+PARTITION BY LIST (rev) (
+PARTITION rev_0 VALUES ('0'),
+PARTITION rev_1 VALUES ('1'),
+PARTITION rev_2 VALUES ('2'),
+PARTITION rev_3 VALUES ('3'),
+PARTITION rev_4 VALUES ('4'),
+PARTITION rev_5 VALUES ('5'),
+PARTITION rev_6 VALUES ('6'),
+PARTITION rev_7 VALUES ('7'),
+PARTITION rev_8 VALUES ('8'),
+PARTITION rev_9 VALUES ('9')
+) COMPRESS
+ AS
+select --+parallel
+E.*
+ FROM SMC_SECURITY_LAST_UPDATE ss, SMC_CONTRACT_INFORMATION  E
+ where ss.smcp= E.SMCP
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="ins_P_hash_rev_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+drop table SMC_CONTRACT_INFORMATION
+/
+		
+create table SMC_CONTRACT_INFORMATION(
+SMCP, CONTRACTTYPE,rev
+)
+PARTITION BY LIST (rev) (
+PARTITION rev_0 VALUES ('0'),
+PARTITION rev_1 VALUES ('1'),
+PARTITION rev_2 VALUES ('2'),
+PARTITION rev_3 VALUES ('3'),
+PARTITION rev_4 VALUES ('4'),
+PARTITION rev_5 VALUES ('5'),
+PARTITION rev_6 VALUES ('6'),
+PARTITION rev_7 VALUES ('7'),
+PARTITION rev_8 VALUES ('8'),
+PARTITION rev_9 VALUES ('9')
+) COMPRESS
+ AS
+SELECT SMCP, C.CONTRACTTYPE     ,substr(reverse(smcp),1,1) rev
+from  C160970SMC.CONTRACT_INFORMATION@gmail.com C
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[ 
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE ,
+E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY
+from SMC_PRODUCT partition(rev_0) p , SMC_INCOME_INFORMATION partition(rev_0) II, SMC_EXCHANGE_LISTING_INFO_S  partition(rev_0)  E
+where p.SMC_PROD_ID = ii.smcp(+) and  p.SMC_PROD_ID = E.smcp(+)
+ ;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+<worker1 name="ins_P_hash_rev_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+drop table SMC_EXCHANGE_LISTING_INFO
+/
+		
+create table SMC_EXCHANGE_LISTING_INFO(
+SMCP, INSTRUMENTLISTINGLEVEL, ISGLOBALPRIMARY,rev
+)
+PARTITION BY LIST (rev) (
+PARTITION rev_0 VALUES ('0'),
+PARTITION rev_1 VALUES ('1'),
+PARTITION rev_2 VALUES ('2'),
+PARTITION rev_3 VALUES ('3'),
+PARTITION rev_4 VALUES ('4'),
+PARTITION rev_5 VALUES ('5'),
+PARTITION rev_6 VALUES ('6'),
+PARTITION rev_7 VALUES ('7'),
+PARTITION rev_8 VALUES ('8'),
+PARTITION rev_9 VALUES ('9')
+) COMPRESS
+ AS SELECT SMCP, E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY ,substr(reverse(smcp),1,1) rev
+  from C160970SMC.EXCHANGE_LISTING_INFO@gmail.com E
+/
+
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+</etldataflow>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+  
+<worker name="SMC_MR_II_C_E_P">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_p_1_2
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append 
+into  del_p_1_2 
+      select --+full(p) full(i) parallel(8)
+      P.SMCP,P.SHORTDESCRIPTION,P.DESCRIPTION,P.OPERATIONALINDICATOR,P.ISDUMMYPRODUCT,  P.MARKETSECTORDESCRIPTION
+      ,P.ISSUECURRENCY,P.MARKET, P.MARKETSEGMENT,P.ISINDEFAULT,P.ISSUESTATUS,P.SECURITYTYPELEVEL3,P.ISSUEDATE      
+      ,I.SMCI,I.ISSUERCOUNTRYOFINCORPORATION,I.ISSUERNAME
+      ,P.SECURITYTYPELEVEL1,P.SECURITYTYPELEVEL2, P.SERIES,(
+        CASE
+        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN
+          CASE
+          WHEN P.COUNTRY IS NULL THEN
+            'UNALLOCATED'
+          ELSE
+            P.COUNTRY
+          END
+        ELSE
+          I.ISSUERCOUNTRYOFRISK
+        END )
+    AS
+      ISS_CTRY,      (
+        CASE
+        WHEN I.ISSUERCOUNTRY IS NULL THEN
+          CASE
+          WHEN P.COUNTRY IS NULL THEN
+            'UNALLOCATED'
+          ELSE
+            P.COUNTRY
+          END
+        ELSE
+          I.ISSUERCOUNTRY
+        END )
+    AS
+      ORIG_ISS_CTRY
+      FROM C160970SMC.PRODUCT@gmail.com P, C160970SMC.ISSUER@gmail.com I,
+      C160970SMC.SECURITY_LAST_UPDATE@gmail.com SLU
+      WHERE P.ISSUERSMCI = I.SMCI(+)  and P.SMCP=SLU.smcp
+      and DDAMODIFIEDTS > sysdate-1    
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+
+</etldataflow>

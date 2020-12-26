@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2009  . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of _Test pipeline
+-->
+<etldataflow name="dev_to_qa_data_copy">
+
+  <worker name="copy_data1">
+    <copy>
+	<sp_data_copy from_connector="CUSER_GMAD" to_connector="PUSER_QA">
+			<sql_template name="data copy using sql*plus" connector = "CUSER_GMAD">
+				<![CDATA[
+select 'set array 5000
+connect {%COPY_FROM%}
+select '''||table_name||''' table_name, count(*) from '||table_name||';
+--copy from {%COPY_FROM%} to {%COPY_TO%} insert '||table_name||' using select * from '||table_name||'
+connect {%COPY_TO%}
+select '''||table_name||''' table_name, count(*) from '||table_name||';
+' "--sql" 
+  FROM all_tables
+ WHERE UPPER
+          ('pu37680.STGE_STAR_MGT_LDGR sl,
+        sb04142.STGE_STAR_PROD pd,
+		         sb04142.STGE_STAR_ACT sa,
+    	 sb04142.amy_recon_0113_NEW m
+		 sb04142.prlgocouccspmap
+sb04142.stractln_prlcoa
+sb04142.stge_fact_actuals
+sb04142.stge_hier_mgd_seg
+sb04142.stge_hier_account
+'
+          ) LIKE '%' || owner || '.' || table_name || ' ' || '%'
+				]]>
+			</sql_template>	  
+	</sp_data_copy>  
+	</copy>
+  </worker>
+</etldataflow>

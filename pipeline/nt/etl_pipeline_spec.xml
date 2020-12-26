@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    LOG_ROOT="C:/tmp/DEPOT_test"
+    LOAD_ROOT="C:/tmp/DEPOT_test/"
+	APPLOG_ROOT="C:/tmp/DEPOT_applog/"
+	SYSLOG_ROOT="C:/tmp/DEPOT_syslog/"
+	CODELOG_ROOT="C:/tmp/DEPOT_codelog/"
+	REFS_PATH="refs"
+	binaries_path ="lib"
+    />
+  <connector>
+    <MAP_S1 schema="MAP_S" pword="***" sid="MAPDEV1" />
+	<CUSER_GMAD schema="C160970GMA" pword="***" sid="GMAD" />
+	<CPEARL_GMAD schema="C160970GMAPRL" pword="***" sid="GMAD" />
+	<CUSER_GMAQA schema="C160970GMA" pword="***" sid="GMAQA" />
+	<JUSER_QA schema="J160970GMA" pword="***" sid="GMAQA" />
+	<PUSER_QA schema="PU37680" pword="***" sid="GMAQA" />
+	<MDW_MDWD schema="MDW" pword="***" sid="MDWD" />
+	<AB_GMAD schema="AB95022" pword="***" sid="GMAD" />
+	<AB_GMAP schema="AB95022" pword="***" sid="GMAP" />
+	<RA_GMAP schema="vk64877" pword="***" sid="GMAP" />
+	<SR_GMAP schema="sr64878" pword="***" sid="GMAP" />
+	<SB_GMAD schema="SB04142" pword="***" sid="GMAD" />
+	<VR_MDWP schema="vr92232" pword="***" sid="MDWP" />
+	
+  </connector>
+  <default>
+    log_dest="LOG_ROOT"	
+  </default>
+  <worker>
+    <copy name="sp_data_copy" module_name="sql_utils" />
+    <copy name="mist" module_name="sql_utils" />
+	<!--
+	<publisher name="csv_publisher" module_name="csv_utils" /> 
+    <extracter name="csv_extracter" module_name="csv_utils" /> 
+	
+	<ddl_extracter name="ddl_extracter" module_name="sql_utils.py" />
+	-->
+  </worker>
+</test_spec>

@@ -1,0 +1,1684 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2009  . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of _Test pipeline
+-->
+<etldataflow name="exadata_copy_all">
+
+XMLS
+
+<worker name="copy_ENTL_APPL_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_APPL_MSTR"></param>
+      <param name="trg_table" value="ENTL_APPL_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_APPL_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_APPL_USER_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_APPL_USER_MSTR"></param>
+      <param name="trg_table" value="ENTL_APPL_USER_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_APPL_USER_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_APPL_USER_ROLE_MAP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_APPL_USER_ROLE_MAP"></param>
+      <param name="trg_table" value="ENTL_APPL_USER_ROLE_MAP"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_APPL_USER_ROLE_MAP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_CNTL_ACCS_DETL">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_CNTL_ACCS_DETL"></param>
+      <param name="trg_table" value="ENTL_CNTL_ACCS_DETL"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_CNTL_ACCS_DETL"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_DATA_VIS_GRP_MAP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_DATA_VIS_GRP_MAP"></param>
+      <param name="trg_table" value="ENTL_DATA_VIS_GRP_MAP"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_DATA_VIS_GRP_MAP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_DATA_VIS_GRP_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_DATA_VIS_GRP_MSTR"></param>
+      <param name="trg_table" value="ENTL_DATA_VIS_GRP_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_DATA_VIS_GRP_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_DATA_VIS_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_DATA_VIS_MSTR"></param>
+      <param name="trg_table" value="ENTL_DATA_VIS_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_DATA_VIS_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_ROLE_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_ROLE_MSTR"></param>
+      <param name="trg_table" value="ENTL_ROLE_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_ROLE_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_USER_DATA_VIS_GRP_MAP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_USER_DATA_VIS_GRP_MAP"></param>
+      <param name="trg_table" value="ENTL_USER_DATA_VIS_GRP_MAP"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_USER_DATA_VIS_GRP_MAP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_USER_GRP_MAP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_USER_GRP_MAP"></param>
+      <param name="trg_table" value="ENTL_USER_GRP_MAP"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_USER_GRP_MAP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_USER_GRP_MASK">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_USER_GRP_MASK"></param>
+      <param name="trg_table" value="ENTL_USER_GRP_MASK"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_USER_GRP_MASK"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_USER_GRP_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_USER_GRP_MSTR"></param>
+      <param name="trg_table" value="ENTL_USER_GRP_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_USER_GRP_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_ENTL_USER_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.ENTL_USER_MSTR"></param>
+      <param name="trg_table" value="ENTL_USER_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/ENTL_USER_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GMA_LOV_CONFIG">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GMA_LOV_CONFIG"></param>
+      <param name="trg_table" value="GMA_LOV_CONFIG"></param>
+      <param name="log_root" value="%LOG_ROOT%/GMA_LOV_CONFIG"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GMA_PARAM_CONFIG">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GMA_PARAM_CONFIG"></param>
+      <param name="trg_table" value="GMA_PARAM_CONFIG"></param>
+      <param name="log_root" value="%LOG_ROOT%/GMA_PARAM_CONFIG"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GMA_PROC_EXCP_LOG">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GMA_PROC_EXCP_LOG"></param>
+      <param name="trg_table" value="GMA_PROC_EXCP_LOG"></param>
+      <param name="log_root" value="%LOG_ROOT%/GMA_PROC_EXCP_LOG"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GMA_PROC_RUN_LOG">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GMA_PROC_RUN_LOG"></param>
+      <param name="trg_table" value="GMA_PROC_RUN_LOG"></param>
+      <param name="log_root" value="%LOG_ROOT%/GMA_PROC_RUN_LOG"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GMA_PROC_RUN_SUB_LOG">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GMA_PROC_RUN_SUB_LOG"></param>
+      <param name="trg_table" value="GMA_PROC_RUN_SUB_LOG"></param>
+      <param name="log_root" value="%LOG_ROOT%/GMA_PROC_RUN_SUB_LOG"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GTT_HIER_RPT_SMRY_ACT">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GTT_HIER_RPT_SMRY_ACT"></param>
+      <param name="trg_table" value="GTT_HIER_RPT_SMRY_ACT"></param>
+      <param name="log_root" value="%LOG_ROOT%/GTT_HIER_RPT_SMRY_ACT"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GTT_HIER_RPT_SMRY_DEPT">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GTT_HIER_RPT_SMRY_DEPT"></param>
+      <param name="trg_table" value="GTT_HIER_RPT_SMRY_DEPT"></param>
+      <param name="log_root" value="%LOG_ROOT%/GTT_HIER_RPT_SMRY_DEPT"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GTT_HIER_RPT_SMRY_ENTY">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GTT_HIER_RPT_SMRY_ENTY"></param>
+      <param name="trg_table" value="GTT_HIER_RPT_SMRY_ENTY"></param>
+      <param name="log_root" value="%LOG_ROOT%/GTT_HIER_RPT_SMRY_ENTY"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GTT_HIER_RPT_SMRY_PROD">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GTT_HIER_RPT_SMRY_PROD"></param>
+      <param name="trg_table" value="GTT_HIER_RPT_SMRY_PROD"></param>
+      <param name="log_root" value="%LOG_ROOT%/GTT_HIER_RPT_SMRY_PROD"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GTT_HIER_RPT_SMRY_RGN">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GTT_HIER_RPT_SMRY_RGN"></param>
+      <param name="trg_table" value="GTT_HIER_RPT_SMRY_RGN"></param>
+      <param name="log_root" value="%LOG_ROOT%/GTT_HIER_RPT_SMRY_RGN"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_GTT_RPT_HIER">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.GTT_RPT_HIER"></param>
+      <param name="trg_table" value="GTT_RPT_HIER"></param>
+      <param name="log_root" value="%LOG_ROOT%/GTT_RPT_HIER"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HC_ANLS_DETL_UPLOAD">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HC_ANLS_DETL_UPLOAD"></param>
+      <param name="trg_table" value="HC_ANLS_DETL_UPLOAD"></param>
+      <param name="log_root" value="%LOG_ROOT%/HC_ANLS_DETL_UPLOAD"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HC_ANLS_STAF_TRGT_UPLOAD">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HC_ANLS_STAF_TRGT_UPLOAD"></param>
+      <param name="trg_table" value="HC_ANLS_STAF_TRGT_UPLOAD"></param>
+      <param name="log_root" value="%LOG_ROOT%/HC_ANLS_STAF_TRGT_UPLOAD"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HC_ANLS_UPLOAD_COD_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HC_ANLS_UPLOAD_COD_MSTR"></param>
+      <param name="trg_table" value="HC_ANLS_UPLOAD_COD_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/HC_ANLS_UPLOAD_COD_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_ITEM_MSTR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_ITEM_MSTR"></param>
+      <param name="trg_table" value="HIER_ITEM_MSTR"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_ITEM_MSTR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_NORM">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_NORM"></param>
+      <param name="trg_table" value="HIER_NORM"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_NORM"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_NORM_CONFIG">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_NORM_CONFIG"></param>
+      <param name="trg_table" value="HIER_NORM_CONFIG"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_NORM_CONFIG"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_COL_MAP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_COL_MAP"></param>
+      <param name="trg_table" value="HIER_RPT_COL_MAP"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_COL_MAP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_COL_SPEC">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_COL_SPEC"></param>
+      <param name="trg_table" value="HIER_RPT_COL_SPEC"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_COL_SPEC"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN_">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN_"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN_"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN_"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN_1">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN_1"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN_1"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN_1"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN_2">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN_2"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN_2"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN_2"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN_3">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN_3"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN_3"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN_3"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN_4">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN_4"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN_4"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN_4"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_DETL_DEFN_5">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_DETL_DEFN_5"></param>
+      <param name="trg_table" value="HIER_RPT_DETL_DEFN_5"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_DETL_DEFN_5"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_FLTR_DEFN">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_FLTR_DEFN"></param>
+      <param name="trg_table" value="HIER_RPT_FLTR_DEFN"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_FLTR_DEFN"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_FLTR_MAP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_FLTR_MAP"></param>
+      <param name="trg_table" value="HIER_RPT_FLTR_MAP"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_FLTR_MAP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_FLTR_MAP_IOT">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_FLTR_MAP_IOT"></param>
+      <param name="trg_table" value="HIER_RPT_FLTR_MAP_IOT"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_FLTR_MAP_IOT"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_PRE_CALC_DATA">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_PRE_CALC_DATA"></param>
+      <param name="trg_table" value="HIER_RPT_PRE_CALC_DATA"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_PRE_CALC_DATA"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_SMRY">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_SMRY"></param>
+      <param name="trg_table" value="HIER_RPT_SMRY"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_SMRY"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_SMRY_TEST">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_SMRY_TEST"></param>
+      <param name="trg_table" value="HIER_RPT_SMRY_TEST"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_SMRY_TEST"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_STRC_DEFN_DENORM">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_STRC_DEFN_DENORM"></param>
+      <param name="trg_table" value="HIER_RPT_STRC_DEFN_DENORM"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_STRC_DEFN_DENORM"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_HIER_RPT_STRC_DEFN_NORM">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.HIER_RPT_STRC_DEFN_NORM"></param>
+      <param name="trg_table" value="HIER_RPT_STRC_DEFN_NORM"></param>
+      <param name="log_root" value="%LOG_ROOT%/HIER_RPT_STRC_DEFN_NORM"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_MBR_ANLS_MANL_UPLOAD">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.MBR_ANLS_MANL_UPLOAD"></param>
+      <param name="trg_table" value="MBR_ANLS_MANL_UPLOAD"></param>
+      <param name="log_root" value="%LOG_ROOT%/MBR_ANLS_MANL_UPLOAD"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_GMA_META_DATA">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_GMA_META_DATA"></param>
+      <param name="trg_table" value="STGE_GMA_META_DATA"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_GMA_META_DATA"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_ACT">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_ACT"></param>
+      <param name="trg_table" value="STGE_STAR_ACT"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_ACT"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_ACT_HIER">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_ACT_HIER"></param>
+      <param name="trg_table" value="STGE_STAR_ACT_HIER"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_ACT_HIER"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_DEPT">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_DEPT"></param>
+      <param name="trg_table" value="STGE_STAR_DEPT"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_DEPT"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_DEPT_HIER">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_DEPT_HIER"></param>
+      <param name="trg_table" value="STGE_STAR_DEPT_HIER"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_DEPT_HIER"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_ENTY_COD_HIER">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_ENTY_COD_HIER"></param>
+      <param name="trg_table" value="STGE_STAR_ENTY_COD_HIER"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_ENTY_COD_HIER"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_GEO_RGN">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_GEO_RGN"></param>
+      <param name="trg_table" value="STGE_STAR_GEO_RGN"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_GEO_RGN"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_GEO_RGN_HIER">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_GEO_RGN_HIER"></param>
+      <param name="trg_table" value="STGE_STAR_GEO_RGN_HIER"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_GEO_RGN_HIER"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_MGT_LDGR">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_MGT_LDGR"></param>
+      <param name="trg_table" value="STGE_STAR_MGT_LDGR"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_MGT_LDGR"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_OUC_CSP">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_OUC_CSP"></param>
+      <param name="trg_table" value="STGE_STAR_OUC_CSP"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_OUC_CSP"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_PROD">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_PROD"></param>
+      <param name="trg_table" value="STGE_STAR_PROD"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_PROD"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_PROD_HIER">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_PROD_HIER"></param>
+      <param name="trg_table" value="STGE_STAR_PROD_HIER"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_PROD_HIER"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_PROD_P">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_PROD_P"></param>
+      <param name="trg_table" value="STGE_STAR_PROD_P"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_PROD_P"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+
+<worker name="copy_STGE_STAR_SCNR_ID">
+  <copy>
+    <mist dll_method="copy">
+      <param name="src_login" value="%AB_GMAP%"></param>
+      <param name="trg_login" value="%AB_GMAD%"></param>
+      <param name="src_table" value="C160970GMA.STGE_STAR_SCNR_ID"></param>
+      <param name="trg_table" value="STGE_STAR_SCNR_ID"></param>
+      <param name="log_root" value="%LOG_ROOT%/STGE_STAR_SCNR_ID"></param>
+      <template>
+        <![CDATA[
+
+#source and target logins
+p1 = c_char_p ("%src_login%") 
+p2 = c_char_p ("%trg_login%") 
+#source and target table names
+p3 = c_char_p ("%src_table%")
+p4 = c_char_p ("%trg_table%")
+#log location
+p5 = c_char_p ("%log_root%")
+self.dllh.copy (p1, p2, p3, p4, p5)
+
+				]]>
+      </template>
+    </mist>
+  </copy>
+</worker>
+     
+</etldataflow>

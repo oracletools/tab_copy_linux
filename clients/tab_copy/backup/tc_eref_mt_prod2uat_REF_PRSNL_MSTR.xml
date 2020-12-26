@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="EREF_MT_PROD2UAT" >
+
+<globals>
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="TO_DB" value="%ESMARTREF_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="ESMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  
+	   <param name="IF_TRUNCATE" value='1'></param>
+
+</globals>
+
+<worker name="REF_PRSNL_MSTR">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_PRSNL_MSTR
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</etldataflow>

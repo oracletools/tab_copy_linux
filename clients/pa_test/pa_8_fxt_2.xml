@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="8_FXT_DELSERT"  >
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Single Record update"></param>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="TABLE_NAME2" value="TRD_VOL_UNION_900_mil"></param>
+	  <param name="TABLE_NAME" value="FX_TRANSACTION"></param>
+	  
+	  <param name="TEST_FILTER" value="where trans_id=16"></param>
+	  <param name="IF_TOSS_CACHE" value="1"></param>
+</globals>
+
+<worker1 name="VACUUM_TABLE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Vacuuming to test update"></param>
+      <sql_template>
+        <![CDATA[VACUUM  %TABLE_NAME%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="COUNT_RECS2UPDATE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT count(*)||'|cnt' FROM %TABLE_NAME% %TEST_FILTER%;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="8.1_FXT_CTAS_1REC">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="temp_fxt_ctas_test"></param>
+      <sql_template>
+        <![CDATA[
+		DROP TABLE %TEMP_TABLE%;
+		create table %TEMP_TABLE% diststyle none as select * from FXT_CTAS_TEST  %TEST_FILTER%; ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="8.1_FXT_CTAS_1REC_UPDATE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="temp_fxt_ctas_test"></param>
+	<param name="UPD_TABLE" value="temp_fxt_ctas_test"></param>
+      <sql_template>
+        <![CDATA[
+		update %TEMP_TABLE% set book_region ='qwrqfedd fdfas aefasd afasdf dfq', buy_sell_code = 'test code test codetest codet';
+ ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="8.1_FXT_CTAS_1REC_INSERT">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="temp_fxt_ctas_test"></param>
+      <sql_template>
+        <![CDATA[
+		insert into FXT_CTAS_TEST select * from %TEMP_TABLE%;
+ ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="8_FXT_UPDATE_1_REC_DELSERT">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="TEMP_FXT_CTAS_TEST"></param>
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		DROP TABLE %TEMP_TABLE%;
+		create table %TEMP_TABLE% diststyle none  as select * from %TABLE_NAME%  %TEST_FILTER%; 
+		BEGIN; delete from %TABLE_NAME% %TEST_FILTER%; COMMIT; END;
+		update %TEMP_TABLE% set book_region ='qfas aefasd afasdf dfq', buy_sell_code = 'fas 88st code test codetest codet';
+		BEGIN; insert into %TABLE_NAME% select * from %TEMP_TABLE%; COMMIT; END;
+ ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker1 name="8_FXT_UPDATE_1_REC_UNLOPY">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="TEMP_FXT_CTAS_TEST"></param>
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		Unload ('select * from %TABLE_NAME%  %TEST_FILTER%') to 'map/%TABLE_NAME%.data' delimiter '|';
+		BEGIN; delete from %TABLE_NAME% %TEST_FILTER%; COMMIT; END;
+		copy %TABLE_NAME% from '$disk/tmp/%TABLE_NAME%.data'  parallel delimiter '|';
+ ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+<worker1 name="8_FXT_UPDATE_1_REC">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+      <sql_template>
+        <![CDATA[begin; update %TABLE_NAME% set book_region        ='qwrqfedd fdfas aefasd afasdf dfq', buy_sell_code  =  'test code test codetest codet' %TEST_FILTER%; rollback; end;]]>
+		
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+
+</etldataflow>

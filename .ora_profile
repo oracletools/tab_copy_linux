@@ -1,0 +1,9 @@
+ORACLE_HOME=/opt/oraClient/11.1.0.7
+export ORACLE_HOME
+#LD_LIBRARY_PATH=$ORACLE_HOME/lib;
+#export LD_LIBRARY_PATH
+PATH=$PATH:$ORACLE_HOME/bin;
+export PATH
+TNS_ADMIN=/opt/etl/apps/smart_dev/volumes/etl/scripts/tab_copy
+export TNS_ADMIN
+

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of BASIC_UAT_COPY pipeline
+-->
+<etldataflow name="BASIC_UAT_COPY" 
+			 email_to="EMAIL_TO"
+			 TO_SCHEMA="ESMARTREF">
+
+
+<worker name="REF_CDMS">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="EREF_MDWD"></param>
+	  <param name="TO_DB" value="EREF_SMARTU1B"></param>
+	  <param name="ARRAYSIZE" value="2500"></param>
+	  <param name="COPYCOMMIT" value="2"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+E155817REF.REF_CDMS
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+
+</etldataflow>

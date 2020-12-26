@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+  
+<worker name="del_fin_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_0
+/
+
+insert --+append
+into del_fin_0 partition(rev_0) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_0)
+  x, DEL_P_I_S partition(rev_0)
+  p, smc_mr_ii_c_e_p partition(rev_0)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+<worker name="del_fin_0_1">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_1
+/
+
+insert --+append
+into del_fin_0 partition(rev_1) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_1)
+  x, DEL_P_I_S partition(rev_1)
+  p, smc_mr_ii_c_e_p partition(rev_1)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+<worker name="del_fin_0_2">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_2
+/
+
+insert --+append
+into del_fin_0 partition(rev_2) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_2)
+  x, DEL_P_I_S partition(rev_2)
+  p, smc_mr_ii_c_e_p partition(rev_2)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+<worker name="del_fin_0_3">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_3
+/
+
+insert --+append
+into del_fin_0 partition(rev_3) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_3)
+  x, DEL_P_I_S partition(rev_3)
+  p, smc_mr_ii_c_e_p partition(rev_3)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+<worker name="del_fin_0_4">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_4
+/
+
+insert --+append
+into del_fin_0 partition(rev_4) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_4)
+  x, DEL_P_I_S partition(rev_4)
+  p, smc_mr_ii_c_e_p partition(rev_4)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+<worker name="del_fin_0_5">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_5
+/
+
+insert --+append
+into del_fin_0 partition(rev_5) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_5)
+  x, DEL_P_I_S partition(rev_5)
+  p, smc_mr_ii_c_e_p partition(rev_5)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+<worker name="del_fin_0_6">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_6
+/
+
+insert --+append
+into del_fin_0 partition(rev_6) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_6)
+  x, DEL_P_I_S partition(rev_6)
+  p, smc_mr_ii_c_e_p partition(rev_6)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+
+<worker name="del_fin_0_7">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_7
+/
+
+insert --+append
+into del_fin_0 partition(rev_7) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_7)
+  x, DEL_P_I_S partition(rev_7)
+  p, smc_mr_ii_c_e_p partition(rev_7)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+
+<worker name="del_fin_0_8">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_8
+/
+
+insert --+append
+into del_fin_0 partition(rev_8) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_8)
+  x, DEL_P_I_S partition(rev_8)
+  p, smc_mr_ii_c_e_p partition(rev_8)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+<worker name="del_fin_0_9">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table del_fin_0 truncate partition rev_9
+/
+
+insert --+append
+into del_fin_0 partition(rev_9) 
+select --+parallel
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s partition(rev_9)
+  x, DEL_P_I_S partition(rev_9)
+  p, smc_mr_ii_c_e_p partition(rev_9)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp
+/
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+
+
+</etldataflow>

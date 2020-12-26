@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FRNBNY_QUERY_COPY2_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="FRBNY_COPY2_TEST_TML">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="FRBNY_DOGS_IOWA_TEST"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="1"></param>		 
+      <sql_template>
+        <![CDATA[
+select /*+PARALLEL (TRD_VOL_UNION) */
+  TRD_VOL_UNION.COB_DT,
+  TRD_VOL_UNION.FEED_SRC_SYS,
+  MAN_REF_MKT_OF_SETL.FIRM_AGT,
+  TRD_VOL_UNION.EXCH,
+  SUM(TRD_VOL_UNION.ITEM_CNT) ITEM_CNT_sum,
+  SUM(TRD_VOL_UNION.CALC_USD_AMT) CALC_USD_AMT_sum,
+  SUM(TRD_VOL_UNION.CON_USD_AMT) CON_USD_AMT_sum,
+  TRD_VOL_UNION.VOL_EVNT_TYP,
+  TRD_VOL_UNION.TRD_STA,
+  TRD_VOL_UNION.OWN_CD_3,
+  TRD_VOL_UNION.CTP_NAM,
+  TRD_VOL_UNION.SETL_LOCA,
+  TRD_VOL_UNION.TRAN_TYP_1,
+  MAN_REF_MKT_OF_SETL.CTRY_DESC,
+  TRD_VOL_UNION.CTP_MNEMONIC,
+  TRD_VOL_UNION.LCL_CCY,
+  TRD_VOL_UNION.LGL_ENTY_NAM_PP,
+  LGL.LGL_ENTY_NAM,
+  TRD_VOL_UNION.SETL_BANK_LOC,
+  SUM(TRD_VOL_UNION.USD_AMT) USD_AMT_sum,
+  TRD_VOL_UNION.BUY_SELL,
+  TRD_VOL_UNION.ASET_LVL_ONE_CD,
+  TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+  TRD_VOL_UNION.ASET_LVL_TWO_CD,
+  TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+  TRD_VOL_UNION.ASET_LVL_THR_CD,
+  TRD_VOL_UNION.ASET_LVL_THR_DESC,
+  ASET.ASET_LVL_2_DESC,
+  ASET.ASET_LVL_0_DESC,
+  ASET.ASET_LVL_3_DESC,
+  ASET.ASET_LVL_1_DESC,
+  TRD_VOL_UNION.EXEC_TYP,
+  TRD_VOL_UNION.TRAN_TYP,
+  TRD_VOL_UNION.FIRM_ACCT_MNEMONIC,
+  --REF_ESALES_FIRM.MNEMONIC,
+  REF_ESALES.MNEMONIC,
+  MAN_REF_MKT_OF_SETL.CTRY_CD_2,
+  TRD_VOL_UNION.OWN_CD_1,
+  TRD_VOL_UNION.OWN_CD_2,
+  TRD_VOL_UNION.OWN_CD_4,
+  --CSMARTREF.REF_SMC.SCR_TYP_LVL_1,
+  --CSMARTREF.REF_SMC.SCR_TYP_LVL_2,
+  --CSMARTREF.REF_SMC.SCR_TYP_LVL_3 ,
+  --CSMARTREF.REF_SMC.PROD_LNG_DESC,
+  LGL.LGL_ENTY_ID
+FROM
+  (
+  select a.*, a1.TRAN_TYP_1, a1.TRD_STA_7 ,a1.TRD_STA_10, a1.TRAN_TYP_4, a1.OWN_CD_1, a1.OWN_CD_2, a1.OWN_CD_3,a1.OWN_CD_4  from
+  (SELECT * FROM csmartvol.TRD_VOL_UNION partition (jan_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (jan_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (feb_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (feb_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (mar_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (mar_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (apr_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (apr_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (may_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (may_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (jun_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (jun_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (jul_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (jul_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (aug_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (aug_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (sep_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (sep_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (oct_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (oct_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (nov_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (nov_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (dec_111) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION partition (dec_112) a where a.src_file_cd  IN  ( 'DOGS', 'IOWA') and a.METRICS_CAT  IN  ( 'Volumes') ) a,
+  (SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jan_111)  where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jan_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (feb_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (feb_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT  * FROM csmartvol.TRD_VOL_UNION_1 partition (mar_111)  where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (mar_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (apr_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (apr_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (may_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (may_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jun_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jun_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jul_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jul_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (aug_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (aug_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (sep_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (sep_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (oct_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (oct_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (nov_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (nov_112) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (dec_111) where src_file_cd  IN  ( 'DOGS', 'IOWA')
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (dec_112)  where src_file_cd  IN  ( 'DOGS', 'IOWA')) a1
+    where 1=1
+    and a.TRD_VOL_SID=a1.TRD_VOL_SID and a.COB_DT=a1.COB_DT and a.SRC_FILE_CD=a1.SRC_FILE_CD
+  AND (
+   a.ASET_LVL_ONE_CD  <>  'FNC'
+   AND
+   a.VOL_EVNT_TYP  <>  'Hand Ticket'
+   AND
+   a1.TRAN_TYP_1  IN  ( 'BUY','SELL','PURCHASE','SALE'  )
+   AND
+   a1.OWN_CD_2  <>  'Prime Brokerage'
+        )
+    ) TRD_VOL_UNION
+    ,
+    (
+    	select * from csmartref.man_ref_aset_lvl_data where aset_lvl_0_desc in ('Equity','Fixed Income')
+    ) ASET
+        ,
+    (
+    select * from csmartref.MAN_REF_MKT_OF_SETL where CTRY_DESC  NOT IN  ( 'Dummy'  )
+    and FIRM_AGT  NOT IN  (  'DTC','SBINC-SBUKE MISC EURO','MISC LONDON','LDC HC BANK NY USD','DUMMY AGENT','BANK OF NYK DKK','CONTROL' )
+    ) MAN_REF_MKT_OF_SETL
+    ,
+    (
+    select * from csmartref.REF_ESALES where MNEMONIC  NOT IN  ( 'ZAOCGMLN','ATHEXCCP','ATHEXPR','EMCFBATE','EMCFBATU','EMCFCHCP','EMCFUKCP','ENEXTAMS','EUREXEXE','IOBCCP','LPAREX','MLNCCPA','MLNCCPC','MLNCCPD','MLNCCPE','MLNCCPL','MLNCCPM','OEKBCCP','OMXEU','OMXEURO','OMXNORF','OMXNORS','OMXUK','OMXUKRO','SSSBSSA','TURKEU','TURKUK','UKE355B','VRTCCP','XETCCA','XETCCP','18BUYIN','18CROSS','18LATE','18SEHK','TSX'  )
+    ) ref_esales
+    ,
+    (
+    (select XREF.lgl_enty_key, DAT.lgl_enty_id, DAT.lgl_enty_nam from csmartref.man_ref_lgl_enty_data  DAT , CSMARTREF.man_ref_lgl_enty_xref XREF where XREF.lgl_enty_id = DAT.lgl_enty_id (+) )
+    ) LGL
+    where TRD_VOL_UNION.ASET_LVL_KEY = aset.ASET_LVL_KEY
+    and TRD_VOL_UNION.ACTL_MKT_OF_SETL_CD=MAN_REF_MKT_OF_SETL.FIN_INSM_KEY (+)
+    and REF_ESALES.ACCOUNT_ID(+)=TRD_VOL_UNION.CTP_UID_GRD
+    and TRD_VOL_UNION.lgl_enty_key = lgl.lgl_enty_key (+)
+group by
+TRD_VOL_UNION.COB_DT,
+  TRD_VOL_UNION.FEED_SRC_SYS,
+  MAN_REF_MKT_OF_SETL.FIRM_AGT,
+  TRD_VOL_UNION.EXCH,
+  TRD_VOL_UNION.VOL_EVNT_TYP,
+  TRD_VOL_UNION.TRD_STA,
+  TRD_VOL_UNION.OWN_CD_3,
+  TRD_VOL_UNION.CTP_NAM,
+  TRD_VOL_UNION.SETL_LOCA,
+  TRD_VOL_UNION.TRAN_TYP_1,
+  MAN_REF_MKT_OF_SETL.CTRY_DESC,
+  TRD_VOL_UNION.CTP_MNEMONIC,
+  TRD_VOL_UNION.LCL_CCY,
+  TRD_VOL_UNION.LGL_ENTY_NAM_PP,
+  LGL.LGL_ENTY_NAM,
+  TRD_VOL_UNION.SETL_BANK_LOC,
+  TRD_VOL_UNION.BUY_SELL,
+  TRD_VOL_UNION.ASET_LVL_ONE_CD,
+  TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+  TRD_VOL_UNION.ASET_LVL_TWO_CD,
+  TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+  TRD_VOL_UNION.ASET_LVL_THR_CD,
+  TRD_VOL_UNION.ASET_LVL_THR_DESC,
+  ASET.ASET_LVL_2_DESC,
+  ASET.ASET_LVL_0_DESC,
+  ASET.ASET_LVL_3_DESC,
+  ASET.ASET_LVL_1_DESC,
+  TRD_VOL_UNION.EXEC_TYP,
+  TRD_VOL_UNION.TRAN_TYP,
+  TRD_VOL_UNION.FIRM_ACCT_MNEMONIC,
+  --REF_ESALES_FIRM.MNEMONIC,
+  REF_ESALES.MNEMONIC,
+  MAN_REF_MKT_OF_SETL.CTRY_CD_2,
+  TRD_VOL_UNION.OWN_CD_1,
+  TRD_VOL_UNION.OWN_CD_2,
+  TRD_VOL_UNION.OWN_CD_4,
+  --CSMARTREF.REF_SMC.SCR_TYP_LVL_1,
+  --CSMARTREF.REF_SMC.SCR_TYP_LVL_2,
+  --CSMARTREF.REF_SMC.SCR_TYP_LVL_3 ,
+  --CSMARTREF.REF_SMC.PROD_LNG_DESC,
+  LGL.LGL_ENTY_ID;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+
+
+</etldataflow>

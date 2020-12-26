@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    LOG_ROOT="log/"
+    LOAD_ROOT="/home/alexb/pysrc/tmp/csv/"
+	CSV_LOAD_ROOT="/home/alexb/pysrc/tmp/csv"
+	APPLOG_ROOT="log/applog/"
+	SYSLOG_ROOT="log/syslog/"
+	CODELOG_ROOT="log/codelog/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib"
+	template_path ="lib/template"
+	test_home ="test/"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+    />
+  <connector>
+	<CUSER_GMAD schema="C160970GMA" pword="***" sid="GMAD" />
+	<CPEARL_GMAD schema="C160970GMAPRL" pword="***" sid="GMAD" />
+	<JUSER_QA schema="J160970GMA" pword="***" sid="GMAQA" />
+	<MDW_MDWD schema="MDW" pword="***" sid="MDWD" />
+	<EREF_MDWD schema="E155817REF" pword="***" sid="MDWD" />
+	<CREF_MDWD schema="C155817REF" pword="***" sid="MDWD" />
+	<VR_MDWP schema="VR92232" pword="***" sid="MDWP" host = "localhost"  PORT = "1823"/>		
+  </connector>
+  <default>
+    log_dest="LOG_ROOT"	
+  </default>
+  <worker>
+    <!--worker name has to be unique -->
+	<exec_dml name="sqlp" module_name="sql_utils" />	
+	
+  </worker>
+</test_spec>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="TEST">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CSMARTREF_SMARTU1B%"></param>
+	  <param name="TO_DB" value="%CSMARTREF_SMARTQ1%"></param>
+	  
+	  <param name="TO_SCHEMA" value="CSMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--Truncate table/partition before inserting -->
+i	  <param name="IF_TRUNCATE" value="0"></param>	  
+
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+
+</globals>
+
+--sql
+
+
+
+
+<worker name="REF_SMC_2">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="TO_TABLE" value="REF_SMC_TMP_PART"></param>
+	 <param name="FILTER" value=" 1=2"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ <worker name="REF_SMC_TMP">
+
+
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+
+
+
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+  ownname => user,
+  tabname => 'REF_SMC_TMP_PART',
+  method_opt => 'FOR COLUMNS  rev smc_prod_id cusip isin ric sedol scr_cusip blmbrg_cusip smc_issuer_id',
+  granularity => 'ALL',
+  cascade => TRUE,
+  degree => 16);
+end;
+/
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+</etldataflow>

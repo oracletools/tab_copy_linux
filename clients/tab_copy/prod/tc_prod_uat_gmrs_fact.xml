@@ -1,0 +1,263 @@
+<etldataflow name="COPY-CSMARTVOL.GMRS_FACT">
+<globals>
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%BK_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100705"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100801"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100802"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100803"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100804"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100901"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100902"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100903"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20100904"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101001"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101002"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101003"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101004"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101005"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101101"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101102"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101103"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101104"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101201"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101202"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101203"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20101204"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+</etldataflow>

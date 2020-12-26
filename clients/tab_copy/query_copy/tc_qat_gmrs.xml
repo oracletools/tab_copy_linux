@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="GMRS">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="#|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AD_SMARTP2%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  
+	  <param name="TO_DB" value="%CSMARTBSER_SMARTU2%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTBSER"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="Q1">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="GMRS_HISTORY"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[select * from csmartbser.gmrs_fact
+where MSTR_SCAT_ITEMKEY
+in
+(
+'W3243-3', 
+'W3243-4', 
+'W3243-1', 
+'W3243-2', 
+'W3155-6', 
+'W3155-9', 
+'W3156-7', 
+'W3156-8', 
+'W3156-9', 
+'W3243-5', 
+'W3243-6', 
+'W3254-1', 
+'W3254-2', 
+'W3254-3', 
+'W3254-4', 
+'W3254-5', 
+'W3254-6', 
+'W3155-10', 
+'W3155-4', 
+'W3155-5', 
+'W5019-17', 
+'W5019-5', 
+'W5019-12', 
+'W5020-19', 
+'W5019-18', 
+'W5019-16', 
+'W5020-14', 
+'W3156-5', 
+'W5019-22', 
+'W5020-4', 
+'W5019-20', 
+'W5019-24', 
+'W5019-26', 
+'W5020-8', 
+'W5020-10', 
+'W5019-19', 
+'W5019-21', 
+'W5019-25', 
+'W5020-9', 
+'W5020-11', 
+'W5019-7', 
+'W5020-20', 
+'W5019-3', 
+'W5019-23', 
+'W5020-22', 
+'W5020-18', 
+'W5020-23', 
+'W5020-1', 
+'W5020-12', 
+'W5020-2', 
+'W5020-3', 
+'W5020-5', 
+'W5020-7', 
+'W5020-13', 
+'W5019-4', 
+'W5019-8', 
+'W5019-10', 
+'W5019-11', 
+'W5019-14', 
+'W5019-15', 
+'W5020-15', 
+'W5020-16', 
+'W5020-17', 
+'W5020-21', 
+'W5020-24', 
+'W5019-6', 
+'W5019-9', 
+'W3264-5', 
+'W3264-6', 
+'W3264-7', 
+'W3264-8', 
+'W3264-9', 
+'W3155-7', 
+'W3155-8', 
+'W3156-6', 
+'W3264-1', 
+'W3264-10', 
+'W3264-11', 
+'W3264-12', 
+'W3264-2', 
+'W3264-3', 
+'W3267-4', 
+'W3267-5', 
+'W3267-6', 
+'W3267-7', 
+'W3267-8', 
+'W3267-9', 
+'W3267-1', 
+'W3267-10', 
+'W3267-11', 
+'W3267-12', 
+'W3267-2', 
+'W3267-3', 
+'W3264-4', 
+'W3254-7', 
+'W3254-9', 
+'W3254-11', 
+'W3156-11', 
+'W3156-12', 
+'W3243-7', 
+'W3243-11', 
+'W3243-12', 
+'W3155-13', 
+'W3155-16', 
+'W3155-17', 
+'W3155-18', 
+'W3243-9', 
+'W3254-12', 
+'W3254-10', 
+'W3155-15', 
+'W3155-12', 
+'W3156-10', 
+'W3156-15', 
+'W3156-13', 
+'W3156-4', 
+'W6091-11', 
+'W6093-11', 
+'W6093-12', 
+'W6091-12', 
+'W3254-8', 
+'W3156-3', 
+'W3156-14', 
+'W3243-8', 
+'W3243-10', 
+'W5020-6', 
+'W5019-13', 
+'W3155-14', 
+'W3155-11', 
+'W6096-4', 
+'W6096-6', 
+'W6096-8', 
+'W6096-10', 
+'W6096-12', 
+'W6097-1', 
+'W6097-4', 
+'W6097-6', 
+'W6097-7', 
+'W6097-9', 
+'W6097-10', 
+'W6097-12', 
+'W6095-2', 
+'W6095-10', 
+'W6095-12', 
+'W6096-11', 
+'W6097-8', 
+'W6096-3', 
+'W6096-9', 
+'W6097-11', 
+'W6096-5', 
+'W6097-2', 
+'W6095-3', 
+'W6095-8', 
+'W6097-5', 
+'W6095-1', 
+'W6095-5', 
+'W6096-7', 
+'W6097-3', 
+'W6095-4', 
+'W6095-6', 
+'W6095-7', 
+'W6095-9', 
+'W6095-11', 
+'W6096-1', 
+'W6096-2', 
+'W6090-8', 
+'W6090-10', 
+'W6090-12', 
+'W6091-4', 
+'W6091-9', 
+'W6092-2', 
+'W6092-5', 
+'W6092-7', 
+'W6092-10', 
+'W6093-3', 
+'W6093-5', 
+'W6093-10', 
+'W6090-7', 
+'W6090-3', 
+'W6092-1', 
+'W6090-2', 
+'W6093-8', 
+'W6092-6', 
+'W6090-4', 
+'W6092-9', 
+'W6092-12', 
+'W6093-6', 
+'W6093-2', 
+'W6090-1', 
+'W6092-3', 
+'W6090-5', 
+'W6091-3', 
+'W6091-5', 
+'W6091-6', 
+'W6092-11', 
+'W6091-1', 
+'W6091-7', 
+'W6093-1', 
+'W6091-2', 
+'W6091-8', 
+'W6090-6', 
+'W6092-4', 
+'W6092-8', 
+'W6091-10', 
+'W6093-7', 
+'W6093-9', 
+'W6090-9', 
+'W6093-4', 
+'W6090-11'
+)]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+</etldataflow>

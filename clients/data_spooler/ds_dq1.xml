@@ -1,0 +1,661 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SELECT_TEST_2S">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%AB_SMARTP1B%"></param>
+	  <param name="SCHEMA_NAME" value="AB95022"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="PDEGREE" value="12"></param> 
+
+</globals>
+
+<worker name="DQ_0">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="PART_DATE" value="2011-01-01 00:00:00"></param>
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+	<param name="FROM_DATE" value="TRUNC(TO_DATE('07-OCT-2011'), 'YEAR')"></param>
+	<param name="FROM_DATE" value="to_date('01-JAN-2011')"></param>
+	<param name="TO_DATE" value="to_date('01-MAR-2011')"></param>
+	
+      <sql_template>
+        <![CDATA[
+SELECT SUM(ITEMS_AFFECTED) OVER (PARTITION BY SRC_FILE_CD) DQCHK_VAL,
+    SUM(TOTAL_TRADES) OVER (PARTITION BY SRC_FILE_CD) DQCHK_TOT,
+    'FAILS'        AS DQCHK_GEN_VAL1,
+    DIMENSION_NAME AS DQCHK_GEN_VAL2,
+    DATASET_TYPE   AS DQCHK_GEN_VAL3,
+    FEED_SRC_SYS   AS DQCHK_GEN_VAL4,
+    SRC_FILE_CD    AS DQCHK_GEN_VAL5,
+    (SELECT MAX(a.prm_bus_dt)
+    FROM dqsmart.dq_rpt_trig a,
+        dqsmart.dq_chk_exec_que b,
+        dqsmart.dq_chk_rslt_smry c
+    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+    AND a.pk_rpt_trig       = b.fk_rpt_trig
+    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+    AND a.prm_bus_dt        < %TO_DATE%
+    AND a.rpt_trig_sta      = 'SUCCESS'
+    AND c.chk_rslt_smry_sta = 'ACTIVE'
+    )             AS DQCHK_GEN_VAL6,
+    DIMENSION_KEY AS DRLDWN_CPK1,
+    CASE
+        WHEN ( EXCEPTION_TYPE = 'NULL KEY'
+         OR EXCEPTION_TYPE    = 'UNALLOCATED KEY' )
+        THEN 'EXTERNAL'
+        WHEN ( EXCEPTION_TYPE = 'ORPHAN KEY'
+         OR EXCEPTION_TYPE    = 'INCOMPLETE REFERENCE RECORD' )
+        THEN 'INTERNAL'
+    END DRLDWN_CPK2,
+    EXCEPTION_TYPE AS DRLDWN_CPK3,
+    ITEMS_AFFECTED AS DRLDWN_CPK4
+FROM
+    (SELECT SUM(ITEM_CNT) TOTAL_TRADES,
+        'ACTUAL MARKET OF SETTLEMENT' AS DIMENSION_NAME,
+        FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS ITEMS_AFFECTED,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END AS EXCEPTION_TYPE,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END AS DIMENSION_KEY
+    FROM
+        (SELECT
+            /*+ PARALLEL (T1, %PDEGREE%)*/
+            ITEM_COUNT        AS ITEM_CNT ,
+            SOURCESYSTEM      AS SRC_FILE_CD ,
+            ACTL_MKT_SETL_KEY AS DIMENSION_KEY,
+            SOURCESYSTEM      AS FEED_SRC_SYS,
+            CASE
+                WHEN COB_DATE <=
+                    (SELECT MAX(a.prm_bus_dt)
+                    FROM dqsmart.dq_rpt_trig a,
+                        dqsmart.dq_chk_exec_que b,
+                        dqsmart.dq_chk_rslt_smry c
+                    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+                    AND a.pk_rpt_trig       = b.fk_rpt_trig
+                    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+                    AND a.prm_bus_dt        < %TO_DATE%
+                    AND a.rpt_trig_sta      = 'SUCCESS'
+                    AND c.chk_rslt_smry_sta = 'ACTIVE'
+                    )
+                THEN 'YTD_LAST_RUN'
+                ELSE 'SINCE_LAST_RUN'
+            END DATASET_TYPE ,
+            CASE
+                WHEN TRIM(ACTL_MKT_SETL_KEY) IS NULL
+                 OR upper(ACTL_MKT_SETL_KEY)  ='NULL'
+                THEN 1
+                ELSE 0
+            END AS NULLKEY_IND,
+            CASE
+                WHEN upper(ACTL_MKT_SETL_KEY)                     ='UNALLOCATED'
+                 OR instr(upper(ACTL_MKT_SETL_KEY),'UNALLOCATED')<>0
+                THEN 1
+                ELSE 0
+            END AS UNALLOCATEDKEY_IND
+        FROM csmartbser.fails_reports_history T1
+        WHERE SOURCESYSTEM NOT IN ( 'OASYSEF','CLU' )
+        AND METRICS_CATEGORY    = 'FAIL'
+        AND FAIL_INDICATOR      ='Y'
+        AND COB_DATE           >= %FROM_DATE%
+        AND COB_DATE           < %TO_DATE%
+        ) FACT_TBL,
+        (SELECT
+            CASE
+                WHEN trim(RGN)      IS NULL
+                 OR upper(RGN)       ='UNALLOCATED'
+                 OR upper(RGN)       ='NULL'
+                 OR trim(CTRY_DESC) IS NULL
+                 OR upper(CTRY_DESC) ='UNALLOCATED'
+                 OR upper(CTRY_DESC) ='NULL'
+                THEN 1
+                ELSE 0
+            END AS INCOMPREC_IND,
+            FIN_INSM_KEY REF_KEY,
+            RGN
+        FROM csmartref.MAN_REF_MKT_OF_SETL
+        ) MAN_REF_TBL
+    WHERE FACT_TBL.DIMENSION_KEY =MAN_REF_TBL.REF_KEY(+)
+    GROUP BY FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END ,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END
+    );
+   
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+<worker name="DQ_1">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="PART_DATE" value="2011-01-01 00:00:00"></param>
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+	<param name="FROM_DATE" value="TRUNC(TO_DATE('07-OCT-2011'), 'YEAR')"></param>
+	<param name="FROM_DATE" value="to_date('01-MAR-2011')"></param>
+	<param name="TO_DATE" value="to_date('01-JUN-2011')"></param>
+	
+      <sql_template>
+        <![CDATA[
+SELECT SUM(ITEMS_AFFECTED) OVER (PARTITION BY SRC_FILE_CD) DQCHK_VAL,
+    SUM(TOTAL_TRADES) OVER (PARTITION BY SRC_FILE_CD) DQCHK_TOT,
+    'FAILS'        AS DQCHK_GEN_VAL1,
+    DIMENSION_NAME AS DQCHK_GEN_VAL2,
+    DATASET_TYPE   AS DQCHK_GEN_VAL3,
+    FEED_SRC_SYS   AS DQCHK_GEN_VAL4,
+    SRC_FILE_CD    AS DQCHK_GEN_VAL5,
+    (SELECT MAX(a.prm_bus_dt)
+    FROM dqsmart.dq_rpt_trig a,
+        dqsmart.dq_chk_exec_que b,
+        dqsmart.dq_chk_rslt_smry c
+    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+    AND a.pk_rpt_trig       = b.fk_rpt_trig
+    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+    AND a.prm_bus_dt        < %TO_DATE%
+    AND a.rpt_trig_sta      = 'SUCCESS'
+    AND c.chk_rslt_smry_sta = 'ACTIVE'
+    )             AS DQCHK_GEN_VAL6,
+    DIMENSION_KEY AS DRLDWN_CPK1,
+    CASE
+        WHEN ( EXCEPTION_TYPE = 'NULL KEY'
+         OR EXCEPTION_TYPE    = 'UNALLOCATED KEY' )
+        THEN 'EXTERNAL'
+        WHEN ( EXCEPTION_TYPE = 'ORPHAN KEY'
+         OR EXCEPTION_TYPE    = 'INCOMPLETE REFERENCE RECORD' )
+        THEN 'INTERNAL'
+    END DRLDWN_CPK2,
+    EXCEPTION_TYPE AS DRLDWN_CPK3,
+    ITEMS_AFFECTED AS DRLDWN_CPK4
+FROM
+    (SELECT SUM(ITEM_CNT) TOTAL_TRADES,
+        'ACTUAL MARKET OF SETTLEMENT' AS DIMENSION_NAME,
+        FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS ITEMS_AFFECTED,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END AS EXCEPTION_TYPE,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END AS DIMENSION_KEY
+    FROM
+        (SELECT
+            /*+ PARALLEL (T1, %PDEGREE%)*/
+            ITEM_COUNT        AS ITEM_CNT ,
+            SOURCESYSTEM      AS SRC_FILE_CD ,
+            ACTL_MKT_SETL_KEY AS DIMENSION_KEY,
+            SOURCESYSTEM      AS FEED_SRC_SYS,
+            CASE
+                WHEN COB_DATE <=
+                    (SELECT MAX(a.prm_bus_dt)
+                    FROM dqsmart.dq_rpt_trig a,
+                        dqsmart.dq_chk_exec_que b,
+                        dqsmart.dq_chk_rslt_smry c
+                    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+                    AND a.pk_rpt_trig       = b.fk_rpt_trig
+                    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+                    AND a.prm_bus_dt        < %TO_DATE%
+                    AND a.rpt_trig_sta      = 'SUCCESS'
+                    AND c.chk_rslt_smry_sta = 'ACTIVE'
+                    )
+                THEN 'YTD_LAST_RUN'
+                ELSE 'SINCE_LAST_RUN'
+            END DATASET_TYPE ,
+            CASE
+                WHEN TRIM(ACTL_MKT_SETL_KEY) IS NULL
+                 OR upper(ACTL_MKT_SETL_KEY)  ='NULL'
+                THEN 1
+                ELSE 0
+            END AS NULLKEY_IND,
+            CASE
+                WHEN upper(ACTL_MKT_SETL_KEY)                     ='UNALLOCATED'
+                 OR instr(upper(ACTL_MKT_SETL_KEY),'UNALLOCATED')<>0
+                THEN 1
+                ELSE 0
+            END AS UNALLOCATEDKEY_IND
+        FROM csmartbser.fails_reports_history T1
+        WHERE SOURCESYSTEM NOT IN ( 'OASYSEF','CLU' )
+        AND METRICS_CATEGORY    = 'FAIL'
+        AND FAIL_INDICATOR      ='Y'
+        AND COB_DATE           >= %FROM_DATE%
+        AND COB_DATE           < %TO_DATE%
+        ) FACT_TBL,
+        (SELECT
+            CASE
+                WHEN trim(RGN)      IS NULL
+                 OR upper(RGN)       ='UNALLOCATED'
+                 OR upper(RGN)       ='NULL'
+                 OR trim(CTRY_DESC) IS NULL
+                 OR upper(CTRY_DESC) ='UNALLOCATED'
+                 OR upper(CTRY_DESC) ='NULL'
+                THEN 1
+                ELSE 0
+            END AS INCOMPREC_IND,
+            FIN_INSM_KEY REF_KEY,
+            RGN
+        FROM csmartref.MAN_REF_MKT_OF_SETL
+        ) MAN_REF_TBL
+    WHERE FACT_TBL.DIMENSION_KEY =MAN_REF_TBL.REF_KEY(+)
+    GROUP BY FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END ,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END
+    );
+   
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+<worker name="DQ_2">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="PART_DATE" value="2011-01-01 00:00:00"></param>
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+	<param name="FROM_DATE" value="TRUNC(TO_DATE('07-OCT-2011'), 'YEAR')"></param>
+	<param name="FROM_DATE" value="to_date('01-JUN-2011')"></param>
+	<param name="TO_DATE" value="to_date('01-AUG-2011')"></param>
+	
+      <sql_template>
+        <![CDATA[
+SELECT SUM(ITEMS_AFFECTED) OVER (PARTITION BY SRC_FILE_CD) DQCHK_VAL,
+    SUM(TOTAL_TRADES) OVER (PARTITION BY SRC_FILE_CD) DQCHK_TOT,
+    'FAILS'        AS DQCHK_GEN_VAL1,
+    DIMENSION_NAME AS DQCHK_GEN_VAL2,
+    DATASET_TYPE   AS DQCHK_GEN_VAL3,
+    FEED_SRC_SYS   AS DQCHK_GEN_VAL4,
+    SRC_FILE_CD    AS DQCHK_GEN_VAL5,
+    (SELECT MAX(a.prm_bus_dt)
+    FROM dqsmart.dq_rpt_trig a,
+        dqsmart.dq_chk_exec_que b,
+        dqsmart.dq_chk_rslt_smry c
+    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+    AND a.pk_rpt_trig       = b.fk_rpt_trig
+    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+    AND a.prm_bus_dt        < %TO_DATE%
+    AND a.rpt_trig_sta      = 'SUCCESS'
+    AND c.chk_rslt_smry_sta = 'ACTIVE'
+    )             AS DQCHK_GEN_VAL6,
+    DIMENSION_KEY AS DRLDWN_CPK1,
+    CASE
+        WHEN ( EXCEPTION_TYPE = 'NULL KEY'
+         OR EXCEPTION_TYPE    = 'UNALLOCATED KEY' )
+        THEN 'EXTERNAL'
+        WHEN ( EXCEPTION_TYPE = 'ORPHAN KEY'
+         OR EXCEPTION_TYPE    = 'INCOMPLETE REFERENCE RECORD' )
+        THEN 'INTERNAL'
+    END DRLDWN_CPK2,
+    EXCEPTION_TYPE AS DRLDWN_CPK3,
+    ITEMS_AFFECTED AS DRLDWN_CPK4
+FROM
+    (SELECT SUM(ITEM_CNT) TOTAL_TRADES,
+        'ACTUAL MARKET OF SETTLEMENT' AS DIMENSION_NAME,
+        FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS ITEMS_AFFECTED,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END AS EXCEPTION_TYPE,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END AS DIMENSION_KEY
+    FROM
+        (SELECT
+            /*+ PARALLEL (T1, %PDEGREE%)*/
+            ITEM_COUNT        AS ITEM_CNT ,
+            SOURCESYSTEM      AS SRC_FILE_CD ,
+            ACTL_MKT_SETL_KEY AS DIMENSION_KEY,
+            SOURCESYSTEM      AS FEED_SRC_SYS,
+            CASE
+                WHEN COB_DATE <=
+                    (SELECT MAX(a.prm_bus_dt)
+                    FROM dqsmart.dq_rpt_trig a,
+                        dqsmart.dq_chk_exec_que b,
+                        dqsmart.dq_chk_rslt_smry c
+                    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+                    AND a.pk_rpt_trig       = b.fk_rpt_trig
+                    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+                    AND a.prm_bus_dt        < %TO_DATE%
+                    AND a.rpt_trig_sta      = 'SUCCESS'
+                    AND c.chk_rslt_smry_sta = 'ACTIVE'
+                    )
+                THEN 'YTD_LAST_RUN'
+                ELSE 'SINCE_LAST_RUN'
+            END DATASET_TYPE ,
+            CASE
+                WHEN TRIM(ACTL_MKT_SETL_KEY) IS NULL
+                 OR upper(ACTL_MKT_SETL_KEY)  ='NULL'
+                THEN 1
+                ELSE 0
+            END AS NULLKEY_IND,
+            CASE
+                WHEN upper(ACTL_MKT_SETL_KEY)                     ='UNALLOCATED'
+                 OR instr(upper(ACTL_MKT_SETL_KEY),'UNALLOCATED')<>0
+                THEN 1
+                ELSE 0
+            END AS UNALLOCATEDKEY_IND
+        FROM csmartbser.fails_reports_history T1
+        WHERE SOURCESYSTEM NOT IN ( 'OASYSEF','CLU' )
+        AND METRICS_CATEGORY    = 'FAIL'
+        AND FAIL_INDICATOR      ='Y'
+        AND COB_DATE           >= %FROM_DATE%
+        AND COB_DATE           < %TO_DATE%
+        ) FACT_TBL,
+        (SELECT
+            CASE
+                WHEN trim(RGN)      IS NULL
+                 OR upper(RGN)       ='UNALLOCATED'
+                 OR upper(RGN)       ='NULL'
+                 OR trim(CTRY_DESC) IS NULL
+                 OR upper(CTRY_DESC) ='UNALLOCATED'
+                 OR upper(CTRY_DESC) ='NULL'
+                THEN 1
+                ELSE 0
+            END AS INCOMPREC_IND,
+            FIN_INSM_KEY REF_KEY,
+            RGN
+        FROM csmartref.MAN_REF_MKT_OF_SETL
+        ) MAN_REF_TBL
+    WHERE FACT_TBL.DIMENSION_KEY =MAN_REF_TBL.REF_KEY(+)
+    GROUP BY FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END ,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END
+    );
+   
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+<worker name="DQ_3">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="PART_DATE" value="2011-01-01 00:00:00"></param>
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+	<param name="FROM_DATE" value="TRUNC(TO_DATE('07-OCT-2011'), 'YEAR')"></param>
+	<param name="FROM_DATE" value="to_date('01-AUG-2011')"></param>
+	<param name="TO_DATE" value="to_date('08-OCT-2011')"></param>
+	
+      <sql_template>
+        <![CDATA[
+SELECT SUM(ITEMS_AFFECTED) OVER (PARTITION BY SRC_FILE_CD) DQCHK_VAL,
+    SUM(TOTAL_TRADES) OVER (PARTITION BY SRC_FILE_CD) DQCHK_TOT,
+    'FAILS'        AS DQCHK_GEN_VAL1,
+    DIMENSION_NAME AS DQCHK_GEN_VAL2,
+    DATASET_TYPE   AS DQCHK_GEN_VAL3,
+    FEED_SRC_SYS   AS DQCHK_GEN_VAL4,
+    SRC_FILE_CD    AS DQCHK_GEN_VAL5,
+    (SELECT MAX(a.prm_bus_dt)
+    FROM dqsmart.dq_rpt_trig a,
+        dqsmart.dq_chk_exec_que b,
+        dqsmart.dq_chk_rslt_smry c
+    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+    AND a.pk_rpt_trig       = b.fk_rpt_trig
+    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+    AND a.prm_bus_dt        < %TO_DATE%
+    AND a.rpt_trig_sta      = 'SUCCESS'
+    AND c.chk_rslt_smry_sta = 'ACTIVE'
+    )             AS DQCHK_GEN_VAL6,
+    DIMENSION_KEY AS DRLDWN_CPK1,
+    CASE
+        WHEN ( EXCEPTION_TYPE = 'NULL KEY'
+         OR EXCEPTION_TYPE    = 'UNALLOCATED KEY' )
+        THEN 'EXTERNAL'
+        WHEN ( EXCEPTION_TYPE = 'ORPHAN KEY'
+         OR EXCEPTION_TYPE    = 'INCOMPLETE REFERENCE RECORD' )
+        THEN 'INTERNAL'
+    END DRLDWN_CPK2,
+    EXCEPTION_TYPE AS DRLDWN_CPK3,
+    ITEMS_AFFECTED AS DRLDWN_CPK4
+FROM
+    (SELECT SUM(ITEM_CNT) TOTAL_TRADES,
+        'ACTUAL MARKET OF SETTLEMENT' AS DIMENSION_NAME,
+        FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS ITEMS_AFFECTED,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END AS EXCEPTION_TYPE,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END AS DIMENSION_KEY
+    FROM
+        (SELECT
+            /*+ PARALLEL (T1, %PDEGREE%)*/
+            ITEM_COUNT        AS ITEM_CNT ,
+            SOURCESYSTEM      AS SRC_FILE_CD ,
+            ACTL_MKT_SETL_KEY AS DIMENSION_KEY,
+            SOURCESYSTEM      AS FEED_SRC_SYS,
+            CASE
+                WHEN COB_DATE <=
+                    (SELECT MAX(a.prm_bus_dt)
+                    FROM dqsmart.dq_rpt_trig a,
+                        dqsmart.dq_chk_exec_que b,
+                        dqsmart.dq_chk_rslt_smry c
+                    WHERE a.fk_rpt_uniq_nam = 'R_REFERENCE_EXCEPTIONS_YTD'
+                    AND a.pk_rpt_trig       = b.fk_rpt_trig
+                    AND b.pk_chk_exec_que   = c.fk_chk_exec_que
+                    AND a.prm_bus_dt        < %TO_DATE%
+                    AND a.rpt_trig_sta      = 'SUCCESS'
+                    AND c.chk_rslt_smry_sta = 'ACTIVE'
+                    )
+                THEN 'YTD_LAST_RUN'
+                ELSE 'SINCE_LAST_RUN'
+            END DATASET_TYPE ,
+            CASE
+                WHEN TRIM(ACTL_MKT_SETL_KEY) IS NULL
+                 OR upper(ACTL_MKT_SETL_KEY)  ='NULL'
+                THEN 1
+                ELSE 0
+            END AS NULLKEY_IND,
+            CASE
+                WHEN upper(ACTL_MKT_SETL_KEY)                     ='UNALLOCATED'
+                 OR instr(upper(ACTL_MKT_SETL_KEY),'UNALLOCATED')<>0
+                THEN 1
+                ELSE 0
+            END AS UNALLOCATEDKEY_IND
+        FROM csmartbser.fails_reports_history T1
+        WHERE SOURCESYSTEM NOT IN ( 'OASYSEF','CLU' )
+        AND METRICS_CATEGORY    = 'FAIL'
+        AND FAIL_INDICATOR      ='Y'
+        AND COB_DATE           >= %FROM_DATE%
+        AND COB_DATE           < %TO_DATE%
+        ) FACT_TBL,
+        (SELECT
+            CASE
+                WHEN trim(RGN)      IS NULL
+                 OR upper(RGN)       ='UNALLOCATED'
+                 OR upper(RGN)       ='NULL'
+                 OR trim(CTRY_DESC) IS NULL
+                 OR upper(CTRY_DESC) ='UNALLOCATED'
+                 OR upper(CTRY_DESC) ='NULL'
+                THEN 1
+                ELSE 0
+            END AS INCOMPREC_IND,
+            FIN_INSM_KEY REF_KEY,
+            RGN
+        FROM csmartref.MAN_REF_MKT_OF_SETL
+        ) MAN_REF_TBL
+    WHERE FACT_TBL.DIMENSION_KEY =MAN_REF_TBL.REF_KEY(+)
+    GROUP BY FEED_SRC_SYS,
+        SRC_FILE_CD,
+        DATASET_TYPE,
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN 'NULL KEY'
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN 'UNALLOCATED KEY'
+            WHEN MAN_REF_TBL.REF_KEY IS NULL
+            THEN 'ORPHAN KEY'
+            WHEN INCOMPREC_IND = 1
+            THEN 'INCOMPLETE REFERENCE RECORD'
+        END ,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END
+    );
+   
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+</etldataflow>

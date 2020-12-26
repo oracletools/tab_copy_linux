@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE test_plan_spec PUBLIC "test_plan_spec.dtd"
+  "C:\test_plan_spec.dtd">
+<!-- Copyright 2009  . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of _Test pipeline
+-->
+<test_plan name="star_vs_pearl_qv_report">
+
+
+  <dimension  name="star_prod_hier_new">
+
+    <source>
+        <!--source_extracter-->
+      <cursor 	connector="CUSER_GMAD" 
+				exec_mode="LAME_DUCK" 
+				cursor_type="query"
+				>
+			<query name="simple test">
+			   <![CDATA[
+					SELECT DISTINCT chld_cod, chld_desc, prnt_cod
+							   FROM hier_norm
+							  WHERE mstr_hier_typ = 'PRODUCT'
+								AND hier_typ = 'STAR_PROD_HIER'
+								AND hier_tree_nam = 'STAR_PROD_HIER'    --and chld_cod like 'CSP%'
+						   ORDER BY 1
+				]]>
+			</query>	  
+      </cursor>
+
+    </source>
+	<load>
+	  <!--data_publisher-->
+	    <csvfile
+			log_dest="LOG_ROOT"
+			header_line="true"
+			file_ext="txt"
+			delim =","
+			quote='"'
+			file_tmpl="{table_name}"
+			/>
+	</load>
+  </dimension>
+
+
+  <worklet  name="STGE_STAR_MGT_LDGR_2009">
+        <!--source_extracter-->
+      <pipeline	source_connector = "RA_GMAP" 
+                  target_connector = "AB_GMAD"
+			     cursor_type = "COPY" 
+			 create_table = "true"
+				>
+			<query name="table copy">
+			   <![CDATA[
+					SELECT *
+                      		  FROM c160970gma.stge_star_mgt_ldgr
+                     	       WHERE fisc_yr = 2009
+				]]>
+			</query>	  
+      </pipeline>
+  </worklet>
+ 
+  
+	<test1 name="P_ENTL_MBR_ANLS_GET_SMRY_VW test">
+		<description>
+			set autoprint off
+			variable xs refcursor
+			variable xsr refcursor
+			exec P_ENTL_MBR_ANLS_GET_SMRY_VW_g(:xs, :xsr, 'MTHL_INCM_STMT','Pre-Outlook','ALL','ALL', IN_USER_SOE_ID=>'SR64878')
+		</description>
+		<config
+			connector="CUSER_GMAD"
+			log_dest="LOG_ROOT"	
+			file_ext="txt"
+			delim =","
+			file_tmpl="{RC_NAME}.{IN_SUB_RPT_NAM}.{IN_PROD}.{IN_ROLLUP}.{IN_OUTL_TYP}.{IN_RPT_MO}.{IN_RPT_YR}.{IN_USER_SOE_ID}.{IN_USER_GRP_ID}"
+			test_mode="EXEC|GEN_CODE|LAME_DUCK" 
+		/>
+		<procedure name="P_ENTL_MBR_ANLS_GET_SMRY_VW" param_source="sql">
+			<sql descr="simple test">
+			   <![CDATA[
+					SELECT 'MTHL_INCM_STMT' in_sub_rpt_nam, ot.v IN_OUTL_TYP, 'ALL' in_prod, rlp.v in_rollup,
+						   'ALL' in_rpt_mo, 'ALL' in_rpt_yr, 'SR64878' in_user_soe_id,
+						   '1' in_user_grp_id
+					  FROM (SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'OTLK_GRP',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '902'
+																  )
+										 )) ot,
+						   (SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'ROLL_GRP',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '1'
+																  )
+										 )) rlp
+				]]>
+			</sql>		
+			<param name="OUT_MBR_SMRY_VW" in_out="OUT" type="REF CURSOR" />
+			<param name="OUT_MBR_SMRY_RSDATA" in_out="OUT"  type="REF CURSOR" />
+			<param name="IN_SUB_RPT_NAM" in_out="IN" value="MTHL_INCM_STMT" type="VARCHAR2" />
+			<param name="IN_OUTL_TYP" in_out="IN" 	value="Pre-Outlook" type="VARCHAR2" />
+			<param name="IN_PROD" in_out="IN" 		value="ALL" 	type="VARCHAR2" />
+			<param name="IN_ROLLUP" in_out="IN" 	value="Total" 	type="VARCHAR2" />
+			<param name="IN_RPT_MO" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_RPT_YR" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_USER_SOE_ID" in_out="IN" value="DS11779" type="VARCHAR2" />
+			<param name="IN_USER_GRP_ID" in_out="IN" value="902" 	type="VARCHAR2" />
+		</procedure>
+		
+	</test1>
+	
+	<test1 name="star vs pearl data dump">
+		<description>
+			Export csv data for STAR vs PEARL QV report
+		</description>
+		<config
+			connector="CUSER_GMAD"
+			log_dest="LOG_ROOT"	
+			file_ext="txt"
+			delim =","
+			file_tmpl="{DESCR}"
+			test_mode="EXEC" 
+		/>
+		<extract name="star_vs_pearl" data_source="sql">
+			<sql descr="star_ouc_csp_new">
+			   <![CDATA[
+					SELECT dept_id, 'CSP-' || soc.comm_sub_prod || '-' || soc.prod csp,
+						   dept_id_descr
+					  FROM stge_star_ouc_csp soc, c160970gma.ouc_goc_xref ogx
+					 WHERE ogx.ouc = soc.dept_id
+				]]>
+			</sql>		
+		</extract>
+	</test1>
+</test_plan>

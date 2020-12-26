@@ -1,0 +1,6 @@
+You must specify direct recipients with -s, -c, or -b.
+find: /u1/apps/smart/script/r2/putfile.bat*: No such file or directory
+find: /u1/apps/smart/script/r2/*_temp: No such file or directory
+find: /u1/apps/smart/script/r2/*_scripttemp.ksh: No such file or directory
+find: /u1/apps/smart/script/*_sftplog: No such file or directory
+find: /u1/apps/smart/script/*_sftperror: No such file or directory

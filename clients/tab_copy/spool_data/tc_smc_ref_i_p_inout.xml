@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+--1 min
+<worker name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_rp_id_io_3p
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert --+append parallel(ri,4)
+into del_rp_id_io_3p ri
+select * from  (
+select --+parallel(p,4)
+R.SMC_PROD_ID R_SMCP , r_rid, P.SMC_PROD_ID P_SMCP , p.rowid p_rid,substr(reverse(nvl(R.SMC_PROD_ID,P.SMC_PROD_ID)),1,1) rev,
+ nvl2(R.SMC_PROD_ID,100 +issuer,1000) +nvl2(P.SMC_PROD_ID,1,10) in_out   from (
+(select /*+parallel(r,4) */ r.rowid r_rid, nvl2(R.SMC_PROD_ID,100000,10000)+ nvl2(t.SMC_ISSUER_ID,10000000,1000000) issuer,SMC_PROD_ID from REF_SMC_TMP_PART r --where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ'
+   ,STG_REF_SMC_ISSUER_ab t where t.SMC_ISSUER_ID(+)=r.SMC_ISSUER_ID     ) R
+      full outer join  DEL_P_I_S P
+      on( R.SMC_PROD_ID =P.SMC_PROD_ID))
+	  ) where in_out not in (1100101,1001,10100101)
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+<worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+
+
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'DEL_RP_ID_IO_3P',
+method_opt => 'FOR ALL COLUMNS',
+granularity => 'ALL',
+cascade => TRUE,
+degree => 4);
+end;
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+
+</etldataflow>

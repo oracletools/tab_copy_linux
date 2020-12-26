@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+
+<worker name="ins_E_hash_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_0)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_0) p, SMC_SECURITY_LAST_UPDATE partition(rev_0) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+<worker name="ins_E_hash_1">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_1)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_1) p, SMC_SECURITY_LAST_UPDATE partition(rev_1) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker name="ins_E_hash_2">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_2)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_2) p, SMC_SECURITY_LAST_UPDATE partition(rev_2) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ins_E_hash_3">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_3)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_3) p, SMC_SECURITY_LAST_UPDATE partition(rev_3) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ins_E_hash_4">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_4)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_4) p, SMC_SECURITY_LAST_UPDATE partition(rev_4) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+<worker name="ins_E_hash_5">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_5)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_5) p, SMC_SECURITY_LAST_UPDATE partition(rev_5) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+	
+
+
+<worker name="ins_E_hash_6">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_6)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_6) p, SMC_SECURITY_LAST_UPDATE partition(rev_6) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ins_E_hash_7">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_7)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_7) p, SMC_SECURITY_LAST_UPDATE partition(rev_7) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+<worker name="ins_E_hash_8">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_8)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_8) p, SMC_SECURITY_LAST_UPDATE partition(rev_8) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ins_E_hash_9">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into SMC_EXCHANGE_LISTING_INFO_S partition(rev_9)
+select --+parallel
+p.* from SMC_EXCHANGE_LISTING_INFO partition(rev_9) p, SMC_SECURITY_LAST_UPDATE partition(rev_9) ss 
+ where p.SMCP = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+</etldataflow>

@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="DF_OASYS.copy">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="TO_DB" value="%CVOL_SMARTQ1%"></param>
+	  
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="0"></param>	  
+	  <param name="IF_CONVENTIONAL" value="0"></param>	
+	  			--use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+			<param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+			<param name="IF_DPL_SERIAL" value="0"></param>
+			<param name="DPL_BINDSIZE" value="100000"></param>
+			
+		<param name="TO_TABLE" value="CLONE_DF_OASYS_HIST"></param>
+			
+</globals>
+
+
+
+  <exec_dml>
+    <sqlp       method="%EXEC_METHOD%" >
+	<param name="LAME_DUCK" value='0'></param>
+			<param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+			<param name="SCHEMA_ANME" value="CSMARTVOL"></param>
+		<param name="IF_DEBUG" value="1"></param>
+		<param name="PARTITION" value="P20120101"></param>		
+      <sql_template>
+        <![CDATA[
+		DELETE CLONE_DF_OASYS_HIST PARTITION(%PARTITION%); 
+		commit;]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+  
+<worker name="COPY.JAN">
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="1000"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	   <param name="IF_TRUNCATE" value="1"></param>	
+	   <param name="IF_DELETE1" value="1"></param>	
+	   <param name="IF_DEBUG" value="1"></param>	
+	   <param name="FILTER1" value="  file_Date > '01-JAN-12' "></param>	
+	   <param name="PARTITION" value="P20120131"></param>	
+	   <param name="IF_IGNORE_EMPTY_PARTITIONS" value="1"></param>
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value="2"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+  
+  
+  <worker1 name="COPY.MAR1">
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="0"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	 
+	   <param name="IF_DELETE" value="1"></param>	 
+	   <param name="IF_DEBUG" value="1"></param>	
+	   <param name="FILTER" value="  file_Date > '01-JAN-12' "></param>	
+	   <param name="PARTITION" value="P2012030[1-3]"></param>	
+	   <param name="IF_IGNORE_EMPTY_PARTITIONS" value="1"></param>
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value="4"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+  <worker1 name="COPY.MAR2">
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="0"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	   <param name="IF_TRUNCATE" value="1"></param>	
+	   <param name="IF_DELETE1" value="1"></param>	
+	   <param name="IF_DEBUG" value="1"></param>	
+	   <param name="FILTER1" value="  file_Date > '01-JAN-12' "></param>	
+	   <param name="PARTITION" value="P2012030[4-9]"></param>	
+	   <param name="IF_IGNORE_EMPTY_PARTITIONS" value="1"></param>
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value="4"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+<worker1 name="COPY.P20120306">
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="0"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	   <param name="TO_TABLE" value="CLONE_DF_OASYS_HIST"></param>
+	   <param name="IF_DELETE" value="1"></param>	
+	   <param name="IF_DEBUG" value="1"></param>	
+	   <param name="FILTER" value=" 1=1 and  file_Date > '01-JAN-12' "></param>	
+	   <param name="PARTITION" value="P20120306"></param>	
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value="4"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+<worker1 name="COPY.P20120102">
+
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="100"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	   <param name="TO_TABLE" value="CLONE_DF_OASYS_HIST"></param>
+	   <param name="IF_TRUNCATE" value="0"></param>	
+	   <param name="FILTER1" value=" 1=2 "></param>	
+	   <param name="PARTITION" value="P20120102"></param>	
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value=""></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+
+<worker1 name="COPY.P20120103">
+
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="100"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	   <param name="TO_TABLE" value="CLONE_DF_OASYS_HIST"></param>
+	   <param name="IF_TRUNCATE" value="0"></param>	
+	   <param name="FILTER1" value=" 1=2 "></param>	
+	   <param name="PARTITION" value="P20120103"></param>	
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value=""></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+
+
+<worker1 name="COPY.P20120104">
+
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="100"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	   <param name="TO_TABLE" value="CLONE_DF_OASYS_HIST"></param>
+	   <param name="IF_TRUNCATE" value="0"></param>	
+	   <param name="FILTER1" value=" 1=2 "></param>	
+	   <param name="PARTITION" value="P20120104"></param>	
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value=""></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+
+  
+<worker1 name="CSMARTVOL.DELETE1">
+  <exec_dml>
+    <sqlp       method="%EXEC_METHOD%" >
+	<param name="LAME_DUCK" value='0'></param>
+        <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	    <param name="SCHEMA_ANME" value="CSMARTVOL"></param>
+		<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+		DELETE FROM del_df_oasys WHERE file_Date > '01-JAN-12';
+		--rollback;
+		commit;
+
+		]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+   <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="0"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	    <param name="TO_TABLE" value="DEL_DF_OASYS"></param>
+	   <param name="IF_TRUNCATE" value="1"></param>	
+	   <param name="FILTER" value=" file_Date >'01-JAN-12' "></param>	
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value="3"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+<worker1 name="CSMARTVOL.DELTE2">
+  <exec_copy>
+    <sqlp       method="%EXEC_METHOD%" >
+	<param name="LAME_DUCK" value='100'></param>
+        <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	    <param name="SCHEMA_ANME" value="CSMARTVOL"></param>
+		<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+		DELETE FROM del_df_oasys WHERE file_Date > '01-JAN-12' AND rowid between 'AAIIWyAA+AAJxUAAAA' and 'AAIIWyABCAAKwWnABk';
+		--rollback;
+		commit;
+		]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+ 
+</worker1>
+
+
+
+<worker1 name="CSMARTVOL.SHARDED_COPY">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value="0"></param>       
+	   <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	    <param name="TO_TABLE" value="DEL_DF_OASYS"></param>
+	   <param name="IF_TRUNCATE" value="1"></param>	
+	   <param name="FILTER" value=" file_Date >'01-JAN-12' "></param>	
+	   --10 max
+	   <param name="NUM_OF_SHARDS" value="3"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.DF_OASYS]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+ 
+</worker1>
+
+
+<worker1 name="CSMARTVOL.FROM_TO1">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value='100'></param>
+       
+	   <param name="TO_TABLE" value="TO_STG_TRD_VOL_FX_1"></param>
+	   <param name="IF_TRUNCATE" value="1"></param>	
+	   <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.FROM_STG_TRD_VOL_FX_1]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+ 
+</worker1>
+
+<worker1 name="CSMARTVOL.SPOOL">
+  <exec_spool>
+    <sqlp       method="%SPOOL_METHOD%" >
+	<param name="FILTER" value="table_name='TO_STG_TRD_VOL_FX_1'"></param>
+	 <param name="FROM_DB" value="%CVOL_SMARTQ1%"></param>
+	  <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.V_UNUSABLE_IDX
+]]>
+      </sql_template>	  
+    </sqlp>
+  </exec_spool>
+</worker1>
+
+
+<worker1 name="CSMARTVOL.FROM_TO1">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+	<param name="LAME_DUCK" value='100'></param>
+      <param name="FILTER1	" value="  rowid between 'AAH/wXAAVAAH1yAAAA' AND 'AAH/wXAAVAAH6V/APo'  "></param>
+	   <param name="TO_TABLE" value="TO_STG_TRD_VOL_FX_1"></param>
+	   <param name="IF_TRUNCATE" value="1"></param>	
+      <sql_template>
+        <![CDATA[CSMARTVOL.%FROM_FX_1%]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+  <exec_dml>
+    <sqlp       method="%EXEC_METHOD%" >
+	
+       <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	   <param name="INDEX_NAME" value="TO_PK_TRD_VOL_FX_MM_1"></param>
+	   <param name="INDEX_NAME1" value="TO_PK_TRD_VOL_FX_MM_1"></param>
+      <sql_template>
+        <![CDATA[
+DECLARE p_jobno INT;
+BEGIN
+ DBMS_JOB.SUBMIT(job       =>  p_jobno,
+                        what      =>  'BEGIN EXECUTE IMMEDIATE ''ALTER INDEX TO_PK_TRD_VOL_FX_MM_1 REBUILD''; END;',
+                        next_date =>  SYSDATE,
+                        interval  =>  NULL);
+        COMMIT;
+p(p_jobno);
+END;
+/		
+]]>
+      </sql_template>	  
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="CSMARTVOL.FROM_TO2">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+      <param name="FILTER" value="  rowid between 'AAH/wXAAVAAHxMAAAA' AND 'AAH/wXAAVAAH1x/APo' "></param>
+	   <param name="TO_TABLE" value="TO_STG_TRD_VOL_FX_1"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.FROM_STG_TRD_VOL_FX_1]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+
+<worker1 name="CSMARTVOL.FROM_TO3">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+      <param name="FILTER" value="  rowid between 'AAH/wXAAWAAEksAAAA' AND 'AAH/wXAAWAAEt7/APo' "></param>
+	   <param name="TO_TABLE" value="TO_STG_TRD_VOL_FX_1"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.FROM_STG_TRD_VOL_FX_1]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+
+
+
+
+
+<worker1 name="CSMARTVOL.STG_TRD_VOL_FX_FEB_121">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+      <param name="PARTITION" value="FEB_121"></param>
+     <sql_template>
+        <![CDATA[CSMARTVOL.STG_TRD_VOL_FX]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker1>
+
+
+
+<worker1 name="COUNTERS">
+  <exec_select>
+    <sqlp       method="%SELECT_METHOD%" >
+      <param name="PARTITION" value="FEB_121"></param>
+	   <param name="DB_CONNECTOR" value="%AB_SMARTP1B%"></param>
+	   <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+	   <param name="IF_DEBUG" value="1"></param>
+     <sql_template>
+        <![CDATA[
+		--source
+		SELECT /*+PARALLEL*/ 'STG_TRD_VOL_FX' tab ,COUNT(*) cnt FROM CSMARTVOL.STG_TRD_VOL_FX PARTITION (%PARTITION%)
+		UNION ALL
+		SELECT /*+PARALLEL*/ 'STG_TRD_VOL_FX_1' tab ,COUNT(*) cnt FROM CSMARTVOL.STG_TRD_VOL_FX_1 PARTITION (%PARTITION%);
+		]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+  <exec_select>
+    <sqlp       method="%SELECT_METHOD%" >
+      <param name="PARTITION" value="FEB_121"></param>
+	   <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	   <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+	   <param name="IF_DEBUG" value="1"></param>
+     <sql_template>
+        <![CDATA[
+		--target
+		SELECT /*+PARALLEL*/ 'STG_TRD_VOL_FX' tab ,COUNT(*) cnt FROM CSMARTVOL.STG_TRD_VOL_FX PARTITION (%PARTITION%)
+		UNION ALL
+		SELECT /*+PARALLEL*/ 'STG_TRD_VOL_FX_1' tab ,COUNT(*) cnt FROM CSMARTVOL.STG_TRD_VOL_FX_1 PARTITION (%PARTITION%);
+		]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>  
+</worker1>
+
+
+
+</etldataflow>

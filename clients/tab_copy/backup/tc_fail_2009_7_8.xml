@@ -1,0 +1,896 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CSMARTBSER.FAILS_REPORTS_HISTORY_2009_7_8">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090831">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090831"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090830">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090830"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090829">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090829"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090828">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090828"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090827">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090827"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090826">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090826"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090825">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090825"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090824">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090824"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090823">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090823"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090822">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090822"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090821">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090821"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090820">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090820"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090819">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090819"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090818">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090818"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090817">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090817"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090816">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090816"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090815">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090815"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090814">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090814"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090813">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090813"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090812">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090812"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090811">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090811"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090810">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090810"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090809">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090809"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090808">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090808"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090807">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090807"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090806">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090806"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090805">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090805"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090804">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090804"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090803">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090803"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090802">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090802"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090801">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090801"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090731">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090731"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090730">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090730"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090729">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090729"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090728">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090728"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090727">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090727"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090726">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090726"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090725">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090725"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090724">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090724"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090723">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090723"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090722">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090722"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090721">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090721"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090720">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090720"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090719">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090719"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090718">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090718"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090717">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090717"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090716">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090716"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090715">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090715"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090714">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090714"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090713">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090713"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090712">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090712"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090711">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090711"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090710">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090710"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090709">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090709"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090708">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090708"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090707">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090707"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090706">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090706"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090705">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090705"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090704">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090704"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090703">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090703"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090702">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090702"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20090701">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+     <param name="PARTITION" value="P20090701"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+  
+
+</etldataflow>

@@ -1,0 +1,1404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SELECT_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTD1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="PDEGREE" value="6"></param> 
+	   <param name="IF_DEBUG" value="1"></param> 
+	  
+
+
+</globals>
+
+<worker name="T_TRUNCATE">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+truncate table  MASTER_MATCHED_RECORDS2;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+--sql
+
+
+
+
+--sql
+
+<worker name="CT_1">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAUAAOM1JAAA', 'AAFCF6AAUAAOM1RAAT'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_1">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_2">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCnAAu', 'AAFCF6ABKAANeCvAAT'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_2">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_3">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeC+AAO', 'AAFCF6ABKAANeDFAAj'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_3">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_4">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDjAAa', 'AAFCF6ABKAANeDrAAA'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_4">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_5">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPaDAAS', 'AAFCF6ABLAAMPaKAAo'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_5">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_6">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPa+AAg', 'AAFCF6ABLAAMPbGAAG'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_6">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_7">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbGAAH', 'AAFCF6ABLAAMPbNAAc'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_7">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_8">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAxAAJOeLAAG', 'AAFCF6AAxAAJg6KAAZ'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_8">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_9">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AA2AAIFwbAAJ', 'AAFCF6AA2AAIXY7AAc'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_9">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_10">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABJAACDSTAAA', 'AAFCF6ABJAACDSaAAR'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_10">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_11">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDUAAd', 'AAFCF6ABKAANeDcAAC'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_11">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_12">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDcAAD', 'AAFCF6ABKAANeDjAAZ'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_12">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_13">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbNAAd', 'AAFCF6ABLAAMPbUAAu'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_13">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_14">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbjAAm', 'AAFCF6ABLAAMPbrAAH'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_14">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_15">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAUAAOM1RAAU', 'AAFCF6AAUAAOM1ZAAq'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_15">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_16">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABJAACDSaAAS', 'AAFCF6ABJAACDShAAj'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_16">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_17">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCZAAB', 'AAFCF6ABKAANeCgAAX'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_17">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_18">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCgAAY', 'AAFCF6ABKAANeCnAAt'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_18">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_19">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDFAAk', 'AAFCF6ABKAANeDNAAI'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_19">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_20">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDrAAB', 'AAFCF6ABKAANeDyAAV'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_20">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_21">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAXAAG+UMAAR', 'AAFCF6AAxAAIaQbAAk'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_21">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_22">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAxAAIaQbAAl', 'AAFCF6AAxAAJOeLAAF'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_22">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_23">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeC2AAq', 'AAFCF6ABKAANeC+AAN'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_23">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_24">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDyAAW', 'AAFCF6ABKAANeD5AAs'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_24">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_25">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbcAAT', 'AAFCF6ABLAAMPbjAAl'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_25">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_26">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAxAAJg6RAAw', 'AAFCF6AA2AAGyxyAAS'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_26">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_27">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCCAAe', 'AAFCF6ABKAANeCKAAC'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_27">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_28">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCvAAU', 'AAFCF6ABKAANeC2AAp'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_28">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_29">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPaKAAp', 'AAFCF6ABLAAMPaSAAM'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_29">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_30">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPaZAAf', 'AAFCF6ABLAAMPagAAv'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_30">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_31">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPagAAw', 'AAFCF6ABLAAMPaoAAS'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_31">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_32">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbrAAI', 'AAFCF6ABLAAMPbyAAd'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_32">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_33">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeD5AAt', 'AAFCF6ABLAAMPaDAAR'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_33">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_34">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPavAAo', 'AAFCF6ABLAAMPa3AAK'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_34">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_35">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPa3AAL', 'AAFCF6ABLAAMPa+AAf'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_35">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_36">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbUAAv', 'AAFCF6ABLAAMPbcAAS'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_36">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_37">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPb6AAD', 'AAFCF6ABPAAJzp5AAZ'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_37">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_38">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAUAAOM1ZAAr', 'AAFCF6AAXAAG+UMAAQ'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_38">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_39">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AAxAAJg6KAAa', 'AAFCF6AAxAAJg6RAAv'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_39">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_40">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCKAAD', 'AAFCF6ABKAANeCRAAa'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_40">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_41">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeDNAAJ', 'AAFCF6ABKAANeDUAAc'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_41">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_42">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPaSAAN', 'AAFCF6ABLAAMPaZAAe'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_42">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_43">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPbyAAe', 'AAFCF6ABLAAMPb6AAC'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_43">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_44">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AA2AAGyxyAAT', 'AAFCF6AA2AAIFwSAAl'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_44">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_45">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AA2AAIFwSAAm', 'AAFCF6AA2AAIFwbAAI'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_45">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_46">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6AA2AAIXY7AAd', 'AAFCF6ABJAACDSSAAw'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_46">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_47">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABJAACDShAAk', 'AAFCF6ABJAACDSpAAI'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_47">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_48">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABJAACDSpAAJ', 'AAFCF6ABKAANeCCAAd'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_48">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_49">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeCRAAb', 'AAFCF6ABKAANeCZAAA'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_49">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+<worker name="CT_50">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPaoAAT', 'AAFCF6ABLAAMPavAAn'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+<worker name="T_COUNT_50">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+select count(*) cnt FROM MASTER_MATCHED_RECORDS2 where match_score>21;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+
+
+</etldataflow>

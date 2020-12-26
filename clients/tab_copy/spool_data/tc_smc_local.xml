@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="ins_P_hash_rev_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--drop table del_hash_2
+--/
+		
+insert --+ append 
+ into del_rev_hash_2 partition(rev_0)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE 
+from del_rev_hash partition(rev_0) p , SMC_INCOME_INFORMATION partition(rev_0) II
+ where p.SMC_PROD_ID = ii.smcp(+)
+/
+
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker1 name="ins_P_hash_rev_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--drop table del_hash_2
+--/
+		
+insert --+ append 
+ into del_rev_hash_2 partition(rev_0)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE 
+from SMC_PRODUCT partition(rev_0) p , SMC_SECURITY_LAST_UPDATE partition(rev_0) ss , SMC_INCOME_INFORMATION partition(rev_0) II
+ where p.SMC_PROD_ID = ss.smcp and p.SMC_PROD_ID = ii.smcp(+)
+/
+
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="ins_P_hash_rev_1">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--drop table del_hash_2
+--/
+		
+insert --+ append 
+ into del_rev_hash_2 partition(rev_1)
+select --+parallel
+p.*,  II.COUPONDIVIDENDRATE    ,II.COUPONDIVIDENDTYPE 
+from SMC_PRODUCT partition(rev_1) p , SMC_SECURITY_LAST_UPDATE partition(rev_1) ss , SMC_INCOME_INFORMATION partition(rev_1) II
+ where p.SMC_PROD_ID = ss.smcp and p.SMC_PROD_ID = ii.smcp
+/
+
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+<worker1 name="ins_P_hash_2">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+drop table del_hash_2
+/
+		
+create table del_hash_2 as
+select --+parallel
+p.*, II.SMCP, II.COUPONDIVIDENDRATE    ,
+II.COUPONDIVIDENDTYPE from SMC_PRODUCT partition(rev_0) p , SMC_SECURITY_LAST_UPDATE partition(rev_0) ss , SMC_INCOME_INFORMATION partition(rev_0) II
+ where p.SMC_PROD_ID = ss.smcp and p.SMC_PROD_ID = ii.smcp
+/
+
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[ 
+select --+parallel
+p.*, II.SMCP, II.COUPONDIVIDENDRATE    ,
+II.COUPONDIVIDENDTYPE from SMC_PRODUCT partition(rev_0) p , SMC_SECURITY_LAST_UPDATE partition(rev_0) ss , SMC_INCOME_INFORMATION partition(rev_0) II
+ where p.SMC_PROD_ID = ss.smcp and p.SMC_PROD_ID = ii.smcp
+ ;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[ 
+select --+parallel
+p.*, II.SMCP, II.COUPONDIVIDENDRATE    ,
+II.COUPONDIVIDENDTYPE from SMC_PRODUCT partition(rev_0) p , SMC_SECURITY_LAST_UPDATE partition(rev_0) ss , SMC_INCOME_INFORMATION partition(rev_0) II
+ where p.SMC_PROD_ID = ss.smcp and p.SMC_PROD_ID = ii.smcp
+ ;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="ins_P_hash_0">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into del_rev_hash partition(rev_0)
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_0) p, SMC_SECURITY_LAST_UPDATE partition(rev_0) ss 
+ where p.SMC_PROD_ID = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+<worker1 name="ins_P_hash_1">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into del_rev_hash partition(rev_1)
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_1) p, SMC_SECURITY_LAST_UPDATE partition(rev_1) ss 
+ where p.SMC_PROD_ID = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="ins_P_hash_2">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into del_rev_hash partition(rev_2)
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_2) p, SMC_SECURITY_LAST_UPDATE partition(rev_2) ss 
+ where p.SMC_PROD_ID = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ins_P_hash_3">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into del_rev_hash partition(rev_3)
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_3) p, SMC_SECURITY_LAST_UPDATE partition(rev_3) ss 
+ where p.SMC_PROD_ID = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ins_P_hash_4">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into del_rev_hash partition(rev_4)
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_4) p, SMC_SECURITY_LAST_UPDATE partition(rev_4) ss 
+ where p.SMC_PROD_ID = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+<worker1 name="ins_P_hash_2">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+ insert --+ append 
+ into del_rev_hash partition(rev_5)
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_5) p, SMC_SECURITY_LAST_UPDATE partition(rev_5) ss 
+ where p.SMC_PROD_ID = ss.smcp 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[ 
+select --+parallel
+p.* from SMC_PRODUCT partition(rev_0) p where p.SMC_PROD_ID in (select ss.smcp from  SMC_SECURITY_LAST_UPDATE partition(rev_0) ss)
+;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="ins_P_CL">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+CREATE TABLE SMC_PRODUCT_CL (
+  smc_prod_id    ,
+  prod_shrt_desc ,
+  prod_lng_desc  ,
+  oper_ind       ,
+  is_dummy_prod  ,
+  mkt_sect_desc  ,
+  scr_typ_lvl_1  ,
+  scr_typ_lvl_2  ,
+  series         ,
+  iss_ccy        ,
+  mkt            ,
+  mkt_seg        ,
+  is_in_dflt     
+) CLUSTER SMC_TEST(smc_prod_id) as
+  select --+ parallel_(4) index_ffs_(P PK_PRODUCT  ) drivin_site(ss)
+P.SMCP    AS      SMC_PROD_ID,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT
+--,substr(reverse(p.smcp),1,1) rev
+from   C160970SMC.PRODUCT@gmail.com  P
+--where --substr(reverse(p.smcp),1,1)='0'
+--p.ROWID BETWEEN 'AACKUuAAKAAA9iIAAA' AND 'AACKUuAALAAJhvcAAn'
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="tp_7">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+insert --+append 
+into SMC_PRODUCT
+  select --+ parallel(4) index_ffs_(P PK_PRODUCT  ) drivin_site(ss)
+P.SMCP    AS      SMC_PROD_ID,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT,
+substr(reverse(p.smcp),1,1) rev
+from   C160970SMC.PRODUCT@gmail.com  P
+where --substr(reverse(p.smcp),1,1)='0'
+p.ROWID BETWEEN 'AACKUuAAYAAHqFpAA/' AND 'AACKUuAAaAAIcTFAAp'
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ins_SECURITY_LAST_UPDATE">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table SMC_SECURITY_LAST_UPDATE
+/
+		
+insert --+append
+into SMC_SECURITY_LAST_UPDATE  select SMCP ,substr(reverse(smcp),1,1) rev from C160970SMC.SECURITY_LAST_UPDATE@gmail.com
+where DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ins_P">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+insert --+append 
+into SMC_PRODUCT
+  select --+ parallel(4) index_ffs_(P PK_PRODUCT  ) drivin_site(ss)
+P.SMCP    AS      SMC_PROD_ID,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT,
+substr(reverse(p.smcp),1,1) rev
+from   C160970SMC.PRODUCT@gmail.com  P
+--where --substr(reverse(p.smcp),1,1)='0'
+--p.ROWID BETWEEN 'AACKUuAAKAAA9iIAAA' AND 'AACKUuAALAAJhvcAAn'
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+ <worker1 name="tp_7">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+--truncate table DEL_TMP_P_1_rev
+--/
+		
+insert --+append
+WHEN rev='0' THEN into SMC_PRODUCT partition (rev_0)
+WHEN rev='1' THEN into SMC_PRODUCT partition (rev_1)
+WHEN rev='2' THEN into SMC_PRODUCT partition (rev_2)
+WHEN rev='3' THEN into SMC_PRODUCT partition (rev_3)
+WHEN rev='4' THEN into SMC_PRODUCT partition (rev_4)
+WHEN rev='5' THEN into SMC_PRODUCT partition (rev_5)
+WHEN rev='6' THEN into SMC_PRODUCT partition (rev_6)
+WHEN rev='7' THEN into SMC_PRODUCT partition (rev_7)
+WHEN rev='8' THEN into SMC_PRODUCT partition (rev_8)
+WHEN rev='9' THEN into SMC_PRODUCT partition (rev_9)
+ELSE INTO SMC_PRODUCT
+  select --+ parallel(4) index_ffs_(P PK_PRODUCT  ) drivin_site(ss)
+P.SMCP    AS      SMC_PROD_ID,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT
+,substr(reverse(p.smcp),1,1) rev
+from   C160970SMC.PRODUCT@gmail.com  P
+where --substr(reverse(p.smcp),1,1)='0'
+p.ROWID BETWEEN 'AACKUuAAaAAIcTFAAq' AND 'AACKUuAAaAAMhmXAAn'
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="tp_7">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table DEL_TMP_P_1
+/
+		
+insert --+append 
+into DEL_TMP_P_1
+  select --+ parallel(4) index_ffs_(P PK_PRODUCT  ) drivin_site(ss)
+P.SMCP    AS      SMC_PROD_ID,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT
+from   C160970SMC.PRODUCT@gmail.com  P
+where substr(reverse(p.smcp),1,1)='1'
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[ 
+insert --+append into DEL_TMP_P_1_rev
+  select --+ parallel(4) index_ffs_(P PK_PRODUCT  ) drivin_site(ss)
+P.SMCP    AS      SMC_PROD_ID,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT
+from   C160970SMC.PRODUCT@gmail.com  P
+where substr(reverse(p.smcp),1,1)='0';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+<worker1 name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[ 
+select --+parallel
+p.* from DEL_TMP_P_1 p, del_tmp_13_3 ss where p.SMC_PROD_ID=ss.smcp;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker1>
+
+
+</etldataflow>

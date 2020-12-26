@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FRNBNY_QUERY_COPY2_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%BK_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="ZDP_COPY_VOL_DATA">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="ZDP_FAILS_DATA"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[
+SELECT UNIQUE_ID,  FO_TRADE_REF,  OPS_SETTLEMENT_TRADE_REF,  ADDITIONAL_TRADE_REF,  OPERATIONS_TRADE_REF,  EXTERNAL_TRADE_REF,  TML_TRD_REF,  LINKED_TRD_REF,  ORIG_TRD_REF_NO,  STOCK_RECORD_TRADE_REF,  COB_DATE,  SETTLEMENT_DATE_CONTRACTUAL,  SOURCESYSTEM,  TRADE_DATE,  TRADE_ENTRY_DATE, CUSIP_CODE,  COUNTERPARTY_MNEMONIC,  QUANTITY_CONTRACTUAL,  AMT_CONTRACTUAL_USD,  SETTLEMENT_CURRENCY,  TRADER_ID,  TRADER_NAME,  SALESPERSON_ID,  SALESPERSON_NAME,  COUNTERPARTY_NAME,  PRE_SETL_AGE_BAND,  PRE_SETL_AGE_BND_1,  PRE_SETL_AGE_BND_2,  ISIN_CODE,  FIRM_MNEMONIC,  PRICE
+FROM CSMARTBSER.FAILS_REPORTS_HISTORY WHERE COB_DATE BETWEEN '01-Aug-2012' AND '31-Aug-2012'
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+
+
+</etldataflow>

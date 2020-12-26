@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="DDL_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%CSMARTBSER_SMARTD1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="PDEGREE" value="6"></param> 
+	  <param name="IF_DEBUG" value="1"></param> 
+	  
+	  <param name="IF_ASYNC_LOG" value="1"></param>
+	  
+
+
+</globals>
+
+
+<worker name="PROC_DDL_SPOOL">
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="DLL_SPOOL_COLUMNS" 
+			value="OWNER,DECODE(OBJECT_TYPE,'PACKAGE', 'PACKAGE_SPEC','PACKAGE BODY','PACKAGE_BODY', OBJECT_TYPE) OBJECT_TYPE,OBJECT_NAME"
+	 ></param>
+	<param name="SPOOL_SCHEMA" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+SELECT %DLL_SPOOL_COLUMNS% from all_objects  where  owner='%SPOOL_SCHEMA%' 
+and  object_type='PROCEDURE' and rownum<50 and (object_name not like 'ADD%' and object_name not like 'CHECKIN%' 
+and object_name not like 'COMPRESS%');
+
+]]>
+      </sql_template>
+    </sqlp>
+	  </exec_spool_ddl>
+</worker>
+
+
+<worker1 name="T_DDL_SPOOL">
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="DLL_SPOOL_COLUMNS" 
+			value="OWNER,DECODE(OBJECT_TYPE,'PACKAGE', 'PACKAGE_SPEC','PACKAGE BODY','PACKAGE_BODY', OBJECT_TYPE) OBJECT_TYPE,OBJECT_NAME"
+	 ></param>
+	<param name="SPOOL_SCHEMA" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+SELECT %DLL_SPOOL_COLUMNS% from all_objects  where  owner='%SPOOL_SCHEMA%' 
+and object_name in (
+'P_FAILS_ATLAS_PAIROFF_IND_UPD',
+'P_DEL_FAILS_REPORTS',
+'P_FAILS_ADD_SUB_PARTITION',
+'FAILS_WOW_RESOLVD_IND_UPDATE',
+'FAILS_UNIN_TO_TLM_PKG',
+'FAILS_UNIN_TO_TLM_PKG'
+) ;
+]]>
+      </sql_template>
+    </sqlp>
+	  </exec_spool_ddl>
+</worker1>
+
+
+
+<worker1 name="T_DDL_SPOOL">
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="DLL_SPOOL_COLUMNS" 
+			value="OWNER,DECODE(OBJECT_TYPE,'PACKAGE', 'PACKAGE_SPEC','PACKAGE BODY','PACKAGE_BODY', OBJECT_TYPE) OBJECT_TYPE,OBJECT_NAME"
+	 ></param>
+	<param name="SPOOL_SCHEMA" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+SELECT %DLL_SPOOL_COLUMNS% from all_objects  where  owner='%SPOOL_SCHEMA%' 
+and object_name in (
+'P_FAILS_ATLAS_PAIROFF_IND_UPD',
+'P_DEL_FAILS_REPORTS',
+'P_FAILS_ADD_SUB_PARTITION',
+'FAILS_WOW_RESOLVD_IND_UPDATE',
+'FAILS_UNIN_TO_TLM_PKG',
+'FAILS_UNIN_TO_TLM_PKG'
+) ;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool_ddl>
+  <publisher >
+   <nzsql 	method="%PUBLISH_DDL%" >
+	   <param name="DB_CONNECTOR" value="%NZ_MAP%"></param>
+	   <param name="SCHEMA_NAME" value="MAP"></param>
+   </nzsql>
+  </publisher>
+</worker1>
+
+  <transformer1>
+   <utils 	method="%CONVERT_DDL%" >
+	   <param name="REGEXP" value="MAP"></param>
+   </utils>
+  </transformer1>  
+
+
+</etldataflow>

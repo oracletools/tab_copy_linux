@@ -1,0 +1,78 @@
+<etldataflow name="COPY-ESMARTVOL.SMC_SUB_TABLES">
+<globals>
+          <param name="FLOW_TYPE" value="ASYNC"></param>
+	  <param name="FIELD_TERMINATOR" value='|^'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CVOL_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%EVOL_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="ESMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+
+</globals>
+
+<worker name="ESMARTVOL.REF_SMC_CUSIP">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_CUSIP]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="ESMARTVOL.REF_SMC_SCR_CUSIP">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_SCR_CUSIP]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="ESMARTVOL.REF_SMC_BLMBRG_CUSIP">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_BLMBRG_CUSIP]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="ESMARTVOL.REF_SMC_ISIN">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_ISIN]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="ESMARTVOL.REF_SMC_SCR_KEY">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_SCR_KEY]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="ESMARTVOL.REF_SMC_MSD_KEY">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_MSD_KEY]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="ESMARTVOL.REF_SMC_SEDOL">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.REF_SMC_SEDOL]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+</etldataflow>

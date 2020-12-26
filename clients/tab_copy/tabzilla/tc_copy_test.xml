@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<etldataflow name="QUERY_COPY_PIPELINE_140128_091727" pipeline_config="test_config.xml">
+  <globals>
+    <!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+    <param name="FLOW_TYPE" value="SYNC"/>
+    <param name="FIELD_TERMINATOR" value="`|"/>
+    <param name="LINE_TERMINATOR" value="~"/>
+    <param name="FROM_DB" value="%test_CSMARTBSER_DEV%"/>
+    <param name="FROM_SCHEMA" value="CSMARTBSER"/>
+    <param name="TO_DB" value="%test_QA%"/>
+    <param name="TO_SCHEMA" value="CSMARTREF"/>
+    <!--will spool ALL records if LAME_DUCK=0-->
+    <param name="LAME_DUCK" value="0"/>
+    <param name="ARRAYSIZE" value="5000"/>
+    <param name="COPYCOMMIT" value="4"/>
+    <!--sqlp attribute-->
+    <param name="IF_TRUNCATE" value="0"/>
+    <param name="IF_SHOW_SERVEROUTPUT" value="1"/>
+  </globals>
+  <worker name="TMP_QC_140128_091727">
+    <exec_query_copy>
+      <table_utils method="%QUERY_COPY_METHOD%">
+        <param name="TO_TABLE" value="TMP_QC_140128_091727"/>
+        <param name="IF_CREATE_TARGET_TABLE" value="1"/>
+        <sql_template>
+<![CDATA[--place your query here
+SELECT  GL_ACCOUNT_NUMBER
+  FROM CSMARTBSER.FAILS_REPORTS_HISTORY SUBPARTITION (P20130203_P_ATLAS)]]>          
+        </sql_template>
+        <param name="IF_TRUNCATE" value="0"/>
+      </table_utils>
+    </exec_query_copy>
+  </worker>
+</etldataflow>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="TVU">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AD_SMARTP2%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTU2%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>		  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+</globals>
+
+
+
+<worker name="1">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="TO_TABLE1" value="TRD_VOL_UNION"></param>
+		  <param name="PARTITION" value="JAN_152"></param>
+                  <param name="IF_TRUNCATE" value="1"></param>
+              <param name="NLS_DATE_FORMAT" value="DD-MON-RRRR HH24:MI:SS"></param>
+              <param name="NLS_TIMESTAMP_FORMAT" value="DD-MON-RRRR HH.MI.SSXFF AM"></param>
+	
+	  
+     <sql_template>
+        <![CDATA[CSMARTVOL.TRD_VOL_UNION]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</etldataflow>

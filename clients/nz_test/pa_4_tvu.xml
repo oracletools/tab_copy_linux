@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="4_TVU">
+<globals>
+
+	<param name="ETLFLOW_DESCR" value="Insert 1 record to TVU."></param>
+
+	<!-- PIPELINE execution type
+	 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>
+
+	<param name="FIELD_TERMINATOR" value="'|'"></param>
+	<param name="LINE_TERMINATOR" value="''"></param>
+
+	<param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	<param name="SCHEMA_NAME" value="PARACCEL"></param>
+	<!--will spool ALL records if LAME_DUCK=0-->
+	<param name="LAME_DUCK" value='0'></param>
+	<param name="ARRAYSIZE" value="5000"></param>
+	<param name="COPYCOMMIT" value="4"></param>
+	<!--sqlp attribute-->
+
+	<param name="TARGET_TABLE" value="TRD_VOL_UNION"></param>
+	<param name="CTAS_TABLE" value="TVU_CTAS_TEST"></param>
+
+
+	<param name="IF_TOSS_CACHE" value="0"></param>
+	<param name="TRANSACTION" value="ROLLBACK"></param>	 
+
+	<param name="IF_ASYNC_LOG" value="1"></param>		
+	
+</globals>
+
+
+<worker name="4_TVU_DROP_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		DROP TABLE  %CTAS_TABLE%;
+		;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="4_TVU_INS_1">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		 CREATE TABLE %CTAS_TABLE% DISTKEY (trd_vol_sid) SORTKEY(cob_dt, con_setl_dt) DISTSTYLE KEY  AS SELECT * 
+		 FROM %TARGET_TABLE%;
+		 --where trd_vol_sid=15 LIMIT 1;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+</etldataflow>

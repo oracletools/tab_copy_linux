@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CLONE_FX">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%CVOL_SMARTQ1%"></param>
+  
+	  <param name="DB_CONNECTOR1" value="%CVOL_SMARTQ1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	<param name="PDEGREE" value="6"></param> 
+	<param name="IF_DEBUG" value="1"></param> 
+
+	<param name="IF_ASYNC_LOG" value="0"></param>
+	<param name="FROM_TABLE" value="STG_TRD_VOL_FX_1"></param> -heap
+	<param name="TO_TABLE" value="CLONE_STG_TRD_VOL_FX_1"></param>
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_CLONE_UNCOMPRESSED" value="0"></param>
+</globals>
+
+
+<worker name="CLONE_TABLE">
+--spool
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="TABLE_DLL_SPOOL_COLUMNS" value="OWNER, 'TABLE' OBJECT_TYPE,table_name OBJECT_NAME"></param>
+	 <param name="SPOOL_SCHEMA" value="CSMARTVOL"></param>
+      <sql_template>
+        <![CDATA[
+SELECT %TABLE_DLL_SPOOL_COLUMNS% from all_tables where  owner='%SPOOL_SCHEMA%' 
+and table_name in (
+'%FROM_TABLE%'
+) ;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool_ddl>
+    <publisher >
+   <sqlp 	method="%PUBLISH_DDL%" >
+	  <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTVOL"></param>   
+      <sql_template><![CDATA[]]></sql_template>   
+   </sqlp>
+  </publisher>  
+ 
+</worker>
+
+
+
+
+</etldataflow>

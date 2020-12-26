@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    env='dev'
+	env2='{$ETL_ENV}'
+    LOG_ROOT="/tmp/gctest/log/"
+	TMPDIR="/tmp/gctest/"
+	REFS_PATH="refs"
+	binaries_path ="lib" 
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	DEV_EMAIL_TO1="AlexBuzunov@gmail.com;sl46566@gmail.com;suryanarayan.kuanar@gmail.com"
+
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	VOL_EMAIL_TO="AlexBuzunov@gmail.com"
+
+	SQL_LOADER_COPY="copy_table"
+	FAST_COPY_METHOD="sql_plus_copy"
+	DQ_EXPLAIN="dq_explain_plan"
+	SPOOL_TEST="spool"
+	SHARDED_SQL_LOADER_COPY="sharded_load"
+	
+	SELECT ="select"	
+	DML ="dml"
+	DDL_SPOOL_TEST="spool_ddl"
+	DDL_PUBLISH_TEST="publish_ddl"
+
+	CLONE_TABLE="clone_table"
+	
+	SAFE_TABLE_COPY="safe_copy"    
+	SPOOL_QUERY="spool_query_data"
+/>
+
+  <connector>  
+        <!--source connector-->
+
+		<DL_GMAP1A type1='inline' schema="DLROGMARWSMART" pword="***" sid="GMAP1A" host = "localhost"  PORT = "11150"/>
+	    <DL_GMAC1B type1='inline' schema="DLROGMARWSMART" pword="***" sid="GMAC1B" host = "localhost"  PORT = "11150"/>
+		<AB_SMARTP1B type1='inline' schema="ab95022" pword="***" sid="SMARTP_B" host = "localhost"  PORT = "11150"/>
+		<DL_GMAU type1='inline' schema="DLROGMARWSMART" pword="***" sid="GMAU1A" HOST ="mapswdbun1-vip.nam.nsroot.net"  PORT = "11150"/>
+		<!-- FAILS 2 MO copy -->
+
+		<AB_SMARTCOB type1='inline' schema="ab95022" pword="***" sid="SMARTC1B" host = "localhost"  PORT = "11150"/>
+		<!-- FAILS 2 MO copy -->
+		<CSMARTBSER_SMARTU1B type1='inline' schema="CSMARTBSER" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+		<CSMARTBSER_SMARTQ1 type1='inline' schema="CSMARTBSER" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+		<CVOL_SMARTQ1 type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>		
+		<CVOL_SMARTD1 type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+
+		--change this to actual prod login
+		<CVOL_SMARTP1B type1='inline' schema="sy25573" pword="***" sid="SMARTP1B" host = "localhost"  PORT = "11150"/>
+		
+
+
+		<EVOL_SMARTD1 type1='inline' schema="Esmartvol " pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+		<CVOL_SMARTU1B type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+
+		<ESMARTABC_SMARTU1B type1='inline' schema="ESMARTABC" pword="***" sid="SMARTU1B" host = "localhost" PORT = "11150"/>
+		<!--target connectors-->
+		<ESMARTABC_SMARTD1 type1='inline' schema="ESMARTABC" pword="***" sid="SMARTD1" host = "localhost" PORT = "11150"/>
+
+
+		<ESMARTREF_SMARTU1B type1='inline' schema="ESMARTREF" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+		<CSMARTREF_SMARTU1B type1='inline' schema="CSMARTREF" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+		<CSMARTREF_SMARTD1 type1='inline' schema="CSMARTREF" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+		<ESMARTREF_SMARTD1 type1='inline' schema="ESMARTREF" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+		<CSMARTREF_SMARTQ1 type1='inline' schema="CSMARTREF" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+		<ESMARTREF_SMARTQ1 type1='inline' schema="ESMARTREF" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+		<SMARTD1 type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+
+
+  </connector>
+ 
+  <default>
+
+        <env>
+	       <vol_spool SPOOL_METHOD="%SQL_SPOOL%">
+		  <param name="EMAIL_TO" value='%VOL_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 		</vol_spool>
+		 <dev 	COPY_METHOD="%SQL_LOADER_COPY%" 
+				SPOOL_METHOD="%SPOOL_TEST%"
+				QUERY_SPOOL_METHOD="%SPOOL_QUERY%"
+				CLONE_TABLE="%CLONE_TABLE%"
+				DML_METHOD="%DML%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 
+		 </dev>
+
+	       <dev0 COPY_METHOD="%SQL_LOADER_COPY%"  SPOOL_METHOD="%SQL_SPOOL%">
+		  <param name="EMAIL_TO" value='%VOL_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 		</dev0>
+	 </env>
+
+  </default>
+  <worker>
+  <!--worker name has to be unique -->
+	<exec_dml1 name="sqlp" module_name="sql_utils" />	
+    <!--worker name has to be unique -->
+	<exec_copy1 name="sqlp" module_name="sql_utils" />
+		
+	<exec_sharded_copy name="sqlp" module_name="sql_utils" />
+	<exec_spool_ddl name="sqlp" module_name="sql_utils" />
+	<publisher name="sqlp" module_name="sql_utils" />
+	<exec_select1 name="sqlp" module_name="sql_utils" />	
+	<exec_clone_table name="table_utils" module_name="table_utils" />	
+	<exec_safe_copy name="table_utils" module_name="table_utils" />	
+	<exec_dml name="table_utils" module_name="table_utils" />	
+	<exec_copy name="table_utils" module_name="table_utils" />
+	<exec_select name="table_utils" module_name="table_utils" />
+	<exec_spool name="table_utils" module_name="table_utils" />	
+	<exec_query_spool name="table_utils" module_name="table_utils" />
+  </worker>
+</test_spec>

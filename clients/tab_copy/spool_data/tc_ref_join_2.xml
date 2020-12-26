@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_0)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_0)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_0) t, TMP_RIDS_idx subpartition(rev_0_2) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_1)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_1)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_1) t, TMP_RIDS_idx subpartition(rev_1_2) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker1 name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_2)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_2)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_2) t, TMP_RIDS_idx subpartition(rev_2_2) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_3)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_3)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_3) t, TMP_RIDS_idx subpartition(rev_2_3) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+<worker1 name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_4)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_4)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_4) t, TMP_RIDS_idx subpartition(rev_2_4) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_5)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_5)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_5) t, TMP_RIDS_idx subpartition(rev_2_5) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_6)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_6)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_6) t, TMP_RIDS_idx subpartition(rev_2_6) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ref_join_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+alter table ref_smc_join_2_0 truncate partition(rev_7)
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append
+into ref_smc_join_2_0 partition(rev_7)
+select --+full(t) parallel(8)
+t.* from TMP_REF_SMC_REV partition(rev_7) t, TMP_RIDS_idx subpartition(rev_2_7) t0 
+where --t.ROWID BETWEEN 'AAPbxwAA2AAHqgIAAA' AND 'AAPbxwAA3AAE4P/ABC'
+ t.SMC_PROD_ID=t0.SMC_ISSUER_ID
+
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+</etldataflow>

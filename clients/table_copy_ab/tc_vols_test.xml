@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="ESALES_TABLES_COPY">
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="Volume tables copy"></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+	  
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CSMARTREF_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTREF"></param>
+
+	  <!--LAME_DUCK translates to ROWNUM < LAME_DUCK -->
+	  <param name="LAME_DUCK" value='0'></param>
+	  
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	 
+	  <!--sqlp attribute--> 
+	  
+
+	  
+ 
+
+</globals>
+
+
+<worker name="VOLS_AUTO_STG_VOL_SMRY">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+	 <param name="IF_TRUNCATE" value="1"></param>
+	 <param name="FROM_DB" value="%AB_SMARTP1B%"></param> 
+	 <param name="TO_TABLE1" value="VOLS_AUTO_STG_VOL_SMRY_NEW"></param> 
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.VOLS_AUTO_STG_VOL_SMRY
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+
+</etldataflow>

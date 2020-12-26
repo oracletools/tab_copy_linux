@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of table_copy pipeline
+-->
+<etldataflow name="EREF_STATS_UAT" 
+			 email_to="EMAIL_TO">
+
+<worker name="EREF_MDWD_TABLE_UPDATE_STATS_UAT">
+  <exec_dml>
+    <sqlp method="dml" >
+	  <param name="DB_CONNECTOR" value="CREF_SMARTU1B"></param>
+	   <param name="SCHEMA_NAME" value="CSMARTREF"></param>	  
+      <sql_template>
+        <![CDATA[
+set line 200		
+SELECT %DB_CONNECTOR%, substr(LAST_COPY_DATE,1,18) LAST_COPY_DATE FROM (
+SELECT '%SCHEMA_NAME%.REF_CDMS' %DB_CONNECTOR%, SCN_TO_TIMESTAMP( ORA_ROWSCN ) LAST_COPY_DATE FROM %SCHEMA_NAME%.REF_CDMS where rownum=1 UNION ALL
+SELECT '%SCHEMA_NAME%.REF_CPI', SCN_TO_TIMESTAMP( ORA_ROWSCN )  FROM %SCHEMA_NAME%.REF_CPI where rownum=1  UNION ALL
+SELECT '%SCHEMA_NAME%.REF_CTP_MSTR ', SCN_TO_TIMESTAMP( ORA_ROWSCN )  FROM %SCHEMA_NAME%.REF_CTP_MSTR where rownum=1 UNION ALL
+SELECT '%SCHEMA_NAME%.REF_SLSPRSN_HIER', SCN_TO_TIMESTAMP( ORA_ROWSCN )  FROM %SCHEMA_NAME%.REF_SLSPRSN_HIER where rownum=1 UNION ALL
+SELECT '%SCHEMA_NAME%.REF_PRSNL_MSTR', SCN_TO_TIMESTAMP( ORA_ROWSCN )  FROM %SCHEMA_NAME%.REF_PRSNL_MSTR where rownum=1 UNION ALL
+SELECT '%SCHEMA_NAME%.REF_PRSNL_MGR_HIER',SCN_TO_TIMESTAMP( ORA_ROWSCN )  FROM %SCHEMA_NAME%.REF_PRSNL_MGR_HIER where rownum=1 UNION ALL
+SELECT '%SCHEMA_NAME%.REF_PRSNL_DEPT_HIER', SCN_TO_TIMESTAMP( ORA_ROWSCN )  FROM %SCHEMA_NAME%.REF_PRSNL_DEPT_HIER where rownum=1 
+) ORDER BY 1; 
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+</etldataflow>

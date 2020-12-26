@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_CONC_TEST_2010_JUST_LOAD_COMMIT"  >
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="Concurrent test 1."></param>
+	  
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	<param name="FROM_TABLE1" value="TRD_VOL_UNION"></param>
+	<param name="TO_TABLE1" value="TVU_LOAD_TEST3"></param>
+	<param name="NODE_LIMIT1" value="1111110"></param>
+	<param name="NODE_LIMIT" value="555555"></param>
+	<param name="NODE_LIMIT1" value="277777"></param>
+	<param name="NODE_LIMIT1" value="10"></param>
+		
+	<param name="IF_TOSS_CACHE" value="1"></param>
+	<param name="TRANSACTION" value="COMMIT"></param>	  
+		
+</globals>
+
+
+
+<worker name="LOAD_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="FROM_TABLE" value="TVU_LOAD_TEST0"></param>
+	<param name="TVU" value="TVU_LOAD_TEST6"></param>
+      <sql_template>
+        <![CDATA[BEGIN; copy %TVU% from '$disk/tmp/%FROM_TABLE%_%NODE_LIMIT%.gz'  GZIP parallel delimiter '|'; %TRANSACTION%; END;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker1 name="Q6diff_2">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU" value="TVU_LOAD_TEST6"></param>
+      <sql_template>
+        <![CDATA[
+         select 
+         MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_1_desc,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_2_desc ,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_3_desc,        
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q12011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q12011_Amt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q22011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q22011_Amt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q32011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q32011_Amt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q42011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q42011_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q12010_Cnt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q12010_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q22010_Cnt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q22010_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q32010_Cnt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q32010_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q42010_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q42010_Amt         
+         FROM
+          %TVU% TRD_VOL_UNION  
+           right outer join MAN_REF_ASET_LVL_DATA on (MAN_REF_ASET_LVL_DATA.ASET_LVL_KEY = TRD_VOL_UNION.ASET_LVL_KEY )
+           where --cob_dt >= '2010-01-01'
+		   cob_dt  < '2011-01-01' 
+           group by 
+         MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_1_desc,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_2_desc ,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_3_desc 
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+
+<worker1 name="COUNT_TARGET_COUNTS">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="TO_TABLE" value="TVU_LOAD_TEST0"></param>
+	<param name="TO_TABLE2" value="TVU_LOAD_TEST1"></param>
+      <sql_template>
+        <![CDATA[SELECT '%TO_TABLE%' tab_name, count(*) cnt FROM %TO_TABLE% UNION ALL SELECT '%TO_TABLE2%' tab_name,  count(*) FROM %TO_TABLE2%;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+</etldataflow>

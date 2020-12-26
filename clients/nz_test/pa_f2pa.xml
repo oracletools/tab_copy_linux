@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FILE2PA_COPY_REF_SMC">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="TO_DB" value="%PADB_DEPOT%"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  <param name="IF_TRUNCATE" value="0"></param>
+
+</globals>
+
+<worker name="REF_SMC_2.0">
+  <exec_file2pa_copy>
+    <psql 	method="%FILE_COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SOURCE" value="0"></param>	
+	<param name="FROM_FILE" value="/home/paraccel/data_spooler/tmp/logs/REF_SMC_SPOOL/20110919_161540/data/CSMARTREF.REF_SMC.SPOOL.CSMARTREF.REF_SMC.data"></param>	
+	<param name="TO_TABLE" value="REF_SMC_2"></param>
+	<param name="FILTER" value=" 1=2 "></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC 
+]]>
+      </sql_template>
+    </psql>
+  </exec_file2pa_copy>
+</worker>
+
+<worker1 name="CSMARTVOL.TRD_VOL_UNION_3_0">
+  <exec_file2pa_copy>
+    <psql 	method="%FILE_COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SOURCE" value="0"></param>	
+	<param name="FROM_FILE" value="/home/paraccel/data_spooler/tmp/logs/PIPED_TEST/20110914_164625/data/CSMARTVOL.TRD_VOL_UNION_1.SPOOL.CSMARTVOL.TRD_VOL_UNION_1.data"></param>	
+	<param name="TO_TABLE1" value="TRD_VOL_UNION_3"></param>
+	<param name="FILTER" value=" 1=2 "></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1 
+]]>
+      </sql_template>
+    </psql>
+  </exec_file2pa_copy>
+</worker1>
+
+</etldataflow>

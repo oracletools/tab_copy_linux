@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FRH_COPY">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+	  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  
+
+	  
+
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--Truncate table/partition before inserting -->
+i	  <param name="IF_TRUNCATE" value="0"></param>	  
+
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+
+</globals>
+
+--sql
+--select * from all_tab_partitions where table_name='FAILS_REPORTS_HISTORY' and num_rows>0 order by num_rows desc
+
+
+
+--real    6m29.833s
+<worker name="FAILS_REPORTS_HISTORY">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="2"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+
+	<param name="TO_DB" value="%CSMARTBSER_SMARTQ1%"></param>
+	<param name="TO_SCHEMA" value="CSMARTBSER"></param>	
+	  
+	<param name="TO_TABLE1" value="COPY_FAILS_REPORTS_HISTORY"></param>
+	<param name="PARTITION1" value="P20090522_P_ATLAS"></param>
+	<param name="SUBPARTITION" value="P20090522_P_ATLAS"></param>
+     --WHERE clause
+	 <param name="FILTER1" value=" COB_DT BETWEEN '' AND '' "></param>
+     <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+
+</etldataflow>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="TEST">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="TO_DB" value="%ESMARTREF_SMARTD1%"></param>
+	  <param name="TO_SCHEMA" value="ESMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>	  
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="REF_CTP_GRAND_PRNT_LIST">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_CTP_GRAND_PRNT_LIST
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker1 name="REF_ESALES">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" 
+			method1="sql_plus_copy">
+	  <param name="FIELD_TERMINATOR" value='||'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_ESALES
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+</etldataflow>

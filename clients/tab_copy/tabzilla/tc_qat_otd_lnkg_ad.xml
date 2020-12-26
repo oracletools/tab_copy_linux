@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="csmartotd">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AD_SMARTP2%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTOTD"></param>
+	  
+	  <param name="TO_DB" value="%COTD_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTOTD"></param>	
+	  
+
+	  <param name="LAME_DUCK" value='9000000'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="0"></param>	  
+
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+
+</globals>
+
+--./run.sh qat_otd_fx_ad_ab tab_copy 
+
+<worker name="SMRY1">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+        <param name="TO_TABLE1" value=""></param>
+        <param name="PARTITION" value="P20150305"></param>
+        <param name="IF_TRUNCATE" value="1"></param> 
+        <param name="FILTER" value="SNAPSHOT_DT in ('05-MAR-2015') "></param>
+		<param name="NLS_DATE_FORMAT" value="DD-MON-RRRR HH24:MI:SS"></param> 
+		<param name="NLS_TIMESTAMP_FORMAT" value="DD-MON-RRRR HH.MI.SSXFF AM"></param> 
+		
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_VOL_FAILS_CLIENT_LNKG_HIST]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</etldataflow>
+

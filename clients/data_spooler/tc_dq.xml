@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CARTHESIAN_TEST" type="async">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="DB_CONNECTOR" value="%MDW_MDWD%"></param>
+	  <param name="SCHEMA_NAME" value="C160970GMAPRL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="BAZEL_TABLE" value="BASEL_MSTR"></param> 
+	  <param name="SQLQ" value="SELECT * FROM NOSTROS_HISTORY, NOSTROS_UNION;"></param> 
+	  
+
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+
+<worker name="CARTHESIAN_JOIN_1">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_2">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_3">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_4">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_5">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_6">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_7">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_8">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_9">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CARTHESIAN_JOIN_10">
+  <exec_select>
+	<sqlp 	method="%TEST_METHOD%" onerror="IGNORE">
+	  <sql_template>
+		<![CDATA[
+%SQLQ%
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_select>
+</worker>
+<worker1 name="TEMPLATE">
+  <exec_dml>
+	<sqlp 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+
+ 
+]]>
+	  </sql_template>
+	</sqlp>
+  </exec_dml>
+</worker1>
+
+
+
+</etldataflow>

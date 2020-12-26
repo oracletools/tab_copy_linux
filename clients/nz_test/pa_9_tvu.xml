@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="9_TVU_UPDATE"  >
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Large Record set (70 million) update"></param>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="IF_TOSS_CACHE" value="1"></param>
+	  
+	  <param name="TEST_FILTER" value="where trd_vol_sid::INT between  0  and 26500"></param>
+	   
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION"></param>
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+</globals>
+
+<worker name="9_TVU_SELECT_COUNT_70mil">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Test if we get 70mil"></param>
+      <sql_template>
+        <![CDATA[SELECT COUNT(*) FROM %TABLE_NAME%  %TEST_FILTER%;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="9_TVU_UPDATE_70M">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Large Record set (70 million) update"></param>
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		BEGIN; 
+			UPDATE %TABLE_NAME% set ctp_nam='test'||ctp_acct_no||ctp_uid_pp||ctp_uid_grd ||ctp_gfcid_pp||ctp_gfcid_grd||ctp_mnemonic %TEST_FILTER%; 
+			ROLLBACK; 
+		END;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker1 name="9_TVU_UPDATE_70M_DELSERT">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="TEMP_TVU_DELSERT_TEST"></param>
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		DROP TABLE %TEMP_TABLE%;
+		create table %TEMP_TABLE% distkey(trd_vol_sid)  as select * from %TABLE_NAME%  %TEST_FILTER%; 
+		--BEGIN; delete from %TABLE_NAME% %TEST_FILTER%; COMMIT; END;
+		--update %TEMP_TABLE% set ctp_nam='test'||ctp_acct_no||ctp_uid_pp||ctp_uid_grd ||ctp_gfcid_pp||ctp_gfcid_grd||ctp_mnemonic;
+		--BEGIN; insert into %TABLE_NAME% select * from %TEMP_TABLE%; COMMIT; END;
+ ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="8_TVU_UPDATE_1_REC_UNLOPY">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Update 1rec"></param>
+	<param name="TEMP_TABLE" value="TEMP_TVU_UNLOPY"></param>
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		Unload ('select * from %TABLE_NAME%  %TEST_FILTER%') to 'map/%TABLE_NAME%.data' delimiter '|';
+		BEGIN; delete from %TABLE_NAME% %TEST_FILTER%; COMMIT; END;
+		copy %TABLE_NAME% from '$disk/tmp/%TABLE_NAME%.data'  parallel delimiter '|';
+ ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+
+</etldataflow>

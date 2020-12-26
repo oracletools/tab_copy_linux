@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_CONC_TEST_2010_LEADER_TVU_ALL_2NDF_SYNC"  >
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="Concurrent test 1."></param>
+	  
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	<param name="TVU" value="TRD_VOL_UNION"></param>
+	<param name="TVU1" value="TVU_LOAD_TEST6"></param>
+	<param name="TO_TABLE1" value="TVU_LOAD_TEST3"></param>
+	<param name="NODE_LIMIT1" value="1111110"></param>
+	<param name="NODE_LIMIT" value="555555"></param>
+	<param name="NODE_LIMIT1" value="277777"></param>
+	<param name="NODE_LIMIT" value="20K"></param>
+		
+	<param name="IF_TOSS_CACHE" value="1"></param>
+	<param name="TRANSACTION" value="ROLLBACK"></param>	  
+		
+</globals>
+
+
+
+<worker1 name="LOAD_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="FROM_TABLE" value="TVU_LOAD_TEST0"></param>
+	<param name="TVU1" value="TVU_LOAD_TEST6"></param>
+	<!-- parallel load -->
+	<param name="PARALLEL_LOAD" value="parallel"></param>
+	<param name="DISK_PATH" value="$disk"></param>
+	
+	<!-- leader load -->
+	<param name="PARALLEL_LOAD" value=""></param>
+	<param name="DISK_PATH" value=""></param>
+	
+      <sql_template>
+        <![CDATA[BEGIN; copy %TVU% from '%DISK_PATH%/tmp/%FROM_TABLE%_%NODE_LIMIT%.gz'  GZIP %PARALLEL_LOAD% delimiter '|'; %TRANSACTION%; END;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker name="Q6diff_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU1" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[
+    SELECT COUNT(*)||'|cnt' cnt FROM (
+        SELECT
+          SUM(TRD_VOL_UNION.TRD_CNT),
+          SUM(TRD_VOL_UNION.ITEM_CNT),
+          SUM(TRD_VOL_UNION.NEW_ITEM_CNT),
+          TRD_VOL_UNION.COB_DT,
+          TRD_VOL_UNION.TRD_TRAN_DT,
+          TRD_VOL_UNION.CON_SETL_DT,
+          TRD_VOL_UNION.SETL_VOL_IND,
+          TRD_VOL_UNION.EXEC_VOL_IND,
+          TRD_VOL_UNION.FEED_SRC_SYS,
+          TRD_VOL_UNION.CTP_NAM,
+          REF_ESALES.CPI,
+          REF_ESALES.MNEMONIC,
+          REF_ESALES.MG_NAME,
+          REF_ESALES.MG_NUMBER,
+          REF_ESALES.GP_NUMBER,
+          REF_ESALES.GP_NAME,
+          TRD_VOL_UNION.ISIN,
+          TRD_VOL_UNION.CUSIP,
+          TRD_VOL_UNION.OPS_SETL_SYS_TRD_REF,
+          TRD_VOL_UNION.OPS_TRD_REF,
+          TRD_VOL_UNION.METRICS_CAT,
+          TRD_VOL_UNION.VOL_EVNT_TYP,
+          TRD_VOL_UNION.BUY_SELL,
+          TRD_VOL_UNION.ASET_LVL_ONE_CD,
+          TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+          TRD_VOL_UNION.ASET_LVL_TWO_CD,
+          TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+          TRD_VOL_UNION.ASET_LVL_THR_CD,
+          TRD_VOL_UNION.ASET_LVL_THR_DESC,
+          TRD_VOL_UNION.INTL_PROD_DESC,
+          TRD_VOL_UNION.SETL_LOCA,
+          TRD_VOL_UNION.PRC,
+          TRD_VOL_UNION.EXEC_TYP,
+          TRD_VOL_UNION.CTP_CPI_ACCT_NO
+        FROM
+          (SELECT * FROM %TVU% ) TRD_VOL_UNION,
+          REF_ESALES
+        WHERE
+          ( REF_ESALES.ACCOUNT_ID(+)=TRD_VOL_UNION.CTP_UID_GRD  )
+          AND
+          (
+           TRD_VOL_UNION.CON_SETL_DT  BETWEEN  '2010/01/01 00:00:00'  AND  '2011/01/01 00:00:00'    AND
+           TRD_VOL_UNION.FEED_SRC_SYS  NOT IN  ( 'TML','OASYS','FLEXCUBELOANS'  )
+           AND
+           (
+                REF_ESALES.MG_NUMBER  IN  ( '55449','55077'  )
+                OR
+                TRD_VOL_UNION.CTP_CPI_ACCT_NO  IN  ( '30492331','30492338','30492339','30492379','30492990','30494801','34990205','34990212','522927P6','5369033T','5369073P','5369199E','5369201W','5369258H','5369295E','5369377D','536940C1','5369556N','5369557N','5369588E','53696271'  )
+                OR
+                REF_ESALES.CPI  IN  ( '30492331','30492338','30492339','30492379','30492990','30494801','34990205','34990212','522927P6','5369033T','5369073P','5369199E','5369201W','5369258H','5369295E','5369377D','536940C1','5369556N','5369557N','5369588E','53696271'  )
+           )
+           AND
+           TRD_VOL_UNION.METRICS_CAT  IN  ( 'Volumes'  )
+          )
+        GROUP BY
+          TRD_VOL_UNION.COB_DT,
+          TRD_VOL_UNION.TRD_TRAN_DT,
+          TRD_VOL_UNION.CON_SETL_DT,
+          TRD_VOL_UNION.SETL_VOL_IND,
+          TRD_VOL_UNION.EXEC_VOL_IND,
+          TRD_VOL_UNION.FEED_SRC_SYS,
+          TRD_VOL_UNION.CTP_NAM,
+          REF_ESALES.CPI,
+          REF_ESALES.MNEMONIC,
+          REF_ESALES.MG_NAME,
+          REF_ESALES.MG_NUMBER,
+          REF_ESALES.GP_NUMBER,
+          REF_ESALES.GP_NAME ,
+          TRD_VOL_UNION.ISIN,
+          TRD_VOL_UNION.CUSIP,
+          TRD_VOL_UNION.OPS_SETL_SYS_TRD_REF,
+          TRD_VOL_UNION.OPS_TRD_REF,
+          TRD_VOL_UNION.METRICS_CAT,
+          TRD_VOL_UNION.VOL_EVNT_TYP,
+          TRD_VOL_UNION.BUY_SELL,
+          TRD_VOL_UNION.ASET_LVL_ONE_CD,
+          TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+          TRD_VOL_UNION.ASET_LVL_TWO_CD,
+          TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+          TRD_VOL_UNION.ASET_LVL_THR_CD,
+          TRD_VOL_UNION.ASET_LVL_THR_DESC,
+          TRD_VOL_UNION.INTL_PROD_DESC,
+          TRD_VOL_UNION.SETL_LOCA,
+          TRD_VOL_UNION.PRC,
+          TRD_VOL_UNION.EXEC_TYP,
+          TRD_VOL_UNION.CTP_CPI_ACCT_NO
+          ) t ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="Q6diff_1">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU1" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[
+SELECT COUNT(*)||'|cnt' cnt FROM (
+        SELECT
+          SUM(TRD_VOL_UNION.TRD_CNT),
+          SUM(TRD_VOL_UNION.ITEM_CNT),
+          SUM(TRD_VOL_UNION.NEW_ITEM_CNT),
+          TRD_VOL_UNION.COB_DT,
+          TRD_VOL_UNION.TRD_TRAN_DT,
+          TRD_VOL_UNION.CON_SETL_DT,
+          TRD_VOL_UNION.SETL_VOL_IND,
+          TRD_VOL_UNION.EXEC_VOL_IND,
+          TRD_VOL_UNION.FEED_SRC_SYS,
+          TRD_VOL_UNION.CTP_NAM,
+          REF_ESALES.CPI,
+          REF_ESALES.MNEMONIC,
+          REF_ESALES.MG_NAME,
+          REF_ESALES.MG_NUMBER,
+          REF_ESALES.GP_NUMBER,
+          REF_ESALES.GP_NAME,
+      MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+      MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC,
+          TRD_VOL_UNION.ISIN,
+          TRD_VOL_UNION.CUSIP,
+          TRD_VOL_UNION.OPS_SETL_SYS_TRD_REF,
+          TRD_VOL_UNION.OPS_TRD_REF,
+          TRD_VOL_UNION.METRICS_CAT,
+          TRD_VOL_UNION.VOL_EVNT_TYP,
+          TRD_VOL_UNION.BUY_SELL,
+          TRD_VOL_UNION.ASET_LVL_ONE_CD,
+          TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+          TRD_VOL_UNION.ASET_LVL_TWO_CD,
+          TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+          TRD_VOL_UNION.ASET_LVL_THR_CD,
+          TRD_VOL_UNION.ASET_LVL_THR_DESC,
+          TRD_VOL_UNION.INTL_PROD_DESC,
+          TRD_VOL_UNION.SETL_LOCA,
+          TRD_VOL_UNION.PRC,
+          TRD_VOL_UNION.EXEC_TYP,
+          TRD_VOL_UNION.CTP_CPI_ACCT_NO
+        FROM
+          %TVU% TRD_VOL_UNION,
+          REF_ESALES,
+          MAN_REF_ASET_LVL_DATA
+        WHERE
+          ( REF_ESALES.ACCOUNT_ID(+)=TRD_VOL_UNION.CTP_UID_GRD  )
+          AND  ( MAN_REF_ASET_LVL_DATA.ASET_LVL_KEY(+)=TRD_VOL_UNION.ASET_LVL_KEY  )
+          AND
+          (
+           TRD_VOL_UNION.CON_SETL_DT  BETWEEN  '2010/01/01 00:00:00'  AND  '2011/06/30 00:00:00'    AND
+           TRD_VOL_UNION.FEED_SRC_SYS  NOT IN  ( 'TML','OASYS','FLEXCUBELOANS'  )
+           AND
+           (
+                REF_ESALES.MG_NUMBER  IN  ( '55449','55077'  )
+                OR
+                TRD_VOL_UNION.CTP_CPI_ACCT_NO  IN  ( '30492331','30492338','30492339','30492379','30492990','30494801','34990205','34990212','522927P6','5369033T','5369073P','5369199E','5369201W','5369258H','5369295E','5369377D','536940C1','5369556N','5369557N','5369588E','53696271'  )
+                OR
+                REF_ESALES.CPI  IN  ( '30492331','30492338','30492339','30492379','30492990','30494801','34990205','34990212','522927P6','5369033T','5369073P','5369199E','5369201W','5369258H','5369295E','5369377D','536940C1','5369556N','5369557N','5369588E','53696271'  )
+           )
+           AND
+           TRD_VOL_UNION.METRICS_CAT  IN  ( 'Volumes'  )
+          )
+        GROUP BY
+          TRD_VOL_UNION.COB_DT,
+          TRD_VOL_UNION.TRD_TRAN_DT,
+          TRD_VOL_UNION.CON_SETL_DT,
+          TRD_VOL_UNION.SETL_VOL_IND,
+          TRD_VOL_UNION.EXEC_VOL_IND,
+          TRD_VOL_UNION.FEED_SRC_SYS,
+          TRD_VOL_UNION.CTP_NAM,
+          REF_ESALES.CPI,
+          REF_ESALES.MNEMONIC,
+          REF_ESALES.MG_NAME,
+          REF_ESALES.MG_NUMBER,
+          REF_ESALES.GP_NUMBER,
+          REF_ESALES.GP_NAME ,
+          MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+          MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC,
+          TRD_VOL_UNION.ISIN,
+          TRD_VOL_UNION.CUSIP,
+          TRD_VOL_UNION.OPS_SETL_SYS_TRD_REF,
+          TRD_VOL_UNION.OPS_TRD_REF,
+          TRD_VOL_UNION.METRICS_CAT,
+          TRD_VOL_UNION.VOL_EVNT_TYP,
+          TRD_VOL_UNION.BUY_SELL,
+          TRD_VOL_UNION.ASET_LVL_ONE_CD,
+          TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+          TRD_VOL_UNION.ASET_LVL_TWO_CD,
+          TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+          TRD_VOL_UNION.ASET_LVL_THR_CD,
+          TRD_VOL_UNION.ASET_LVL_THR_DESC,
+          TRD_VOL_UNION.INTL_PROD_DESC,
+          TRD_VOL_UNION.SETL_LOCA,
+          TRD_VOL_UNION.PRC,
+          TRD_VOL_UNION.EXEC_TYP,
+          TRD_VOL_UNION.CTP_CPI_ACCT_NO
+          ) t ;
+
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+<worker name="Q6diff_2">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU1" value="TVU_LOAD_TEST6"></param>
+      <sql_template>
+        <![CDATA[
+         select 
+         MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_1_desc,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_2_desc ,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_3_desc,        
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q12011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q12011_Amt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q22011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q22011_Amt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q32011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q32011_Amt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2011) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q42011_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2011) then lcl_ccy_amt::float  else 0 end)::FLOAT Q42011_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q12010_Cnt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 1 and 3) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q12010_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q22010_Cnt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 4 and 6) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q22010_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q32010_Cnt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 7 and 9) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q32010_Amt,
+  SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2010) then ISNULL(TRD_VOL_UNION.TRD_CNT,0)  else 0 end) as Q42010_Cnt,
+         SUM(CASE when (DATEPART(month,cob_dt)  BETWEEN 10 and 12) and (DATEPART(year,cob_dt) = 2010) then lcl_ccy_amt::float  else 0 end)::FLOAT Q42010_Amt         
+         FROM
+          %TVU% TRD_VOL_UNION  
+           right outer join MAN_REF_ASET_LVL_DATA on (MAN_REF_ASET_LVL_DATA.ASET_LVL_KEY = TRD_VOL_UNION.ASET_LVL_KEY )
+           where --cob_dt >= '2010-01-01'
+		   cob_dt  < '2011-01-01' 
+           group by 
+         MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_1_desc,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_2_desc ,
+         MAN_REF_ASET_LVL_DATA.aset_lvl_3_desc 
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+
+<worker name="Q6diff_3">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU1" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[
+ SELECT
+    SUM(NULLKEY_CNT+ORPHAN_CNT+UNALLOCATEDKEY_CNT+INCOMPREC_CNT) OVER (PARTITION BY SRC_FILE_CD) DQCHK_VAL,
+    SUM(TOTAL_TRADES) OVER (PARTITION BY SRC_FILE_CD) DQCHK_TOT,
+    'VOLUMES'      AS DQCHK_GEN_VAL1,
+    DIMENSION_NAME     AS DQCHK_GEN_VAL2,
+    'YTD_LAST_RUN' AS DQCHK_GEN_VAL3,
+    CASE
+        WHEN ( ( FEED_SRC_SYS )= 'ATLAS'
+         OR ( FEED_SRC_SYS )   ='BRDRDGE'
+         OR ( FEED_SRC_SYS )   = 'BROADRIDGE'
+         OR ( FEED_SRC_SYS )   ='CNS'
+         OR ( FEED_SRC_SYS )   ='COPES-SG'
+         OR ( FEED_SRC_SYS )   ='COPES-TH'
+         OR ( FEED_SRC_SYS )   ='CTS'
+         OR ( FEED_SRC_SYS )   ='DOGS'
+         OR ( FEED_SRC_SYS )   ='TML'
+         OR ( FEED_SRC_SYS )   ='GCS'
+         OR ( FEED_SRC_SYS )   ='IOWA'
+         OR ( FEED_SRC_SYS )   ='KOSMOS'
+         OR ( FEED_SRC_SYS )   ='MATCHBOOK'
+         OR ( FEED_SRC_SYS )   ='TML'
+         OR ( FEED_SRC_SYS )   ='NEWASKA'
+         OR ( FEED_SRC_SYS )   ='RADAR'
+         OR ( FEED_SRC_SYS )   ='SMS_Set'
+         OR ( FEED_SRC_SYS )   ='SMS_Exe'
+         OR ( FEED_SRC_SYS )   ='RTGSA')
+        THEN 'CASH_SECURITIES'
+        WHEN (( FEED_SRC_SYS )='OPENLINK_UK')
+        THEN 'COMMODITIES'
+        WHEN ( ( FEED_SRC_SYS )='DEPOTTRACS' )
+        THEN 'FX'
+        WHEN ( ( FEED_SRC_SYS )='FLXLAG'
+         OR ( FEED_SRC_SYS )   ='FLXORG3'
+         OR ( FEED_SRC_SYS )   ='FLXORG1'
+         OR ( FEED_SRC_SYS )   ='FLEXCUBELOANS')
+        THEN 'LOANS'
+        WHEN (( FEED_SRC_SYS )='OPICS CA'
+         OR ( FEED_SRC_SYS )  ='OPICS NY' )
+        THEN 'MONEY_MARKETS'
+        WHEN( ( FEED_SRC_SYS )='OASYS')
+        THEN 'OTC_DERIVATIVES'
+        ELSE 'OTHER'
+    END DQCHK_GEN_VAL4,
+    FEED_SRC_SYS AS DQCHK_GEN_VAL5,
+    SRC_FILE_CD  AS DQCHK_GEN_VAL6,
+    NULL DQCHK_GEN_VAL7,
+    NULL DQCHK_GEN_VAL8,
+    NULL DQCHK_GEN_VAL9,
+    NULL DQCHK_GEN_VAL10,
+    --        SUM(NULLKEY_CNT_ASET_CLS) OVER (PARTITION BY SRC_FILE_CD) DQCHK_GEN_VAL6,
+    --        SUM(UNALLOCATEDKEY_CNT_ASET_CLS) OVER (PARTITION BY SRC_FILE_CD) DQCHK_GEN_VAL7,
+    --        SUM(UNALLOCATEDKEY_CNT_ASET_CLS) OVER (PARTITION BY SRC_FILE_CD) DQCHK_GEN_VAL8,
+    --        SUM(INCOMPREC_CNT_ASET_CLS) OVER (PARTITION BY SRC_FILE_CD) DQCHK_GEN_VAL9,
+    NULLKEY_CNT        AS DRLDWN_CPK1,
+    UNALLOCATEDKEY_CNT AS DRLDWN_CPK2,
+    ORPHAN_CNT    AS DRLDWN_CPK3,
+    INCOMPREC_CNT      AS DRLDWN_CPK4,
+    DIMENSION_KEY      AS DRLDWN_CPK5,
+    NULL               AS DRLDWN_CPK6,
+    NULL               AS DRLDWN_CPK7,
+    NULL               AS DRLDWN_CPK8,
+    NULL               AS DRLDWN_CPK9,
+    TOTAL_TRADES       AS DRLDWN_CPK10
+FROM
+    (SELECT SUM(ITEM_CNT) TOTAL_TRADES,
+       'MARKET OF SETTLEMENT'  AS DIMENSION_NAME,
+        FEED_SRC_SYS,
+        SRC_FILE_CD,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND = 1
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS NULLKEY_CNT,
+        SUM(
+        CASE
+            WHEN UNALLOCATEDKEY_IND =1
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS UNALLOCATEDKEY_CNT,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND         = 0
+            AND UNALLOCATEDKEY_IND   =0
+            AND MAN_REF_TBL.REF_KEY IS NULL
+            THEN ITEM_CNT
+            ELSE 0
+        END) AS ORPHAN_CNT,
+        SUM(
+        CASE
+            WHEN NULLKEY_IND       = 0
+            AND UNALLOCATEDKEY_IND =0
+            AND INCOMPREC_IND      =1
+            THEN ITEM_CNT
+            ELSE 0
+        END ) AS INCOMPREC_CNT,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END AS DIMENSION_KEY
+    FROM
+        (SELECT TRD_VOL_UNION.ITEM_CNT,
+            TRD_VOL_UNION.SRC_FILE_CD,
+            CASE
+                WHEN TRIM(TRD_VOL_UNION.MKT_OF_SETL_CD) IS NULL
+                 OR upper(TRD_VOL_UNION.MKT_OF_SETL_CD)  ='NULL'
+                THEN 1
+                ELSE 0
+            END AS NULLKEY_IND,
+            CASE
+                WHEN upper(TRD_VOL_UNION.MKT_OF_SETL_CD)                     ='UNALLOCATED'
+                 OR substring(upper(TRD_VOL_UNION.MKT_OF_SETL_CD),'UNALLOCATED')<>0
+                THEN 1
+                ELSE 0
+            END AS UNALLOCATEDKEY_IND,
+            TRD_VOL_UNION.MKT_OF_SETL_CD DIMENSION_KEY,
+            TRD_VOL_UNION.FEED_SRC_SYS
+        FROM %TVU% TRD_VOL_UNION
+        WHERE TRD_VOL_UNION.SRC_FILE_CD   <> 'EQDW'
+        AND TRD_VOL_UNION.SRC_FILE_CD   <> 'OASYSEF'
+        AND ( TRD_VOL_UNION.METRICS_CAT  = 'Volumes'
+         OR TRD_VOL_UNION.METRICS_CAT   IS NULL )
+        AND TRD_VOL_UNION.COB_DT        >= to_date('01-01-2011','mm-dd-yyyy')
+        ) TRD_VOL_UNION LEFT OUTER JOIN
+        (SELECT
+            CASE
+                WHEN trim(RGN) IS NULL
+                 OR upper(RGN)  ='UNALLOCATED'
+                 OR upper(RGN)  ='NULL'
+                THEN 1
+                ELSE 0
+            END AS INCOMPREC_IND,
+            FIN_INSM_KEY REF_KEY
+        FROM MAN_REF_MKT_OF_SETL
+        ) MAN_REF_TBL
+    ON ( TRD_VOL_UNION.DIMENSION_KEY = MAN_REF_TBL.REF_KEY )
+    GROUP BY FEED_SRC_SYS,
+        SRC_FILE_CD,
+        CASE
+            WHEN NULLKEY_IND         = 1
+             OR UNALLOCATEDKEY_IND   =1
+             OR MAN_REF_TBL.REF_KEY IS NULL
+             OR INCOMPREC_IND        =1
+            THEN DIMENSION_KEY
+        END
+    )
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="Q6diff_4">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU1" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[
+ SELECT *
+FROM	
+  ( SELECT DISTINCT SUM(ALK_FAIL) over (PARTITION BY FEED_SRC_SYS,SRC_FILE_CD) AS ALK_FAIL_BYPROD,
+    ALK_DSTNCT_FAIL,
+    SUM(AL0_FAIL) over (PARTITION BY FEED_SRC_SYS,SRC_FILE_CD) AS AL0_FAIL_BYPROD,
+    AL0_DSTNCT_FAIL,
+    SUM(AL1_FAIL) over (PARTITION BY FEED_SRC_SYS,SRC_FILE_CD) AS AL1_FAIL_BYPROD,
+    AL1_DSTNCT_FAIL,
+    COB_DT,
+    SRC_FILE_CD,
+    CUSIP,
+    ISIN,
+    SEDOL,
+    ASET_LVL_ONE_DESC,
+    FEED_SRC_SYS,
+    PROD_CATEGORY
+  FROM 
+( SELECT
+     CASE
+        WHEN trim(TRD_VOL_UNION.ASET_LVL_KEY)              =''
+        OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='UNALLOCATED'
+        OR TRD_VOL_UNION.ASET_LVL_KEY                     IS NULL
+        OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='NULL'
+        OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+        OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0
+        THEN 1
+        ELSE 0
+      END AS ALK_FAIL,
+      CASE
+        WHEN trim(TRD_VOL_UNION.ASET_LVL_KEY) =''
+        OR TRD_VOL_UNION.ASET_LVL_KEY        IS NULL
+        OR upper(TRD_VOL_UNION.ASET_LVL_KEY)  ='NULL'
+        THEN 'NULL'
+        ELSE
+          CASE
+            WHEN upper(TRD_VOL_UNION.ASET_LVL_KEY)             ='UNALLOCATED'
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0
+            THEN TRD_VOL_UNION.ASET_LVL_KEY
+          END
+      END AS ALK_DSTNCT_FAIL,
+      CASE
+        WHEN (trim(MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC)=''
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC)  ='UNALLOCATED'
+        OR MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC        IS NULL
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC)  ='NULL')
+        AND ( (
+          CASE
+            WHEN trim(TRD_VOL_UNION.ASET_LVL_KEY)              =''
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='UNALLOCATED'
+            OR TRD_VOL_UNION.ASET_LVL_KEY                     IS NULL
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='NULL'
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0
+            THEN 1
+            ELSE 0
+          END )=0)
+        THEN 1
+        ELSE 0
+      END AS AL0_FAIL,
+      CASE
+        WHEN (trim(MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC)=''
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC)  ='UNALLOCATED'
+        OR MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC        IS NULL
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC)  ='NULL')
+        AND ( (
+          CASE
+            WHEN trim(TRD_VOL_UNION.ASET_LVL_KEY)              =''
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='UNALLOCATED'
+            OR TRD_VOL_UNION.ASET_LVL_KEY                     IS NULL
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='NULL'
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0
+            THEN 1
+            ELSE 0
+          END )=0)
+        THEN TRD_VOL_UNION.ASET_LVL_KEY
+      END AS AL0_DSTNCT_FAIL,
+      CASE
+        WHEN (TRIM(MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC)=''
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC)  ='UNALLOCATED'
+        OR MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC        IS NULL
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC)  ='NULL')
+        AND ( (
+          CASE
+            WHEN trim(TRD_VOL_UNION.ASET_LVL_KEY)              =''
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='UNALLOCATED'
+            OR TRD_VOL_UNION.ASET_LVL_KEY                     IS NULL
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='NULL'
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0
+            THEN 1
+            ELSE 0
+          END )=0)
+        THEN 1
+        ELSE 0
+      END AS AL1_FAIL,
+   CASE
+        WHEN (TRIM(MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC)=''
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC)  ='NULL'
+        OR UPPER(MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC)  ='UNALLOCATED'
+        OR MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC        IS NULL)
+        AND (( (
+          CASE
+            WHEN trim(TRD_VOL_UNION.ASET_LVL_KEY)              =''
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='UNALLOCATED'
+            OR TRD_VOL_UNION.ASET_LVL_KEY                     IS NULL
+            OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='NULL'
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+            OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0
+            THEN 1
+            ELSE 0
+          END )=0) )
+        THEN TRD_VOL_UNION.ASET_LVL_KEY
+      END AS AL1_DSTNCT_FAIL,
+      CASE
+        WHEN (upper(trim(TRD_VOL_UNION.FEED_SRC_SYS) ))='DEPOTTRACS'
+        THEN 'FX'
+        WHEN (upper(trim(TRD_VOL_UNION.FEED_SRC_SYS) ))='FLEXCUBELOANS'
+        THEN 'Loans'
+        WHEN upper(trim(TRD_VOL_UNION.FEED_SRC_SYS) ) ='OPICS CA'
+        OR upper(trim(TRD_VOL_UNION.FEED_SRC_SYS) )   ='OPICS NY'
+        THEN 'Money Markets'
+        ELSE 'Cash Securities'
+      END AS PROD_CATEGORY,TRD_VOL_UNION.FEED_SRC_SYS,
+      TRD_VOL_UNION.COB_DT,
+      TRD_VOL_UNION.SRC_FILE_CD,
+      TRD_VOL_UNION.CUSIP,
+      TRD_VOL_UNION.ISIN,
+      TRD_VOL_UNION.SEDOL,
+      TRD_VOL_UNION.ASET_LVL_ONE_DESC
+    FROM %TVU% TRD_VOL_UNION
+       LEFT OUTER JOIN MAN_REF_ASET_LVL_DATA on 
+      (MAN_REF_ASET_LVL_DATA.ASET_LVL_KEY =TRD_VOL_UNION.ASET_LVL_KEY )
+ WHERE    
+ (
+        ( trim(TRD_VOL_UNION.ASET_LVL_KEY)            =''
+        OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='UNALLOCATED'
+        OR TRD_VOL_UNION.ASET_LVL_KEY                     IS NULL
+        OR upper(TRD_VOL_UNION.ASET_LVL_KEY)               ='NULL'
+        OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'___')        <>0
+        OR strpos(TRD_VOL_UNION.ASET_LVL_KEY,'UNALLOCATED')<>0)
+      OR 
+        ( trim(ASET_LVL_0_DESC)=''
+      OR UPPER(ASET_LVL_0_DESC)   ='UNALLOCATED'
+      OR ASET_LVL_0_DESC         IS NULL
+      OR UPPER(ASET_LVL_0_DESC)   ='NULL')
+      OR (TRIM(ASET_LVL_1_DESC)   =''
+      OR UPPER(ASET_LVL_1_DESC)   ='UNALLOCATED'
+      OR ASET_LVL_1_DESC         IS NULL
+      OR UPPER(ASET_LVL_1_DESC)   ='NULL' )
+      )
+    ) as abc
+ ) as abc1
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="Q6diff_5">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU1" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[
+ SELECT * FROM %TVU% TRD_VOL_UNION Where src_file_Cd in ('DOGS','IOWA') and CUSIP = '622999910' and COB_DT = '2011-05-20' ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+
+
+
+</etldataflow>

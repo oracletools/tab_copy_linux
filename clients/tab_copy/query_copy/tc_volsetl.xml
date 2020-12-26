@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FRNBNY_QUERY_COPY2_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="FRBNY_COPY2_TEST_TML">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="VOL_SMRY_STL_ABCD"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[SELECT /*+PARALLEL(A,4)*/ 
+      A.SMRY_NO smry_no,
+      A.SRC_SYS src_sys,
+      A.FEED_SRC_SYS FEED_SRC_SYS,
+      A.SRC_FILE_CD SRC_FILE_CD,
+      A.LGL_ENTY_KEY LGL_ENTY_KEY ,
+      A.MKT_OF_SETL_CD MKT_OF_SETL_CD,
+      A.OWN_CD OWN_CD,
+      A.ASET_LVL_KEY ASET_LVL_KEY,
+      A.GOC GOC,
+      A.EXEC_TYPE EXEC_TYPE ,
+      A.MSSB_IND MSSB_IND,
+      A.DIVN DIVN,
+      A.METRICS_CAT METRICS_CAT,
+      A.VOL_EVNT_TYP VOL_EVNT_TYP ,
+      A.TRAN_TYP TRAN_TYP,
+      A.COB_DT COB_DT,
+      A.FO_BOOK_SYS FO_BOOK_SYS,
+      A.ACTL_MKT_OF_SETL ACTL_MKT_OF_SETL,
+      A.CPT_KEY CPT_KEY,
+      A.HLDY_FLAG HLDY_FLAG,
+      A.FO_OS_TRD_QTY FO_OS_TRD_QTY,
+      A.FO_OS_TRD_VAL FO_OS_TRD_VAL,
+      A.FO_OS_TRD_CNT FO_OS_TRD_CNT,
+      A.BO_OS_TRD_CNT BO_OS_TRD_CNT,
+      A.BO_OS_TRD_VAL BO_OS_TRD_VAL,
+      A.BO_OS_TRD_QTY BO_OS_TRD_QTY,
+      A.UPLD_TYP UPLD_TYP,
+      A.CRTD_DT CRTD_DT,
+      A.UPD_DT UPD_DT,
+      A.VOLS_MEASURE_TYP VOLS_MEASURE_TYP,
+      A.BUY_SELL BUY_SELL,
+      LGL.LGL_ENTY_RGN RPT_RGN,           
+      A.CTP_GFCID_GRD CTP_GFCID_GRD
+FROM csmartvol.vol_SMRY_STL A,
+  CSMARTREF.MAN_REF_LGL_ENTY_DATA LGL,
+  CSMARTREF.MAN_REF_LGL_ENTY_XREF XREF
+WHERE A.SRC_SYS      ='SMART'
+AND a.LGL_ENTY_KEY   = xref.LGL_ENTY_KEY
+AND XREF.LGL_ENTY_ID = LGL.LGL_ENTY_ID
+and A.COB_DT between '01-MAR-12' AND '30-APR-12' 
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+
+
+</etldataflow>

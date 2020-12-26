@@ -1,0 +1,28 @@
+<etldataflow name="COPY-CSMARTVOL.STG_TRD_VOL_LOANS">
+<globals>
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CVOL_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CSMARTREF_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="10000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+<worker name="CSMARTVOL.Vol_SMRY">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+                 <param name="FIELD_TERMINATOR" value='^'></param>
+      <sql_template>
+        <![CDATA[CSMARTREF.MAN_REF_ASET_LVL_DATA]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+</etldataflow>

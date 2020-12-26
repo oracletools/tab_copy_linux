@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CLONE_DFH">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%CVOL_SMARTQ1%"></param>
+  
+	  <param name="DB_CONNECTOR1" value="%CVOL_SMARTQ1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	<param name="PDEGREE" value="6"></param> 
+	<param name="IF_DEBUG" value="1"></param> 
+
+	<param name="IF_ASYNC_LOG" value="0"></param>
+	<param name="FROM_TABLE" value="DF_OASYS_HIST"></param> -heap
+	<param name="TO_TABLE" value="CLONE_DF_OASYS"></param>
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_CLONE_UNCOMPRESSED" value="1"></param>
+</globals>
+
+
+<worker name="T_DDL_REDEFINE">
+--spool
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="TABLE_DLL_SPOOL_COLUMNS" value="OWNER, 'TABLE' OBJECT_TYPE,table_name OBJECT_NAME"></param>
+	<param name="FROM_SCHAME" value="AAAAAA"></param>
+	 <param name="SPOOL_SCHEMA" value="CSMARTVOL"></param>
+      <sql_template>
+        <![CDATA[
+SELECT %TABLE_DLL_SPOOL_COLUMNS% from all_tables where  owner='%SPOOL_SCHEMA%' 
+and table_name in (
+'%FROM_TABLE%'
+) ;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool_ddl>
+
+ 
+</worker>
+
+    <publisher >
+   <sqlp 	method="%PUBLISH_DDL%" >
+	  <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTVOL"></param>   
+      <sql_template><![CDATA[]]></sql_template>   
+   </sqlp>
+  </publisher>  
+
+<worker1 name="T_DDL_REDEFINE">
+--spool
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="TABLE_DLL_SPOOL_COLUMNS" value="OWNER, 'TABLE' OBJECT_TYPE,table_name OBJECT_NAME"></param>
+	<param name="FROM_SCHAME" value="AAAAAA"></param>
+	 <param name="SPOOL_SCHEMA" value="CSMARTVOL"></param>
+      <sql_template>
+        <![CDATA[
+SELECT %TABLE_DLL_SPOOL_COLUMNS% from all_tables where  owner='%SPOOL_SCHEMA%' 
+and table_name in (
+'%FROM_TABLE%'
+) ;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool_ddl>
+
+    <publisher >
+   <sqlp 	method="%PUBLISH_DDL%" >
+	  <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTVOL"></param>   
+      <sql_template><![CDATA[]]></sql_template>   
+   </sqlp>
+  </publisher>   
+</worker1>
+
+--clean-up  
+  <exec_dml>
+    <sqlp 	method="%DML_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+DROP TABLE %TO_TABLE%
+/
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+  
+  
+--publish  
+  <publisher >
+   <sqlp 	method="%PUBLISH_DDL%" >
+	  <param name="DB_CONNECTOR" value="%CVOL_SMARTQ1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTVOL"></param>   
+      <sql_template><![CDATA[]]></sql_template>   
+   </sqlp>
+  </publisher>  
+<worker1 name="TAB_STATUS_AFTER">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	
+      <sql_template>
+        <![CDATA[
+select   table_name, compression ,  compress_for, status
+from user_tables c
+where  table_name = '%TO_TABLE%'
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="TAB_BLOCK_COUNT">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	
+      <sql_template>
+        <![CDATA[
+select count(distinct(dbms_rowid.rowid_block_number(rowid))) BLOCK_COUNT from  %TO_TABLE%
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+--validate insert
+  <exec_dml>
+    <sqlp 	method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+SELECT count(*) FROM  %TO_TABLE%;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>  
+
+--validate create
+  <exec_dml>
+    <sqlp 	method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+SELECT 'PARTITIONS' type, count(*) cnt FROM  all_tab_partitions where table_name= '%TO_TABLE%' and TABLE_OWNER='%SCHEMA_NAME%'
+UNION ALL
+SELECT 'SUB-PARTITIONS' type, count(*) cnt FROM  all_tab_subpartitions where table_name= '%TO_TABLE%' and TABLE_OWNER='%SCHEMA_NAME%';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>  
+
+</etldataflow>

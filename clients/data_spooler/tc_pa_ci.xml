@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PADB_CONV_INSERT_TEST" type="sync">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="BAZEL_TABLE" value="BASEL_MSTR"></param>
+	  <param name="EXCHANGE_BAZEL_TABLE" value="BASEL_MSTR_MONTH"></param>
+	  <param name="EXCHANGE_PARTITION" value="P_BASEL_MSTR_2011_SP_01"></param>
+	  <!--PADB attributes-->
+	  <param1 name="DB_CONNECTOR" value="%PA_DEPOT%"></param1>
+	  <param name="SCHEMA_NAME" value="public"></param>	  
+
+</globals>
+
+
+
+
+<worker name="CONV_INSERT_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+insert into trd_vol_union_100mil select * from trd_vol_union_large LIMIT 100;
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+<worker name="CONV_INSERT_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+insert into trd_vol_union_100mil select * from trd_vol_union_large LIMIT 100;
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="CONV_INSERT_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+insert into trd_vol_union_100mil select * from trd_vol_union_large LIMIT 100;
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="CONV_INSERT_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+insert into trd_vol_union_100mil select * from trd_vol_union_large LIMIT 100;
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="CONV_INSERT_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+insert into trd_vol_union_100mil select * from trd_vol_union_large LIMIT 100;
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+
+</etldataflow>

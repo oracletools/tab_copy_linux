@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ORA_TABLE_COPY pipeline
+-->
+<etldataflow name="ORA_TABLE_COPY_MT">
+
+<worker name="COPY_TABLE_BATCH_1">
+  <exec_dml>
+    <sqlp method="sql_plus_copy">
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="MDW_MDWD"></param>
+	  <param name="TO_DB" value="MDW_MDWD"></param>
+      <sql_template>
+        <![CDATA[
+
+E155817REF.REF_CDMS
+E155817REF.REF_CPI
+E155817REF.REF_CTP_MSTR
+E155817REF.REF_SLSPRSN_HIER
+E155817REF.REF_PRSNL_MSTR
+E155817REF.REF_PRSNL_MGR_HIER
+E155817REF.REF_PRSNL_DEPT_HIER
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+<worker name="COPY_TABLE_BATCH_2">
+  <exec_dml>
+    <sqlp method="sql_plus_copy">
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="MDW_MDWD"></param>
+	  <param name="TO_DB" value="MDW_MDWD"></param>
+      <sql_template>
+        <![CDATA[
+C155817REF.REF_FX
+C155817REF.REF_MTM
+C155817REF.REF_SECURE
+C155817REF.REF_ESALES
+C155817REF.REF_MNGD_SEG_HIER
+C155817REF.REF_MNGD_SEG_XREF
+C155817REF.MAN_REF_MKT_OF_SETL
+C155817REF.MAN_REF_LGL_ENTY_DATA
+C155817REF.MAN_REF_LGL_ENTY_XREF
+C155817REF.MAN_REF_TRAN_TYP
+C155817REF.MAN_REF_ASET_LVL_DATA
+C155817REF.MAN_REF_PLAT_CLIENTS
+C155817REF.MAN_REF_OPS_OWN_HIER
+C155817REF.MAN_REF_FIRM_TMS
+C155817REF.MAN_REF_FIRM_ETPL
+C155817REF.MAN_REF_MARKETSIDE_MAPNG
+C155817REF.MAN_REF_SOEID_MAPNG
+C155817REF.MAN_REF_SOLAR
+C155817REF.MAN_REF_STGY_TO_DESK
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+</etldataflow>

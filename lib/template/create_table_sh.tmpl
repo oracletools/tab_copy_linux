@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# INSERT LAST WEEK VIEWERSHIP DATA TABLE
+# 
+# Author: 	AlexB (AlexBuzunov@gmail.com)
+# Created on: 	09/15/2010
+#
+
+TABLE='$TABLE_NAME$'
+osuser='dbadmin'
+base="/home/$osuser/work/dev"
+dbuser='netoeasdvdev'
+dbpw='$PWD$'
+vsql='/opt/vertica/bin/vsql'
+OPER='ins'
+
+echo "START OF ${OPER}_${TABLE}.sh ..."
+
+date
+
+##INSERT RECORDS INTO LAST WEEK DAILY VIEWERSHIP TABLE
+$vsql -d $dbuser -w $dbpw -c "
+$INSERT_TEMPLATE$
+"
+
+date
+
+echo "END OF ${OPER}_${TABLE}.sh"
+

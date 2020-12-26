@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_UNLOAD_40M_01_NONE_SYNC"  >
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="LEADER UNLOAD 2 sets of rows from TVU table."></param>
+	  
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="FROM_TABLE" value="TRD_VOL_UNION"></param>
+	  
+		<param name="NODE_LIMIT1" value="1111110"></param>
+		<param name="NODE_LIMIT" value="555555"></param>
+		<param name="NODE_LIMIT1" value="277777"></param>
+		<param name="NODE_LIMIT1" value="10"></param>
+		<param name="NODE_LIMIT1" value="50000"></param>
+		<param name="TO_TABLE_0" value="TVU_LOAD_TEST4"></param>
+		<param name="TO_TABLE_1" value="TVU_LOAD_TEST5"></param>
+
+		<param name="TO_TABLE_0" value="TVU_LOAD_TEST0"></param>
+		<param name="TO_TABLE_1" value="TVU_LOAD_TEST1"></param>
+
+		
+		<param name="DISTSTYLE1" value="EVEN"></param>
+		<param name="DISTSTYLE" value="NONE"></param>
+
+</globals>
+
+
+<worker name="LEAD_UNLOAD_2010">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	   <param name="LEADER_UNLOAD" value="ON"></param>
+      <sql_template>
+        <![CDATA[
+		--unload
+		set leader_unload=%LEADER_UNLOAD%;
+		Unload ('select * from %TO_TABLE_0% ') to '/tmp/%TO_TABLE_0%_%NODE_LIMIT%_%DISTSTYLE%.gz' GZIP DISTSTYLE %DISTSTYLE% delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="LEAD_UNLOAD_2011">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+
+	  <param name="LEADER_UNLOAD" value="ON"></param>
+      <sql_template>
+        <![CDATA[
+		--unload
+		set leader_unload=%LEADER_UNLOAD%;
+		Unload ('select * from %TO_TABLE_1%') to '/tmp/%TO_TABLE_1%_%NODE_LIMIT%_%DISTSTYLE%.gz' GZIP DISTSTYLE %DISTSTYLE% delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+</etldataflow>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="17_FXT_COUNT_STAR">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Count star"></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="FX_TRANSACTION"></param>
+	   <param name="IF_TOSS_CACHE" value="1"></param>
+	   
+
+</globals>
+
+<worker name="17_FXT_COUNT_STAR_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT COUNT(*)||'|cnt' FROM %TABLE_NAME%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+</etldataflow>

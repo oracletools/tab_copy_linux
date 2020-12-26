@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<etldataflow name="SHARDED_TABLE_COPY_CSMARTREF_REF_ACCT_ALTERNATE" pipeline_config="pipeline_config_140224_213644.xml">
+  <globals>
+    <param name="FLOW_TYPE" value="SYNC"/>
+    <param name="FIELD_TERMINATOR" value="|"/>
+    <param name="LINE_TERMINATOR" value="~"/>
+    <param name="FROM_DB" value="%test_QA%"/>
+    <param name="TO_DB" value="%CSMARTREF_SMARTD1%"/>
+    <param name="LAME_DUCK" value="0"/>
+    <param name="ARRAYSIZE" value="100000"/>
+    <param name="COPYCOMMIT" value="4"/>
+    <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"/>
+    <param name="DPL_BINDSIZE" value="100000"/>
+    <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"/>
+    <param name="IF_SHOW_SERVEROUTPUT" value="1"/>
+  </globals>
+  <CallBefore/>
+  <worker name="CSMARTREF.REF_ACCT_ALTERNATE">
+    <exec_select>
+      <table_utils method="%DML_METHOD%">
+        <param name="DB_CONNECTOR" value="%CSMARTREF_SMARTD1%"/>
+        <param name="SCHEMA_NAME" value="CSMARTREF"/>
+        <param name="TABLE_NAME" value="REF_ACCT_ALTERNATE"/>
+        <sql_template>
+<![CDATA[
+set serveroutput on echo on termout on line 200		
+TRUNCATE TABLE 
+%SCHEMA_NAME%.%TABLE_NAME%
+/
+]]>        </sql_template>
+      </table_utils>
+    </exec_select>
+    <exec_select>
+      <table_utils method="%DML_METHOD%">
+        <param name="DB_CONNECTOR" value="%CSMARTREF_SMARTD1%"/>
+        <param name="SCHEMA_NAME" value="CSMARTREF"/>
+        <param name="TABLE_NAME" value="REF_ACCT_ALTERNATE"/>
+        <sql_template>
+<![CDATA[
+set serveroutput on echo on termout on line 200
+ALTER TABLE 
+%SCHEMA_NAME%.%TABLE_NAME% 
+COMPRESS
+/
+]]>        </sql_template>
+      </table_utils>
+    </exec_select>
+    <exec_copy>
+      <sqlp method="%COPY_METHOD%">
+        <param name="IF_TRUNCATE" value="0"/>
+        <param name="NUM_OF_SHARDS" value="6"/>
+        <param name="IF_DPL_SERIAL" value="0"/>
+        <param name="TO_SCHEMA" value="CSMARTREF"/>
+        <param name="TO_TABLE" value="REF_ACCT_ALTERNATE"/>
+        <sql_template>
+<![CDATA[%TO_SCHEMA%.%TO_TABLE%]]>        </sql_template>
+      </sqlp>
+    </exec_copy>
+    <exec_select>
+      <table_utils method="%DML_METHOD%">
+        <param name="DB_CONNECTOR" value="%CSMARTREF_SMARTD1%"/>
+        <param name="SCHEMA_NAME" value="CSMARTREF"/>
+        <param name="TABLE_NAME" value="REF_ACCT_ALTERNATE"/>
+        <param name="STATS_METHOD_OPT" value="FOR ALL COLUMNS"/>
+        <param name="STATS_GRANULARITY" value="AUTO"/>
+        <param name="STATS_DEGREE" value="16"/>
+        <param name="STATS_CASCADE" value="TRUE"/>
+        <sql_template>
+<![CDATA[
+set serveroutput on echo on termout on
+select '%TABLE_NAME% / %STATS_METHOD_OPT% / %STATS_GRANULARITY% / %STATS_CASCADE% / %STATS_DEGREE% ' gather_stats from dual;
+/*
+BEGIN
+	SYS.DBMS_STATS.GATHER_TABLE_STATS (
+		OwnName        => '%SCHEMA_NAME%'
+		,TabName        => '%TABLE_NAME%'
+		,No_Invalidate     => FALSE,
+  method_opt => '%STATS_METHOD_OPT%',
+  granularity => '%STATS_GRANULARITY%',
+  cascade => %STATS_CASCADE%,
+  degree => %STATS_DEGREE%);
+END;
+*/
+set line 300
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+]]>        </sql_template>
+      </table_utils>
+    </exec_select>
+  </worker>
+  <CallAfter/>
+</etldataflow>

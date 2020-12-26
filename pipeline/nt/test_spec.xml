@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    LOG_ROOT="C:/tmp/DEPOT_test/"
+    LOAD_ROOT="C:/tmp/DEPOT_test/"
+	APPLOG_ROOT="C:/tmp/DEPOT_applog/"
+	SYSLOG_ROOT="C:/tmp/DEPOT_syslog/"
+	CODELOG_ROOT="C:/tmp/DEPOT_codelog/"
+    />
+  <connector>
+	<CUSER_GMAD schema="C160970GMA" pword="***" sid="GMAD" />
+	<MDW_MDWD schema="MDW" pword="***" sid="MDWD" />
+	<AB_GMAD schema="AB95022" pword="***" sid="GMAD" />
+	<RA_GMAP schema="vk64877" pword="***" sid="GMAP" />
+  </connector>
+  <default>
+    log_dest="LOG_ROOT"	
+  </default>
+  <worklet>
+    <publisher name="csvfile" module_name="csv_file_publisher" /> 
+    <extracter name="csvfile" module_name="csv_file_extracter" /> 
+    <extracter name="ldapinfo_extracter" module_name="ldap_extracter" /> 
+    <extracter name="etlfile_extracter" module_name="etl_extracter" /> 
+    <transformer name="join_transformer" module_name="join_transformer" /> 
+    <!-- dump etl xml to csv fie-->
+    <transformer name="etlxmlimplode_transformer" module_name="xml_transformer" /> 
+    <!-- dump staging xml to csv fie-->
+    <transformer name="stagingxmlimplode_transformer" module_name="xml_transformer" /> 
+    <!-- simple table annotated list-->
+    <transformer name="annotatedlist_transformer" module_name="image_transformer" /> 
+    <!--Xml to JSON -->
+    <transformer name="xmltojson_transformer" module_name="json_transformer" /> 
+    <!--Xml to JavaScript -->
+    <transformer name="xmltojs_transformer" module_name="js_transformer" /> 
+  </worklet>
+</test_spec>

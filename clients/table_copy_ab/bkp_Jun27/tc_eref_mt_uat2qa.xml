@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="EREF_MT_UAT2DEV" >
+
+<globals>
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%ESMARTREF_SMARTU1B%"></param>
+	  <param name="TO_DB" value="%ESMARTREF_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="ESMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+
+</globals>
+
+<worker name="REF_CDMS">
+  <exec_dml>
+    <sqlp method="%SQL_LOADER_COPY%" >
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_CDMS
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+<worker name="REF_CPI">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_CPI
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="REF_CTP_MSTR">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_CTP_MSTR
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="REF_SLSPRSN_HIER">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_SLSPRSN_HIER
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="REF_PRSNL_MSTR">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_PRSNL_MSTR
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+<worker name="REF_PRSNL_MGR_HIER">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_PRSNL_MGR_HIER
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="REF_PRSNL_DEPT_HIER">
+  <exec_dml>
+    <sqlp method="%COPY_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+ESMARTREF.REF_PRSNL_DEPT_HIER
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+</etldataflow>

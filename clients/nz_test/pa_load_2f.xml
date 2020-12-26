@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_LOAD_20M_2F_ASYNC_BASE"  >
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="COPY 20mil records to a test 2 TVU tables."></param>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="FROM_TABLE" value="TRD_VOL_UNION"></param>
+	  <param name="TO_TABLE" value="TVU_LOAD_TEST3"></param>
+	  
+		<param name="NODE_LIMIT1" value="1111110"></param>
+		<param name="NODE_LIMIT" value="555555"></param>
+		<param name="NODE_LIMIT1" value="277777"></param>
+		
+		
+		<param name="NODE_LIMIT1" value="1"></param>
+	  
+
+</globals>
+
+<worker1 name="TRUNCATE_TARGET">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[TRUNCATE TABLE %TO_TABLE%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="COUNT_SOURCE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT count(*) FROM %FROM_TABLE%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+<worker1 name="UNLOAD">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="NODE_LIMIT" value="555555"></param>
+      <sql_template>
+        <![CDATA[Unload ('select * from %FROM_TABLE% LIMIT %NODE_LIMIT%') to '/tmp/%TO_TABLE%.gz' delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="LOAD_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	  <param name="TO_TABLE" value="TVU_LOAD_TEST2"></param>
+      <sql_template>
+        <![CDATA[copy %TO_TABLE% from '$disk/tmp/%TO_TABLE%_%NODE_LIMIT%.gz'  parallel delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="LOAD_1">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	  <param name="TO_TABLE" value="TVU_LOAD_TEST3"></param>
+      <sql_template>
+        <![CDATA[copy %TO_TABLE% from '$disk/tmp/%TO_TABLE%_%NODE_LIMIT%.gz'  parallel delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker1 name="COUNT_TARGET">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT count(*) FROM %TO_TABLE%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+</etldataflow>

@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<test_spec>
+  <process_spec CLONE_TABLE="clone_table" COPY_QUERY="copy_query_data" DDL_PUBLISH_TEST="publish_ddl" DDL_SPOOL_TEST="spool_ddl" DEV_EMAIL_TO="AlexBuzunov@gmail.com"/>
+  <connector>
+    <test_CSMARTBSER_QA HOST="mapswdbdn1.nam.nsroot.net" PORT="11150" pword="***" schema="CSMARTBSER" sid="SMARTQ1" type1="inline"/>
+    <test_CSMARTBSER_DEV HOST="mapswdbdn1.nam.nsroot.net" PORT="11150" pword="***" schema="CSMARTBSER" sid="SMARTD1" type1="inline"/>
+  </connector>
+  <default>
+    <env>
+      <vol_spool SPOOL_METHOD="%SQL_SPOOL%">
+        <param name="EMAIL_TO" value="%VOL_EMAIL_TO%"/>
+        <param name="FROM_DB" value="%AB_SMARTP1B%"/>
+      </vol_spool>
+      <dev CLONE_TABLE="%CLONE_TABLE%" COPY_METHOD="%SQL_LOADER_COPY%" DDL_SPOOL_METHOD="%DDL_SPOOL_TEST%" DML_METHOD="%DML%" PUBLISH_DDL="%DDL_PUBLISH_TEST%" QUERY_COPY_METHOD="%COPY_QUERY%" QUERY_SPOOL_METHOD="%SPOOL_QUERY%" SELECT_METHOD="%SELECT%" SPOOL_METHOD="%SPOOL_TEST%">
+        <param name="EMAIL_TO" value="%DEV_EMAIL_TO1%"/>
+        <param name="FROM_DB" value="%AB_SMARTP1B%"/>
+      </dev>
+      <dev0 COPY_METHOD="%SQL_LOADER_COPY%" SPOOL_METHOD="%SQL_SPOOL%">
+        <param name="EMAIL_TO" value="%VOL_EMAIL_TO%"/>
+        <param name="FROM_DB" value="%AB_SMARTP1B%"/>
+      </dev0>
+    </env>
+  </default>
+  <worker>
+    <!--worker name has to be unique -->
+    <exec_dml module_name="sql_utils" name="sqlp"/>
+    <!--worker name has to be unique -->
+    <exec_copy module_name="sql_utils" name="sqlp"/>
+    <exec_sharded_copy module_name="sql_utils" name="sqlp"/>
+    <exec_spool_ddl module_name="sql_utils" name="sqlp"/>
+    <publisher module_name="sql_utils" name="sqlp"/>
+    <exec_select1 module_name="sql_utils" name="sqlp"/>
+    <exec_clone_table module_name="table_utils" name="table_utils"/>
+    <exec_safe_copy module_name="table_utils" name="table_utils"/>
+    <exec_ddl module_name="table_utils" name="table_utils"/>
+    <exec_copy1 module_name="table_utils" name="table_utils"/>
+    <exec_select module_name="table_utils" name="table_utils"/>
+    <exec_spool module_name="table_utils" name="table_utils"/>
+    <exec_query_spool module_name="table_utils" name="table_utils"/>
+    <exec_query_copy module_name="table_utils" name="table_utils"/>
+  </worker>
+</test_spec>

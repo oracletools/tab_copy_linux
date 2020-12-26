@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FRNBNY_QUERY_COPY_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="FRBNY_COPY_TEST_TML">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="PROD_FRBNY_SPOOL_4"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[
+SELECT --+PARALLEL(TRD_VOL_UNION,4)
+  TRD_VOL_UNION.METRICS_CAT,
+  TRD_VOL_UNION.COB_DT,
+  TRD_VOL_UNION.FEED_SRC_SYS,
+  MKT_OF_SET.FIRM_AGT,
+  TRD_VOL_UNION.EXCH,
+     SUM(
+    CASE
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('CXCR','CXLD')
+      AND TRD_VOL_UNION.trd_sta_2          =1
+        THEN 0
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('ACTV','MOD')
+      AND TRD_VOL_UNION.trd_sta_2          =0
+        THEN 1
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('CXCR','CXLD')
+      AND TRD_VOL_UNION.trd_sta_2          =0
+        THEN -1
+    END) ITEM_CNT_SUM,
+  SUM(
+    CASE
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('CXCR','CXLD')
+      AND TRD_VOL_UNION.trd_sta_2          =1
+        THEN 0
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('ACTV','MOD')
+      AND TRD_VOL_UNION.trd_sta_2          =0
+        THEN TRD_VOL_UNION.CALC_USD_AMT
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('CXCR','CXLD')
+      AND TRD_VOL_UNION.trd_sta_2          =0
+        THEN -1*TRD_VOL_UNION.CALC_USD_AMT
+    END)    CALC_USD_AMT_SUM
+  , SUM(
+    CASE
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('CXCR','CXLD')
+      AND TRD_VOL_UNION.trd_sta_2          =1
+        THEN 0
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('ACTV','MOD')
+      AND TRD_VOL_UNION.trd_sta_2          =0
+        THEN TRD_VOL_UNION.CON_USD_AMT
+      WHEN UPPER(TRD_VOL_UNION.trd_sta_1) IN('CXCR','CXLD')
+      AND TRD_VOL_UNION.trd_sta_2          =0
+        THEN -1*TRD_VOL_UNION.CON_USD_AMT
+    END)    CON_USD_AMT_SUM
+,    
+  TRD_VOL_UNION.VOL_EVNT_TYP,
+  TRD_VOL_UNION.TRD_STA,
+  TRD_VOL_UNION.OWN_CD_3,
+  TRD_VOL_UNION.CTP_NAM,
+  TRD_VOL_UNION.SETL_LOCA,
+  TRD_VOL_UNION.TRAN_TYP_1,
+  MKT_OF_SET.CTRY_DESC,
+  TRD_VOL_UNION.CTP_MNEMONIC,
+  TRD_VOL_UNION.FIRM_NOS_NAM,
+  TRD_VOL_UNION.CTP_NOS_NAM,  
+  TRD_VOL_UNION.LCL_CCY,
+  TRD_VOL_UNION.LGL_ENTY_NAM_PP,
+  MAN_REF_LGL_ENTY.LGL_ENTY_NAM,
+  TRD_VOL_UNION.SETL_BANK_LOC,
+  TRD_STA_7 ,TRD_STA_10, TRAN_TYP_4 ,ASET_LVL_ONE_DESC, 
+  SUM(TRD_VOL_UNION.USD_AMT) USD_AMT_SU
+FROM
+  (
+  select a.*, a1.TRAN_TYP_1, a1.OWN_CD_3, a1.TRD_STA_7 ,a1.TRD_STA_10, a1.TRAN_TYP_4, a1.TRD_STA_2 , a1.TRD_STA_1 from 
+	  (SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (dec_111) 
+	    UNION ALL
+	   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (dec_112) 
+	   ) a,
+	  ( SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (dec_111)
+	    UNION ALL
+	   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (dec_112)
+	   ) a1
+    where a.src_file_cd  IN  ( 'TMLSALO', 'TMLSMB')   and a.metrics_cat = 'Volumes'
+    and a.TRD_VOL_SID=a1.TRD_VOL_SID and a.COB_DT=a1.COB_DT and a.SRC_FILE_CD=a1.SRC_FILE_CD
+    ) TRD_VOL_UNION,    
+  CSMARTREF.MAN_REF_MKT_OF_SETL  MKT_OF_SET,  
+  (SELECT LGL_ENTY_KEY, LGL_ENTY_NAM FROM  CSMARTREF.MAN_REF_LGL_ENTY_DATA, CSMARTREF.MAN_REF_LGL_ENTY_XREF
+    WHERE ( MAN_REF_LGL_ENTY_DATA.LGL_ENTY_ID=MAN_REF_LGL_ENTY_XREF.LGL_ENTY_ID  ) and
+    MAN_REF_LGL_ENTY_DATA.LGL_ENTY_RGN in ('NAM','EMEA')
+    ) MAN_REF_LGL_ENTY,    
+    (
+    	select * from csmartref.man_ref_aset_lvl_data where aset_lvl_0_desc in ('Equity','Fixed Income')
+    ) ASET    
+ WHERE
+   ( MAN_REF_LGL_ENTY.LGL_ENTY_KEY=TRD_VOL_UNION.LGL_ENTY_KEY  )
+  AND  ( MKT_OF_SET.FIN_INSM_KEY(+)=TRD_VOL_UNION.MKT_OF_SETL_CD  )
+  and TRD_VOL_UNION.aset_lvl_key = aset.aset_lvl_key
+GROUP BY
+  TRD_VOL_UNION.METRICS_CAT,
+  TRD_VOL_UNION.COB_DT,
+  TRD_VOL_UNION.FEED_SRC_SYS,
+  MKT_OF_SET.FIRM_AGT,
+  TRD_VOL_UNION.EXCH,
+  TRD_VOL_UNION.VOL_EVNT_TYP,
+  TRD_VOL_UNION.TRD_STA,
+  TRD_VOL_UNION.OWN_CD_3,
+  TRD_VOL_UNION.CTP_NAM,
+  TRD_VOL_UNION.SETL_LOCA,
+  TRD_VOL_UNION.TRAN_TYP_1,
+  MKT_OF_SET.CTRY_DESC,
+  TRD_VOL_UNION.CTP_MNEMONIC,
+  TRD_VOL_UNION.FIRM_NOS_NAM,
+  TRD_VOL_UNION.CTP_NOS_NAM,
+  TRD_VOL_UNION.LCL_CCY,
+  TRD_VOL_UNION.LGL_ENTY_NAM_PP,
+  MAN_REF_LGL_ENTY.LGL_ENTY_NAM,
+  TRD_VOL_UNION.SETL_BANK_LOC,
+  TRD_STA_7 ,TRD_STA_10, TRAN_TYP_4 ,ASET_LVL_ONE_DESC;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+<worker name="FRBNY_COPY_ALL">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="PROD_FRBNY_SPOOL_4"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[
+SELECT --+PARALLEL(TRD_VOL_UNION,24)
+  TRD_VOL_UNION.METRICS_CAT,
+  TRD_VOL_UNION.COB_DT,
+  TRD_VOL_UNION.FEED_SRC_SYS,
+  MAN_ACT_MKT_OF_SET.FIRM_AGT,
+  TRD_VOL_UNION.EXCH,
+  SUM(TRD_VOL_UNION.ITEM_CNT) ITEM_CNT_SUM,
+  SUM(TRD_VOL_UNION.CALC_USD_AMT) CALC_USD_AMT_SUM,
+  SUM(TRD_VOL_UNION.CON_USD_AMT) CON_USD_AMT_SUM,
+  TRD_VOL_UNION.VOL_EVNT_TYP,
+  TRD_VOL_UNION.TRD_STA,
+  TRD_VOL_UNION.OWN_CD_3,
+  TRD_VOL_UNION.CTP_NAM,
+  TRD_VOL_UNION.SETL_LOCA,
+  TRD_VOL_UNION.TRAN_TYP_1,
+  MAN_ACT_MKT_OF_SET.CTRY_DESC,
+  TRD_VOL_UNION.CTP_MNEMONIC,
+  TRD_VOL_UNION.FIRM_NOS_NAM,
+  TRD_VOL_UNION.CTP_NOS_NAM,  
+  TRD_VOL_UNION.LCL_CCY,
+  TRD_VOL_UNION.LGL_ENTY_NAM_PP,
+  MAN_REF_LGL_ENTY.LGL_ENTY_NAM,
+  TRD_VOL_UNION.SETL_BANK_LOC,
+  TRD_STA_7 ,TRD_STA_10, TRAN_TYP_4 ,ASET_LVL_ONE_DESC, 
+  SUM(TRD_VOL_UNION.USD_AMT) USD_AMT_SU
+FROM
+  (
+  select a.*, a1.TRAN_TYP_1, a1.OWN_CD_3, a1.TRD_STA_7 ,a1.TRD_STA_10, a1.TRAN_TYP_4  from 
+  (SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jan_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jan_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (feb_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (feb_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */ * FROM csmartvol.TRD_VOL_UNION partition (mar_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */ * FROM csmartvol.TRD_VOL_UNION partition (mar_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */ * FROM csmartvol.TRD_VOL_UNION partition (apr_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (apr_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (sep_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (sep_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (oct_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (oct_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (nov_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (nov_112) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (dec_111) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (dec_112) a) a,
+  (SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jan_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jan_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (feb_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (feb_112)
+    UNION ALL
+   SELECT  * FROM csmartvol.TRD_VOL_UNION_1 partition (mar_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (mar_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (apr_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (apr_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (may_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (may_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jun_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jun_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jul_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (jul_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (aug_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (aug_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (sep_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (sep_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (oct_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (oct_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (nov_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (nov_112)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (dec_111)
+    UNION ALL
+   SELECT * FROM csmartvol.TRD_VOL_UNION_1 partition (dec_112)) a1
+    where a.src_file_cd  IN  ( 'ATLASCO', 'ATLASEQ','GCS','CTS','NEWASKA', 'RADAR', 'DOGS', 'IOWA')  
+    and a.TRD_VOL_SID=a1.TRD_VOL_SID and a.COB_DT=a1.COB_DT and a.SRC_FILE_CD=a1.SRC_FILE_CD
+  AND (   (a.FEED_SRC_SYS  IN  ( 'ATLAS','GCS','CTS','NEWASKA'  ) AND a.VOL_EVNT_TYP  IN  ( 'Settlement Volume'  ) )
+        OR
+          ( a.FEED_SRC_SYS  IN  ( 'RADAR'  )  AND a.VOL_EVNT_TYP  IN  ( 'Settlement Volume'  ) AND a1.TRD_STA_10  IN  ( 'REC'  )
+          AND a1.TRAN_TYP_4  NOT IN  ( 'TCN','WLP','WLC','TSR','TES','TM','ID','TOT','MDE'  ) )
+        OR
+          ( a.FEED_SRC_SYS  IN  ( 'RADAR'  )  AND a.VOL_EVNT_TYP  IN  ( 'Settlement Volume'  ) AND a1.TRD_STA_10  IN  ( 'DEL'  )
+          AND a1.TRD_STA_7  NOT IN  ( 'TM','POF','WLC','FRN','ID','TCN','TES','TOT','WLP','MDE'  ))
+        OR
+          ( a.FEED_SRC_SYS  IN  ( 'DOGS','IOWA'  ) AND  a1.TRAN_TYP_1  IN  ( 'BUY','SELL','PURCHASE','SALE'  )
+              AND ( a.ASET_LVL_ONE_DESC  NOT IN  ( 'FOREX'  ) OR  a.ASET_LVL_ONE_DESC  Is Null ) )
+      )
+    ) TRD_VOL_UNION,
+  CSMARTREF.MAN_REF_MKT_OF_SETL  MAN_ACT_MKT_OF_SET,
+  (SELECT LGL_ENTY_KEY, LGL_ENTY_NAM FROM  CSMARTREF.MAN_REF_LGL_ENTY_DATA, CSMARTREF.MAN_REF_LGL_ENTY_XREF
+    WHERE ( MAN_REF_LGL_ENTY_DATA.LGL_ENTY_ID(+)=MAN_REF_LGL_ENTY_XREF.LGL_ENTY_ID  )) MAN_REF_LGL_ENTY
+ WHERE
+   ( MAN_REF_LGL_ENTY.LGL_ENTY_KEY(+)=TRD_VOL_UNION.LGL_ENTY_KEY  )
+  AND  ( MAN_ACT_MKT_OF_SET.FIN_INSM_KEY(+)=TRD_VOL_UNION.ACTL_MKT_OF_SETL_CD  )
+GROUP BY
+  TRD_VOL_UNION.METRICS_CAT,
+  TRD_VOL_UNION.COB_DT,
+  TRD_VOL_UNION.FEED_SRC_SYS,
+  MAN_ACT_MKT_OF_SET.FIRM_AGT,
+  TRD_VOL_UNION.EXCH,
+  TRD_VOL_UNION.VOL_EVNT_TYP,
+  TRD_VOL_UNION.TRD_STA,
+  TRD_VOL_UNION.OWN_CD_3,
+  TRD_VOL_UNION.CTP_NAM,
+  TRD_VOL_UNION.SETL_LOCA,
+  TRD_VOL_UNION.TRAN_TYP_1,
+  MAN_ACT_MKT_OF_SET.CTRY_DESC,
+  TRD_VOL_UNION.CTP_MNEMONIC,
+  TRD_VOL_UNION.FIRM_NOS_NAM,
+  TRD_VOL_UNION.CTP_NOS_NAM,
+  TRD_VOL_UNION.LCL_CCY,
+  TRD_VOL_UNION.LGL_ENTY_NAM_PP,
+  MAN_REF_LGL_ENTY.LGL_ENTY_NAM,
+  TRD_VOL_UNION.SETL_BANK_LOC,
+  TRD_STA_7 ,TRD_STA_10, TRAN_TYP_4 ,ASET_LVL_ONE_DESC;
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+
+</etldataflow>

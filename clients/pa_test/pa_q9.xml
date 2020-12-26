@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="Q921.9_1">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Line #10 on Q-921 list."></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_MAP%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION"></param>
+
+	   
+
+</globals>
+
+<worker name="Q9_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Clear cache."></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+	  
+
+<worker name="Q9_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from (SELECT * FROM trd_vol_union ) t group by cob_dt ) t LIMIT 20;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+</etldataflow>

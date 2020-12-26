@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="5_FXT">
+<globals>
+
+	<param name="ETLFLOW_DESCR" value="Insert all recs record to FXT."></param>
+
+	<!-- PIPELINE execution type
+	 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>
+
+	<param name="FIELD_TERMINATOR" value="'|'"></param>
+	<param name="LINE_TERMINATOR" value="''"></param>
+
+	<param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	<param name="SCHEMA_NAME" value="PARACCEL"></param>
+	<!--will spool ALL records if LAME_DUCK=0-->
+	<param name="LAME_DUCK" value='0'></param>
+	<param name="ARRAYSIZE" value="5000"></param>
+	<param name="COPYCOMMIT" value="4"></param>
+	<!--sqlp attribute-->
+
+	<param name="SOURCE_TABLE" value="FX_TRANSACTION"></param>
+	<param name="INS_TABLE" value="FXT_ALL_INSERT_TEST"></param>
+
+
+	<param name="IF_TOSS_CACHE" value="0"></param>
+	<param name="TRANSACTION" value="COMMIT;"></param>	 
+
+	<param name="IF_ASYNC_LOG" value="1"></param>		
+	
+</globals>
+
+
+
+<worker1 name="5_FXT_CR_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		 
+CREATE TABLE %INS_TABLE% (
+    trans_id bigint distkey,
+    trans_version numeric(4,0) encode runlength,
+    trade_date date,
+    product_type_id numeric(12,0),
+    broker_id numeric(12,0),
+    business_date date encode runlength,
+    instrument_type_id numeric(12,0) encode delta,
+    book_region character varying(36) encode runlength,
+    business_event character varying(36) encode runlength,
+    transaction_event character varying(36) encode runlength,
+    curr_pair character varying(36) encode runlength,
+    g10_ind character varying(36) encode runlength,
+    buy_curr character varying(36) encode runlength,
+    sell_curr character varying(36) encode runlength,
+    buy_amount numeric(19,6) encode runlength,
+    sell_amount numeric(19,6) encode runlength,
+    base_curr character varying(36) encode runlength,
+    notional numeric(19,6),
+    source_product_id character varying(24) encode runlength,
+    strike_price numeric(19,6) encode runlength,
+    strike_curr character varying(36) encode runlength,
+    tenor numeric(4,0) encode delta,
+    option_type character varying(12) encode runlength,
+    execution_method character varying(36) encode runlength,
+    trading_location character varying(36) encode runlength,
+    excercise_style character varying(36) encode runlength,
+    ind_brokerage numeric(19,6) encode runlength,
+    curr_group_code character varying(12) encode runlength,
+    customer_id numeric(19,0),
+    firm_acct_id numeric(19,0),
+    trader_id numeric(19,0) encode delta,
+    legal_entity_id numeric(19,0) encode delta,
+    trading_accnt_id numeric(19,0),
+    calc_ind character varying(1) encode runlength,
+    calc_eligible_ind character varying(1) encode runlength,
+    charge_status character varying(24) encode runlength,
+    calc_exception_ind character varying(1) encode runlength,
+    source_id numeric(12,0),
+    process_state character varying(24) encode runlength,
+    link_id numeric(19,0),
+    link_type character varying(36) encode runlength,
+    primary_leg_ind character varying(1) encode runlength,
+    feed_id character varying(36) encode runlength,
+    cost_center character varying(36) encode runlength,
+    buy_sell_code character varying(36) encode runlength,
+    hash_code numeric(4,0),
+    payout_amount numeric(19,2),
+    settlement_date date,
+    trans_active_ind character(1)
+)
+DISTSTYLE KEY
+SORTKEY ( trans_id, trade_date, product_type_id, broker_id );
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="5_FXT_TRUNC_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		TRUNCATE TABLE  %INS_TABLE%;
+		;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="5_FXT_ALL_INS_1">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+
+ 
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		BEGIN;
+		 INSERT INTO %INS_TABLE%  SELECT * FROM %SOURCE_TABLE%;
+		 %TRANSACTION%;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+</etldataflow>

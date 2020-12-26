@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PADB_CONV_INSERT_TEST" type="sync">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="BAZEL_TABLE" value="BASEL_MSTR"></param>
+	  <param name="EXCHANGE_BAZEL_TABLE" value="BASEL_MSTR_MONTH"></param>
+	  <param name="EXCHANGE_PARTITION" value="P_BASEL_MSTR_2011_SP_01"></param>
+	  <!--PADB attributes-->
+	  <param1 name="DB_CONNECTOR" value="%PA_DEPOT%"></param1>
+	  <param name="SCHEMA_NAME" value="public"></param>	  
+
+</globals>
+
+<worker name="ref_esales">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  ref_esales;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="fx_transaction_detail">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  fx_transaction_detail;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="ref_smc_ctas">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  ref_smc_ctas;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="cva">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  cva;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="man_ref_lgl_enty_xref">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  man_ref_lgl_enty_xref;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_aux3">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_aux3;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="man_ref_ops_own_hier">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  man_ref_ops_own_hier;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="cva_star_tran_map">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  cva_star_tran_map;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="ref_smc">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  ref_smc;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="systable_schema">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  systable_schema;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="man_ref_lgl_enty_data">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  man_ref_lgl_enty_data;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="id_test">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  id_test;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="transaction_charge">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  transaction_charge;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_goc_map">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_goc_map;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="talend_load">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  talend_load;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="fails_reports_history">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  fails_reports_history;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="trd_vol_union">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  trd_vol_union;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="trd_vol_summary_abi">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  trd_vol_summary_abi;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_prod">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_prod;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="products">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  products;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="transaction_charge_optimized">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  transaction_charge_optimized;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_aux">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_aux;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="trd_vol_union_large">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  trd_vol_union_large;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="cva_basel_rules">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  cva_basel_rules;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_mstr">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_mstr;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="systable_globaldict">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  systable_globaldict;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="trd_vol_union_100mil">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  trd_vol_union_100mil;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="ref_smc_1mil">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  ref_smc_1mil;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="test_charge">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  test_charge;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="cva_grr_fcl_map">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  cva_grr_fcl_map;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="man_ref_aset_lvl_data">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  man_ref_aset_lvl_data;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="fx_transaction_test">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  fx_transaction_test;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="padb_config_harvest">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  padb_config_harvest;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="trd_vol_union_abi">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  trd_vol_union_abi;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_aux2">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_aux2;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="systable_topology">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  systable_topology;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="man_ref_mkt_of_setl">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  man_ref_mkt_of_setl;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="ref_cpi">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  ref_cpi;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_dept">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_dept;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="ramesh_test">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  ramesh_test;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="fx_transaction">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  fx_transaction;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="basel_gfcid_map">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  basel_gfcid_map;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+ <worker name="man_ref_norm_fail_rsn_cd">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+SELECT COUNT(*) FROM  man_ref_norm_fail_rsn_cd;
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+
+</etldataflow>

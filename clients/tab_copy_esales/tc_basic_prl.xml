@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="BASIC_PRL" 
+			 email_to="EMAIL_TO"
+			 TO_SCHEMA="SR64878"
+			 TRUNCATE_TARGET="1">
+
+
+<worker name="PRL_GMA_FACT1">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="PARTITION" value="YEAR2007"></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='100'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+<worker1 name="PRL_GMA_FACT2">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="PARTITION" value="YEAR2008"></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+<worker1 name="PRL_GMA_FACT3">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="PARTITION" value="YEAR2009"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+<worker1 name="PRL_GMA_FACT4">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="SUBPARTITION" value="ACTUALS2010"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+<worker1 name="PRL_GMA_FACT41">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="SUBPARTITION" value="PLAN0012010"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="PRL_GMA_FACT42">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="SUBPARTITION" value="FCST0012010"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="PRL_GMA_FACT43">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="SUBPARTITION" value="FCST0032010"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="PRL_GMA_FACT44">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="SUBPARTITION" value="FCST0052010"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="PRL_GMA_FACT45">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPRL_GMAQ1"></param>
+	  <param name="SUBPARTITION" value="FCST0082010"></param> 
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+<worker1 name="REF_CDMS">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPEARL_GMAD"></param>
+	  <param name="PARTITION" value="YEAR2007"></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="2"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+</etldataflow>

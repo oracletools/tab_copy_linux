@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="csmartotd.stg_otd_cwm">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value='^|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AD_SMARTC1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTOTD"></param>
+	  
+	  <param name="TO_DB" value="%COTD_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTOTD"></param>	
+	  
+
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>	  
+
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+
+</globals>
+
+--xml
+--DEC_121 (6994405)
+<worker name="DEC_121">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="15"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="DEC_121"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--MAR_142 (2663664)
+<worker name="MAR_142">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="5"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="MAR_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JAN_142 (2469106)
+<worker name="JAN_142">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="5"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JAN_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--DEC_132 (2382510)
+<worker name="DEC_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="DEC_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--FEB_141 (2339461)
+<worker name="FEB_141">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="FEB_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--MAR_141 (2301412)
+<worker name="MAR_141">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="MAR_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--APR_141 (2271943)
+<worker name="APR_141">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="APR_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--NOV_132 (2265625)
+<worker name="NOV_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="NOV_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--DEC_131 (2245849)
+<worker name="DEC_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="DEC_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--OCT_132 (2112501)
+<worker name="OCT_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="OCT_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--OCT_131 (2042144)
+<worker name="OCT_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="OCT_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--FEB_142 (2036661)
+<worker name="FEB_142">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="FEB_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--SEP_132 (2011290)
+<worker name="SEP_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="SEP_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JAN_141 (1946670)
+<worker name="JAN_141">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JAN_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--NOV_131 (1907855)
+<worker name="NOV_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="4"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="NOV_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--AUG_132 (1884668)
+<worker name="AUG_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="AUG_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--SEP_131 (1768122)
+<worker name="SEP_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="SEP_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JUN_131 (1721577)
+<worker name="JUN_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JUN_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--MAY_131 (1709389)
+<worker name="MAY_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="MAY_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--MAY_132 (1657526)
+<worker name="MAY_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="MAY_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JUN_132 (1522017)
+<worker name="JUN_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JUN_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JUL_132 (1432628)
+<worker name="JUL_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JUL_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JUL_131 (1393071)
+<worker name="JUL_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JUL_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--AUG_131 (1334294)
+<worker name="AUG_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="3"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="AUG_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--APR_132 (1098359)
+<worker name="APR_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value="2"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="APR_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--APR_142 (328654)
+<worker name="APR_142">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="APR_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JAN_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--JAN_131 (327705)
+<worker name="FEB_131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="FEB_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="MAR_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--MAR_132 (211118)
+<worker name="JAN_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="JAN_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="MAR_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--MAR_132 (211118)
+<worker name="FEB_132">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="FEB_132"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="APR_131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	 <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+		  <param name="PARTITION" value="DEC_122"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+--MAY_142 ()
+<worker name="MAY_142">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="MAY_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="MAY_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="JUN_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="JUN_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="JUL_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="JUL_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="AUG_141"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+                  <param name="PARTITION" value="AUG_142"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.STG_OTC_CWM]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</etldataflow>

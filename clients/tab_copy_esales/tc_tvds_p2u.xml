@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CSMARTVOL.TRD_VOL_DLY_SMRY_JAN_MAX_2011">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='^'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>	  
+	  <param name="TO_DB1" value="%CSMARTREF_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.JAN_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="JAN_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.JAN_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="JAN_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.FEB_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="FEB_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.FEB_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="FEB_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.MAR_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="MAR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.MAR_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="MAR_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.APR_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="APR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.APR_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="APR_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.MAY_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="MAY_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.MAY_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="MAY_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.JUN_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="JUN_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.JUN_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="JUN_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.JUL_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="JUL_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.JUL_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="JUL_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.AUG_111">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="AUG_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.AUG_112">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="AUG_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_DLY_SMRY.MAX_PARTITION">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		  
+		<param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+		<param name="PARTITION" value="MAX_PARTITION"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_DLY_SMRY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+
+
+
+
+</etldataflow>

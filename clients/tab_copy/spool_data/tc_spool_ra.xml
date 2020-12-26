@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB1" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA1" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+	
+<worker name="SMC_3t">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="FROM_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[ 
+SELECT csmartbser.df_credit_engine.DEPOTcorp_unit_gfcid AS legal_entity_code,
+       ref_firm.cust_nam AS legal_entity_desc,
+       csmartbser.df_credit_engine.gfcid AS obligor_gfcid,
+       ref_cdms.cust_nam AS obligor_desc,
+       ref_cdms.dmcl_adr_ctry AS obligor_domcile,
+       ref_cdms.inc_adr_ctry AS gfcid_incorporation, ref_cdms.gfpid AS gfpid,
+       ref_parent_name.cust_nam AS gfpid_desc,
+       ref_parent_name.dmcl_adr_ctry AS parent_domicile,
+       ref_parent_name.inc_adr_ctry AS parent_incorporation,
+       ref_cdms.gfcid_typ AS gfcid_type, ref_cdms.acct_typ AS account_type,
+       csmartbser.df_credit_engine.netting_agreement_id
+                                                      AS netting_agreement_id,
+       csmartbser.df_credit_engine.margin_agreement_id AS margin_agreement_id,
+       csmartbser.df_credit_engine.transaction_id AS transaction_id,
+       csmartbser.df_credit_engine.oasys_deal AS deal_id,
+       csmartbser.df_credit_engine.oasys_transactionid AS oasystxn_id,
+       csmartbser.df_credit_engine.sub_instrument_desc
+                                                    AS facility_sub_type_desc,
+       csmartbser.df_credit_engine.fdic_product_category AS product,
+       csmartbser.df_credit_engine.buy_sell_ind AS bought_sold,
+       csmartbser.df_oasys.underlying_cusip AS underlyingcusip,
+       csmartbser.df_oasys.underlying AS cusip_short_name,
+       TO_CHAR (csmartbser.df_credit_engine.maturity_date,
+                'DD-Mon-YYYY'
+               ) AS maturity_date,
+       NULL AS secured, csmartbser.df_credit_engine.psr AS use_psr_margin,
+       csmartbser.df_credit_engine.coll_call_freq AS margin_frequency,
+       csmartbser.df_credit_engine.receive_currency
+                                                 AS receive_notional_currency,
+       csmartbser.df_credit_engine.receive_nominal AS receive_side_notional,
+       csmartbser.df_credit_engine.pay_currency AS pay_notional_currency,
+       csmartbser.df_credit_engine.pay_nominal AS pay_side_notional,
+       csmartbser.df_credit_engine.receive_nominal_usd
+                                               AS rcv_side_notional_usd_equiv,
+       csmartbser.df_credit_engine.pay_nominal_usd
+                                               AS pay_side_notional_usd_equiv,
+      csmartbser.df_credit_engine.DEPOT_min_call_amt_usd
+                                                  AS min_transfer_amount_DEPOT,
+       csmartbser.df_credit_engine.cpty_min_call_amt_usd
+                                                  AS min_transfer_amount_ctpy,
+       csmartbser.df_credit_engine.margin_dir AS margining_direction,
+       csmartbser.df_credit_engine.cbk_thld_amt_usd
+                                                 AS bank_threshold_amount,
+       csmartbser.df_credit_engine.cpty_thld_amt_usd
+                                                   AS client_threshold_amount,
+       csmartbser.df_credit_engine.cbk_thld_pct
+                                             AS bank_threshold_percentage,
+       csmartbser.df_credit_engine.cpty_thld_pct
+                                               AS client_threshold_percentage,
+       csmartbser.df_credit_engine.cmtm AS mtm_original,
+       csmartbser.df_credit_engine.cmtm_ccy AS mtm_original_ccy,
+       csmartbser.df_credit_engine.cmtm_usd AS mtm_usd_equivalent,
+       NULL AS mtm_post_fin_39_netting, NULL AS collateral_netting_benefits,
+       NULL AS singleindex_type, NULL AS gaap_asset_liab,
+       csmartbser.df_credit_engine.sys_nam AS SOURCE,
+       csmartbser.df_credit_engine.display_name AS display_name,
+       csmartbser.df_credit_engine.host_system_id AS host_system_id,
+       csmartbser.df_credit_engine.reportable_notional_amt
+                                                       AS calculated_notional,
+       csmartbser.df_oasys.fix_rt AS fix_rt,
+       csmartbser.df_oasys.accr_rt AS accr_rt,
+       CASE
+          WHEN (   (    (ref_cdms.acct_typ) <> 'B'
+                    AND (ref_cdms.inc_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                   )
+                OR (    (ref_cdms.gfcid_typ) <> 'FUND'
+                    AND (ref_cdms.dmcl_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                   )
+                OR (    (ref_cdms.acct_typ) = 'B'
+                    AND (ref_cdms.dmcl_adr_ctry) NOT IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                    AND (   (ref_cdms.inc_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                         OR (ref_parent_name.inc_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                        )
+                   )
+               )
+             THEN 'US Person'
+          ELSE 'Non-US Person'
+       END AS customer_type,
+       ref_cdms.us_prsn_flg AS us_person_flag,
+       ref_firm.dmcl_adr_ctry AS legal_entity_domicile,
+       ref_firm.inc_adr_ctry AS legal_entity_incorporation,
+       CASE
+          WHEN (   (    (ref_firm.acct_typ) <> 'B'
+                    AND (ref_firm.inc_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                   )
+                OR (    (ref_firm.gfcid_typ) <> 'FUND'
+                    AND (ref_firm.dmcl_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                   )
+                OR (    (ref_firm.acct_typ) = 'B'
+                    AND (ref_firm.dmcl_adr_ctry) NOT IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                    AND (   (ref_firm.inc_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                         OR (ref_parent_firm.inc_adr_ctry) IN
+                                         ('US', 'AS', 'GU', 'MP', 'PR', 'VI')
+                        )
+                   )
+               )
+             THEN 'US Person'
+          ELSE 'Non-US Person'
+       END AS legal_entity_customer_type
+  FROM csmartbser.del_DF_REF_CDMS_rnk ref_firm,
+       csmartbser.del_DF_REF_CDMS_rnk ref_parent_firm,
+       csmartbser.del_DF_REF_CDMS_rnk ref_cdms,
+       csmartbser.del_DF_REF_CDMS_rnk ref_parent_name,
+       csmartbser.df_credit_engine,
+       csmartbser.df_oasys
+WHERE csmartbser.df_credit_engine.gfcid = ref_cdms.gfcid(+)
+   AND ref_cdms.gfpid = ref_parent_name.gfcid(+)
+   AND ref_firm.gfpid = ref_parent_firm.gfcid(+)
+   AND ref_firm.gfcid(+) = csmartbser.df_credit_engine.DEPOTcorp_unit_gfcid
+   AND csmartbser.df_oasys.deal(+) = csmartbser.df_credit_engine.oasys_deal
+   AND csmartbser.df_oasys.transactionid(+) =
+                               csmartbser.df_credit_engine.oasys_transactionid
+   AND ref_cdms.gfcid_typ <> 'DEPOT'
+   AND csmartbser.df_credit_engine.cmtm_usd IS NOT NULL;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker >
+
+</etldataflow>

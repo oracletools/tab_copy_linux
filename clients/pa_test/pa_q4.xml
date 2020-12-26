@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="Q921.4_1">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Line #5 on Q-921 list."></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_MAP%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION_900_mil"></param>
+
+	   
+
+</globals>
+
+<worker name="Q4_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Clear cache."></param>
+
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+	  
+
+<worker name="Q4_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[SELECT 
+  DISTINCT 
+  TRD_VOL_DLY_SMRY.SRC_FILE_CD,
+  TRD_VOL_DLY_SMRY.COB_DT,
+  TRD_VOL_DLY_SMRY.METRICS_CAT,
+  REF_MNGD_SEG_HIER.GOC_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_5_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_6_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_7_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_8_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_9_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_10_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_11_DESCR,
+  MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+  MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC,
+  MAN_REF_ASET_LVL_DATA.ASET_LVL_2_DESC,
+  MAN_REF_LGL_ENTY_DATA.LGL_ENTY_RGN,
+  REF_MNGD_SEG_HIER.GOC_RGN_DESCR,
+  TRD_VOL_DLY_SMRY.FEED_SRC_SYS ,
+   SUM(TRD_VOL_DLY_SMRY.CALC_USD_AMT),
+  SUM(TRD_VOL_DLY_SMRY.ITEM_CNT),  
+  SUM(TRD_VOL_DLY_SMRY.CON_QTY)  
+FROM TRD_VOL_UNION TRD_VOL_DLY_SMRY,
+  REF_MNGD_SEG_HIER,
+  MAN_REF_ASET_LVL_DATA,
+  MAN_REF_LGL_ENTY_DATA,
+  MAN_REF_LGL_ENTY_XREF
+WHERE 
+ ( MAN_REF_LGL_ENTY_XREF.LGL_ENTY_ID  =MAN_REF_LGL_ENTY_DATA.LGL_ENTY_ID(+) )
+ AND ( REF_MNGD_SEG_HIER.GOC(+)             =TRD_VOL_DLY_SMRY.FO_GOC )
+ AND ( MAN_REF_LGL_ENTY_XREF.LGL_ENTY_KEY(+)=TRD_VOL_DLY_SMRY.LGL_ENTY_KEY )
+ AND ( TRD_VOL_DLY_SMRY.ASET_LVL_KEY        =MAN_REF_ASET_LVL_DATA.ASET_LVL_KEY(+) 
+        AND MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC IN ('Equity', 'Fixed Income', 'Exchange Traded Derivatives')
+        AND MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC != 'Future' )
+ AND TRD_VOL_DLY_SMRY.SRC_FILE_CD        IN ( 'TMLSMB','TMLSALO' )
+ AND TRD_VOL_DLY_SMRY.METRICS_CAT        ='Volumes'
+ AND TRD_VOL_DLY_SMRY.COB_DT between '01-JUNE-2011' and '30-JUNE-2011'
+GROUP BY 
+  TRD_VOL_DLY_SMRY.SRC_FILE_CD,
+  TRD_VOL_DLY_SMRY.COB_DT,
+  --TRD_VOL_DLY_SMRY.EXEC_TYP,
+  TRD_VOL_DLY_SMRY.METRICS_CAT,
+  --TRD_VOL_DLY_SMRY.VOL_EVNT_TYP,
+  REF_MNGD_SEG_HIER.GOC_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_5_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_6_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_7_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_8_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_9_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_10_DESCR,
+  REF_MNGD_SEG_HIER.MNGD_SEG_LVL_11_DESCR,
+  MAN_REF_ASET_LVL_DATA.ASET_LVL_0_DESC,
+  MAN_REF_ASET_LVL_DATA.ASET_LVL_1_DESC,
+  MAN_REF_ASET_LVL_DATA.ASET_LVL_2_DESC,
+  MAN_REF_LGL_ENTY_DATA.LGL_ENTY_RGN,
+  REF_MNGD_SEG_HIER.GOC_RGN_DESCR,
+  TRD_VOL_DLY_SMRY.FEED_SRC_SYS
+  ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+	
+</etldataflow>

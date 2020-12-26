@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SPOOL_BK94994_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="CSMARTVOL.Q1.SPOOL">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+select * from csmartvol.TRD_VOL_UNION partition (JUL_%COB_YEAR%1) a where  a.cob_dt ='03-jul-2013' AND rownum<=5 ;
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+</etldataflow>

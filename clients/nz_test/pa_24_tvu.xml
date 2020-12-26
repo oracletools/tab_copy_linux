@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="24_TVU_NO_LIMIT_LG">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Remove the sub query with limit and run it on the whole table. No Subquery."></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME1" value=" (SELECT * FROM TRD_VOL_UNION_900_mil) "></param>
+	  <param name="TABLE_NAME" value=" TRD_VOL_UNION_LARGE "></param>
+
+	   
+
+</globals>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="24_TVU_NO_LIMIT_8">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 8. No limit."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+			SELECT * FROM (SELECT t.*, min(cnt_all) over() min_cnt FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from %TABLE_NAME% t group by cob_dt having count(*)>100000 ) t ) tt WHERE min_cnt=cnt_all;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker name="24_TVU_NO_LIMIT_7">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 7. No limit."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+			SELECT * FROM (SELECT t.*, min(cnt_all) over() min_cnt FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from %TABLE_NAME% t group by cob_dt having count(*)>100000 ) t ) tt WHERE min_cnt=cnt_all;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_6">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 6. No limit."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+			SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from %TABLE_NAME% t group by cob_dt having count(*)>100000 ) t order by cnt_all;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_5">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 5. No limit."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+			SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from %TABLE_NAME% t group by cob_dt having count(*)>100000 ) t;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_4">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 4. No limit."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+			SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from %TABLE_NAME% t group by cob_dt ) t ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_3">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 3."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+			SELECT  count(trd_vol_sid) as a ,ASET_LVL_KEY FROM %TABLE_NAME% t Where src_file_Cd in ('DOGS','IOWA')  and COB_DT = '2011-05-19' group by ASET_LVL_KEY order by a ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_2_50COLS">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 2. 50 columns."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+		SELECT TRD_VOL_SID,
+COB_DT,
+SRC_FILE_CD,
+FEED_SRC_SYS,
+TRD_TRAN_DT,
+TRD_EFF_DT,
+CON_SETL_DT,
+CON_SETL_OPEN_LEG_DT,
+CON_SETL_CLS_LEG_DT,
+TRD_ENTR_DTM,
+SRC_SYS_ENTR_TS,
+CTP_ACCT_NO,
+CTP_UID_PP,
+CTP_UID_GRD,
+CTP_GFCID_PP,
+CTP_GFCID_GRD,
+CTP_MNEMONIC,
+CORP_VS_INTBANK,
+CTP_IMS_ACCT_NO,
+CTP_CPI_ACCT_NO,
+CTP_BASENO,
+CTP_INDS_SECT,
+SALOMON_6_DGT_NO,
+CTP_NAM,
+FO_GOC,
+LGL_ENTY_ID_PP,
+LGL_ENTY_NAM_PP,
+LGL_ENTY_KEY,
+INTL_PROD_ID,
+INTL_PROD_DESC,
+SCR_UID_PP,
+SCR_UID_GRD,
+CUSIP,
+ISIN,
+SEDOL,
+TKR_SYMB,
+PHYS_IND,
+ASET_LVL_KEY,
+ASET_LVL_ONE_CD,
+ASET_LVL_ONE_DESC,
+ASET_LVL_TWO_CD,
+ASET_LVL_TWO_DESC,
+ASET_LVL_THR_CD,
+ASET_LVL_THR_DESC,
+FIRM_ACCT_NO,
+FIRM_ACCT_MNEMONIC,
+FIRM_UID_PP,
+FIRM_UID_GRD,
+IMS_FIRM_ACCT_NO,
+CPI_FIRM_ACCT_NO FROM %TABLE_NAME% t Where src_file_Cd in ('DOGS','IOWA') and CUSIP = '622999910' and COB_DT = '2011-05-20' ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_2_ALL">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 2. All columns."></param>
+	<param name="TVU_LIMIT1" value="100000"></param>
+      <sql_template>
+        <![CDATA[
+		SELECT * FROM %TABLE_NAME% t Where src_file_Cd in ('DOGS','IOWA') and CUSIP = '622999910' and COB_DT = '2011-05-20' ;
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Outer join with REF_ESALES. NO LIMIT. year 2010, count(*)"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="24_TVU_NO_LIMIT_1">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Select 1"></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION_900_mil"></param>
+      <sql_template>
+        <![CDATA[
+		SELECT count(*)||'|cnt' FROM %TABLE_NAME% t Where src_file_Cd in ('DOGS','IOWA')  and COB_DT = '2011-05-20';	
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+	
+</etldataflow>

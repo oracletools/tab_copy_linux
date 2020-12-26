@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SPOOL_BK94994_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%CSMARTBSER_SMARTQ1%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+--sql
+
+<worker name="STATS_04">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_04',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_01">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_01',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_16">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_16',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_05">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_05',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_23">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_23',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_30">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_30',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_09">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_09',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_12">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_12',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_22">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_22',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_10">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_10',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_40">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_40',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_24">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_24',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_00">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_00',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_07">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_07',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_33">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_33',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_02">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_02',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_03">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_03',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_14">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_14',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_06">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_06',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_27">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_27',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_08">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_08',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_26">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_26',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_19">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_19',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_25">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_25',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="STATS_15">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+begin
+  dbms_stats.gather_table_stats (
+     ownname    => USER,
+     tabname    => 'STG_OASYS_FEED_f2',
+    partname        => 'part_15',
+    GRANULARITY => 'PARTITION'
+     --estimate_percent =>30,
+     --degree=>16
+  );
+end;
+/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+
+
+</etldataflow>

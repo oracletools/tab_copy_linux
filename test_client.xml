@@ -1,0 +1,23 @@
+<etldataflow name="client_2370">
+<globals>
+  <param name="FIELD_TERMINATOR" value="`|" />
+<param name="LINE_TERMINATOR" value="~" />
+<param name="FROM_DB" value="%FROM_DB%" />
+<param name="FROM_SCHEMA" value="AD45676" />
+<param name="TO_DB" value="%TO_DB%" />
+<param name="TO_SCHEMA" value="CSMARTVOL" />
+<param name="LAME_DUCK" value="0" />
+<param name="ARRAYSIZE" value="5000" />
+<param name="IF_TRUNCATE" value="0" />
+<param name="TO_TABLE" value="VOL_SMRY" />
+
+ </globals>
+   <worker name="worker_2370">
+<exec_query_copy>
+<table_utils method="%COPY_QUERY_DATA%">
+<sql_template>
+<![CDATA[  select /*+PARLLEL(FX1,8)*/* from csmartvol.vol_smry where rownum <2
+  ]]> 
+</sql_template></table_utils></exec_query_copy>
+</worker>
+</etldataflow> 

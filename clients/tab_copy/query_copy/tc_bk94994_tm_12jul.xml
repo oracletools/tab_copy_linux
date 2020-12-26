@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FRNBNY_QUERY_COPY2_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="FRBNY_COPY2_TEST_TML">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="TVU_ANALYSIS"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="1"></param>		 
+      <sql_template>
+        <![CDATA[
+select --+PARALLEL(TRD_VOL_UNION,8)
+BLK_TRD_REF , 
+BLTR_CD ,
+COB_DT ,
+CON_SETL_DT,
+ENTP_TRD_REF_NO,
+EXT_TRD_REF,
+FO_TRD_REF ,
+OPS_SETL_SYS_TRD_REF ,
+OPS_TRD_REF,
+TRD_REF_1,
+TRD_REF_2,
+TRD_REF_3,
+TRD_REF_4,
+TRD_REF_5
+from (
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+    UNION ALL
+   SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+   union all
+  SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a 
+    union all 
+    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a 
+    union all 
+    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+   )  tvu 
+where 
+trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+and TRD_TRAN_DT = tvu.COB_DT
+and METRICS_CAT = 'Volumes'
+and VOL_EVNT_TYP = 'Settlement Volume';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+
+
+
+</etldataflow>

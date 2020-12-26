@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="Q_COPY2_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="^|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%BK_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB" value="%CVOL_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+<worker name="Q">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="ZDP_VOL_DATA2"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[SELECT   TRD_VOL_SID,          COB_DT,          SRC_FILE_CD,          TRD_TRAN_DT,          TRD_EFF_DT,          CON_SETL_DT,          TRD_ENTR_DTM,          SRC_SYS_ENTR_TS,          CTP_UID_GRD,          CUSIP,          ISIN,          SEDOL,          ASET_LVL_KEY,          FIRM_UID_GRD,          FO_BOOK_SYS,          EXCH,          ORD_NO,          TRD_ENTR_USER_ID,          TRDR_ID,          SLSPRSN_ID,          BLTR_CD,          TRAN_EXEC_METH,          TRAN_EXEC_CNDT,          BUY_SELL,          MKT_OF_SETL_CD,          ACTL_MKT_OF_SETL_CD,          VOL_EVNT_TYP,          TRAN_TYP,          TRD_STA,          EXEC_TYP,          METRICS_CAT,          TRD_STA_RESN,          BLK_TRD_REF,          EXT_TRD_REF,          ENTP_TRD_REF_NO,          OPS_TRD_REF,          OPS_SETL_SYS_TRD_REF,          FO_TRD_REF,          TRD_REF_1,          TRD_REF_2,          TRD_REF_3,          TRD_REF_4,          TRD_REF_5,          LCL_CCY,          CON_LCL_CCY_AMT,          USD_AMT,          CON_USD_AMT,          QTY,          CON_QTY,          TRDR_NAM,          TRDR_RGN FROM   CSMARTVOL.TRD_VOL_UNION  where src_file_cd in ('ATLASCO', 'ATLASEQ', 'DOGS', 'IOWA', 'RADAR', 'TMLSALO') and cob_dt between '13-Dec-2012' and '31-Dec-2012']]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+
+</etldataflow>

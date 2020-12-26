@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    env='tab_copy'
+	env2='{$ETL_ENV}'
+    LOG_ROOT="log/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib"
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	SPOOL_TEST="spool"
+	
+	SQL_LOADER_COPY="sql_echo_loader"
+	FAST_COPY_METHOD="sql_plus_copy"
+
+	PA_DML_TEST="psql_dml"	
+    />
+  <connector>
+	<!--source connector-->
+	<AB95022_SMARTD1 type1='inline' schema="AB95022" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+	<AB95022_SMARTP1B type1='inline' schema="AB95022" pword="***" sid="SMARTP1B" host = "localhost"  PORT = "11150"/>
+	
+	<DQSMART_SMARTD1 type1='inline' schema="DQSMART" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+	
+	<DLR_SMARTD1 type1='inline' schema="DLROGMARWSMART" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+	<!--BASEL/CVA-->
+	<AB95022_GMAU1A type1='inline' schema="AB95022" pword="***" sid="GMAU1A" host = "localhost"  PORT = "11150"/>
+
+	<AB95022_GMAP1A type1='inline' schema="AB95022" pword="***" sid="GMAP1A" host = "localhost"  PORT = "11150"/>
+
+	<AB95022_GMAD1 type1='inline' schema="AB95022" pword="***" sid="GMAD1" host = "localhost"  PORT = "11150"/> 
+    <AB95022_LAB type='scp' user="AB95022" pword="***" HOST="168.109.7.14"  PORT="" home ="/home/ab95022/incoming" />
+	
+	
+	<!--tab_copy connectors-->
+	<ESMARTREF_SMARTU1B type1='inline' schema="ESMARTREF" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+	<CSMARTREF_SMARTU1B type1='inline' schema="CSMARTREF" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>	
+	<CSMARTREF_SMARTD1 type1='inline' schema="CSMARTREF" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+	<ESMARTREF_SMARTD1 type1='inline' schema="ESMARTREF" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+	<CSMARTREF_SMARTQ1 type1='inline' schema="CSMARTREF" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+	<ESMARTREF_SMARTQ1 type1='inline' schema="ESMARTREF" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+
+	<!--PADB connectors-->
+	<PA_DEPOT type='PADB' schema="paraccel" pword="" sid="DEPOT" host = "localhost"  PORT = ""/>
+	
+  </connector> 
+  <default>
+	  <env>
+		 <prod SPOOL_METHOD="%SPOOL_TEST%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		 </prod>	  
+		 <spool SPOOL_METHOD="%SPOOL_TEST%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		 </spool>
+		 <!--   FAST_COPY_METHOD / SQL_LOADER_COPY -->
+		 <tab_copy COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB95022_SMARTP1B%"></param>
+		 </tab_copy>
+		 <tab_copy_obj COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB95022_GMAP1A%"></param>
+		 </tab_copy_obj>
+		 
+		 <!--PADB env config -->
+		 <padb TEST_METHOD="%PA_DML_TEST%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="DB_CONNECTOR" value="%PA_DEPOT%"></param>
+ 		  <param name="PROJECT_NAME" value='PADB'></param>
+
+		 </padb>
+		 
+	  </env>
+  </default>
+  <worker>
+    <!--worker name has to be unique -->
+	<exec_copy name="sqlp" module_name="sql_utils" />
+	<exec_dml name="sqlp" module_name="sql_utils" />
+	<exec_ddl name="sqlp" module_name="sql_utils" />	
+	<exec_select name="sqlp" module_name="sql_utils" />
+	<exec_spool name="sqlp" module_name="sql_utils" />	
+	<publisher_scp name="scp" module_name="pub_utils" />
+	<!--PADB worker types -->
+	<exec_pa_dml name="psql" module_name="pa_sql_utils" />
+	
+  </worker>
+</test_spec>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="TEST_FTB_TRD_VOL_SMRY">
+<globals>
+
+        <!-- PIPELINE execution type
+                 SYNC - synchronous, ANYNC - asynchronous
+        -->
+          <param name="FLOW_TYPE" value="ASYNC"></param>
+
+
+	  <param name="FIELD_TERMINATOR" value="|^"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CVOL_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value="0"></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+
+
+</globals>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_1.PARTITION">
+    <exec_copy>
+      <sqlp     method="%COPY_METHOD%" >
+        <param name="PARTITION" value="JAN_121"></param>
+ <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+
+      <sql_template>
+        <![CDATA[CSMARTVOL.TRD_VOL_UNION_1]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+</etldataflow>

@@ -1,0 +1,39 @@
+<etldataflow name="COPY-CSMARTVOL.TRD_VOL_OTC_DERV">
+<globals>
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CVOL_SMARTD1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+<worker name="CSMARTVOL.STG_TRD_VOL_OTC_DERV_MAR_12">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="MAR_12"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.STG_TRD_VOL_OTC_DERV]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="CSMARTVOL.STG_TRD_VOL_OTC_DERV_1_MAR_12">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="MAR_12"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.STG_TRD_VOL_OTC_DERV_1]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+
+</etldataflow>

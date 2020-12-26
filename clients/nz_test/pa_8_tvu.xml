@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="8_TVU_COMMIT"  >
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  <param name="IF_TOSS_CACHE" value="1"></param>
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION"></param>
+	  <param name="TEST_FILTER" value="where trd_vol_sid= 1012967 and  src_file_cd='TMLSALO' and feed_src_sys='TML' and cob_dt= '2011-05-06 00:00:00'"></param>
+</globals>
+
+<worker1 name="VACUUM_TABLE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Vacuuming to test update"></param>
+      <sql_template>
+        <![CDATA[VACUUM  %TABLE_NAME%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+<worker1 name="COUNT_TABLE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT count(*)||'|cnt' FROM %TABLE_NAME% %TEST_FILTER%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker name="8_TVU_UPDATE_1_REC">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Single Record update"></param>
+      <sql_template>
+        <![CDATA[
+		--elapsed_sum
+		BEGIN; UPDATE %TABLE_NAME% set ctp_nam='test'||ctp_acct_no||ctp_uid_pp||ctp_uid_grd ||ctp_gfcid_pp||ctp_gfcid_grd||ctp_mnemonic %TEST_FILTER%; ROLLBACK; END;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+
+</etldataflow>

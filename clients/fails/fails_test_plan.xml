@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testplan name="fails_test_plan">
+<test name="FAILS test">
+	<description>
+		variable sc refcursor
+		variable err varchar2
+		variable tcn number
+		set serveroutput on autoprint on
+		exec fails_ops_view_summary_sp_ab ('11/13/2009','FAIL',null,null,null,null,null,null,null,null,null,null,null,null,:err,:tcn,:sc)
+	</description>
+	<config
+		connector="MDW_MDWD"
+		log_dest="LOG_ROOT"	
+		file_ext="csv"
+		delim =","
+	/>
+	<procedure name="FAILS_OPS_VIEW_SUMMARY_SP_AB" param_source="sql" >
+	   <sql descr="up to l5">
+	   <![CDATA[
+			SELECT a.cob_date var_cob_date, b.metrics_category var_metrics_category,
+					   d.OPEN_POSITION_TYPE var_open_position_type, c.sourcesystem var_sourcesystem, NULL var_l7_owner,
+					   NULL var_l6_owner, l5.L5_OWNER var_l5_owner, NULL var_l4_owner,
+					   NULL var_l3_owner, NULL var_l2_owner, NULL var_l1_owner,
+					   NULL var_super_bus_unit_nme, NULL var_bus_unit_name,
+					   NULL var_level_filter
+				  FROM (SELECT DISTINCT cob_date
+								   FROM mdw.fails_reports_summary) a,
+					   (SELECT DISTINCT metrics_category
+								   FROM mdw.fails_reports_summary) b,
+					   (SELECT DISTINCT sourcesystem
+								   FROM mdw.fails_reports_summary) c,
+								(SELECT DISTINCT OPEN_POSITION_TYPE
+								   FROM mdw.fails_reports_summary) d,
+								(SELECT DISTINCT L5_OWNER
+								   FROM mdw.fails_reports_summary) l5	
+			where rownum <10
+		]]>
+		</sql>
+		<param name="VAR_COB_DATE" in_out="IN" type="VARCHAR2" value="11/13/2009"/>
+		<param name="VAR_METRICS_CATEGORY" in_out="IN" type="VARCHAR2" value="FAIL"/>
+		<param name="VAR_OPEN_POSITION_TYPE" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_SOURCESYSTEM" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L7_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L6_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L5_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L4_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L3_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L2_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_L1_OWNER" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_SUPER_BUS_UNIT_NME" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_BUS_UNIT_NAME" in_out="IN" type="VARCHAR2" value="Null"/>
+		<param name="VAR_LEVEL_FILTER" in_out="IN" type="NUMBER" value="Null"/>
+		<param name="ERROR_MESSAGE" in_out="OUT" type="VARCHAR2" value="Null"/>
+		<param name="TOTAL_COUNT_NUMBER" in_out="OUT" type="NUMBER" value="Null"/>
+		<param name="FAILS_OPS_SUMMARY_CURSOR" in_out="OUT" type="REF CURSOR" value="Null"/>
+	</procedure>
+</test>
+</testplan>

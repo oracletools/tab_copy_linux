@@ -1,0 +1,24 @@
+<etldataflow name="COPY-ESMARTREF.stg_ref_slsprsn_smb">
+<globals>
+          <param name="FLOW_TYPE" value="ASYNC"></param>
+	  <param name="FIELD_TERMINATOR" value='|^'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CVOL_SMARTQ1%"></param>	  
+	  <param name="TO_DB" value="%EREF_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="ESMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+
+</globals>
+
+<worker name="ESMARTREF.stg_ref_slsprsn_smb">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTREF.stg_ref_slsprsn_smb]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+</etldataflow>

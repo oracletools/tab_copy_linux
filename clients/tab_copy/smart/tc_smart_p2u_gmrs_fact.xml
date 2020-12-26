@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="TEST_SMART_COPY">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>	  
+	  <param name="TO_DB1" value="%CSMARTREF_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="CSMARTBSER.GMRS_FACT.2012">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		 <param name="FIELD_TERMINATOR" value='^^'></param>
+		<param name="TO_DB" value="%CSMARTBSER_SMARTU1B"></param>
+		<param name="PARTITION" value="PART_2012[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT.2009">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		 <param name="FIELD_TERMINATOR" value='~~'></param>
+		<param name="TO_DB" value="%CSMARTBSER_SMARTU1B"></param>
+		<param name="PARTITION" value="PART_2009[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT.2010">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		<param name="FIELD_TERMINATOR" value='^^'></param>
+		<param name="TO_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="PARTITION" value="PART_2010[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT.2011">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+		<param name="FIELD_TERMINATOR" value='^^'></param>
+		<param name="TO_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="PARTITION" value="PART_2011[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+</etldataflow>

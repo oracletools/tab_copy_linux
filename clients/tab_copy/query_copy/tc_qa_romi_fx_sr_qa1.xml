@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="Q_COPY2_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="`^|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AD_SMARTP2%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  
+	  <param name="TO_DB" value="%CSMARTBSER_SMARTU2%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTBSER"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	 <param name="IF_CONVENTIONAL" value="1"></param> 
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="Q1">
+  <exec_query_copy>
+    <table_utils        method="%QUERY_COPY_METHOD%" >
+         <param name="TO_TABLE" value="FAILS_REPORTS_HISTORY"></param>
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>
+      <sql_template>
+        <![CDATA[select * from CSMARTBSER.FAILS_REPORTS_HISTORY  WHERE cob_date = '21-JAN-15']]>
+
+      </sql_template>
+   </table_utils>
+  </exec_query_copy>
+
+</worker>
+
+
+
+</etldataflow>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SQL_LOADER" 
+			 email_to="EMAIL_TO"
+			 TO_SCHEMA1="MDW"
+			 TRUNCATE_TARGET="1">
+
+
+<worker name="PRL_GMA_FACT1">
+  <exec_dml>
+    <sqlp method="sql_echo_loader" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPEARL_GMAD"></param>
+	  <param name="PARTITION" value="YEAR2007"></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='100000'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+<worker1 name="PRL_GMA_FACT2">
+  <exec_dml>
+    <sqlp method="sql_echo_loader" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPRL_GMAP1A"></param>
+	  <param name="TO_DB" value="CPEARL_GMAD"></param>
+	  <param name="PARTITION" value="YEAR2008"></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='10000'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.PRL_GMA_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="PRL_GMA_FACT1">
+  <exec_dml>
+    <sqlp method="sql_echo_loader" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="CPEARL_GMAD"></param>
+	  <param name="TO_DB" value="MDW_MDWD"></param>
+	  
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="LAME_DUCK" value='10'></param>
+      <sql_template>
+        <![CDATA[
+C160970GMAPRL.DELETE_LOAD_TEST
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+
+
+</etldataflow>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    env='prod'
+	env2='{$ETL_ENV}'
+    LOG_ROOT="log/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib" 
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	FAILS_EMAIL_TO="AlexBuzunov@gmail.com"
+	SQL_LOADER_COPY="sql_echo_loader"
+	FAST_COPY_METHOD="sql_plus_copy"
+	DQ_EXPLAIN="dq_explain_plan"	
+    />
+
+  <connector>
+        <!--source connector-->
+        <AB_SMARTP1B type1='inline' schema="SZ18178" pword="***" sid="SMARTP1B" host = "localhost"  PORT = "11150"/>
+		<!-- FAILS 2 MO copy -->
+		<CSMARTBSER_SMARTU1B type1='inline' schema="CSMARTBSER" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+		<CSMARTBSER_SMARTQ1 type1='inline' schema="CSMARTBSER" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+		
+		<EVOL_SMARTD1 type1='inline' schema="Esmartvol " pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+		<CVOL_SMARTU1B type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+		
+		
+        <!--target connectors-->
+        <ESMARTREF_SMARTU1B type1='inline' schema="ESMARTREF" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+        <CSMARTREF_SMARTU1B type1='inline' schema="CSMARTREF" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+        <CSMARTREF_SMARTD1 type1='inline' schema="CSMARTREF" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+        <ESMARTREF_SMARTD1 type1='inline' schema="ESMARTREF" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+        <CSMARTREF_SMARTQ1 type1='inline' schema="CSMARTREF" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+        <ESMARTREF_SMARTQ1 type1='inline' schema="ESMARTREF" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+
+  </connector>
+ 
+  <default>
+	  <env>
+		 <fail_2m COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%FAILS_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+		 </fail_2m>	
+		 
+		 <dq_test DQ_TEST_METHOD="%DQ_EXPLAIN%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 
+		 </dq_test>
+		 
+		 <dev COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 
+		 </dev>
+		 
+		 <dev_copy COPY_METHOD="%FAST_COPY_METHOD%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 
+		 </dev_copy>
+
+		 <qa COPY_METHOD="%FAST_COPY_METHOD%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>	  
+		 </qa>
+
+		 <uat COPY_METHOD="%FAST_COPY_METHOD%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>	  
+		 </uat>		 
+		 
+		 <prod COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+		 </prod>	 
+	  </env>
+  </default>
+  <worker>
+    <!--worker name has to be unique -->
+	<exec_dml name="sqlp" module_name="sql_utils" />	
+    <!--worker name has to be unique -->
+	<exec_copy name="sqlp" module_name="sql_utils" />
+
+	
+  </worker>
+</test_spec>

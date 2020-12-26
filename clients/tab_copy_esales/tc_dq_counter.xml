@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="DQ_COUNTER_TEST" >
+
+<globals>
+
+          <param name="FIELD_TERMINATOR" value='|'></param>
+          <param name="LINE_TERMINATOR" value="~"></param>
+		  <param name="SCHEMA_NAME" value="AB95022"></param>
+		  <param name="DB_CONNECTOR" value="%AB_SMARTP1B%"></param>
+          <param name="LAME_DUCK" value='100'></param>
+
+</globals>
+
+
+<worker name="DQ_COUNTER05-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='05-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER22-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='22-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER05-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='05-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER29-JUN-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='29-JUN-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER28-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='28-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER27-JUN-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='27-JUN-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER04-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='04-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER15-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='15-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER30-JUN-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='30-JUN-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER26-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='26-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER01-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='01-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER20-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='20-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER07-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='07-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER28-JUN-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='28-JUN-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER21-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='21-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER06-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='06-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER27-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='27-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER04-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='04-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER02-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='02-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER25-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='25-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER11-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='11-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER03-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='03-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER01-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='01-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER18-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='18-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER10-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='10-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER19-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='19-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER29-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='29-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER09-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='09-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER13-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='13-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER14-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='14-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER12-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='12-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER08-JUL-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='08-JUL-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="DQ_COUNTER08-AUG-11">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+
+      <sql_template>
+        <![CDATA[
+   select  /*+ PARALLEL(T, DEFAULT) */ DISTINCT SUM(DECODE (AFRM_STA_TYP,'Y',0,'N',0,1))  OVER () DQCHK_VAL,
+            COUNT (*) OVER () DQCHK_TOT
+       FROM CSMARTVOL.STG_TRD_VOL_FX_MM T
+        WHERE SRC_FILE_CD='FLEXCUBE_FX' AND COB_DT='08-AUG-11';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+
+
+
+
+
+
+
+
+</etldataflow>

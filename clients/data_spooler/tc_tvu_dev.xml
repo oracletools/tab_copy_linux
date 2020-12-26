@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PARACCELL_POC_TVU_DEV">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+
+	  <param name="FROM_DB" value="%AB95022_SMARTD1%"></param>
+	  <!--will spool ~81 mil records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='100'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.APR_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="APR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.APR_112">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="APR_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.MAY_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="MAY_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.MAY_112">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="MAY_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.JUN_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="JUN_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.MAY_102">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="MAY_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.OCT_101">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="OCT_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.OCT_102">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="OCT_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.NOV_101">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="NOV_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.NOV_102">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="NOV_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.DEC_101">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="DEC_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.DEC_102">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="DEC_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.JAN_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="JAN_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.JAN_112">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="JAN_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.FEB_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="FEB_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.FEB_112">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="FEB_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.MAR_111">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="MAR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.MAR_112">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="MAR_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.MAR_102">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="MAR_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION.JAN_101">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="PARTITION" value="JAN_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+
+
+<worker1 name="ENTL_USER_GRP_MAP">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="SUBPARTITION" value="~"></param>
+      <sql_template>
+        <![CDATA[ 
+CSMARTVOL.TRD_VOL_UNION
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker1>
+
+<worker1 name="ENTL_USER_GRP_MAP">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+      <sql_template>
+        <![CDATA[ 
+C160970GMAPRL.ENTL_USER_GRP_MAP
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker1>
+
+<worker1 name="REF_ESALES">
+  <exec_dml>
+    <sqlp 	method="%SPOOL_METHOD%" 
+			method1="sql_plus_copy">
+	  <param name="FIELD_TERMINATOR" value='||'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_ESALES
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+</etldataflow>

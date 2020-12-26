@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ORA_TABLE_COPY_BASIC pipeline
+-->
+<etldataflow name="EREF_COUNTS" 
+			 email_to="EMAIL_TO">
+
+<worker name="EREF_MDWD_TABLE_COUNTS">
+  <exec_dml>
+    <sqlp method="dml" >
+	  <param name="DB_CONNECTOR" value="EREF_MDWD"></param>
+	   <param name="SCHEMA_NAME" value="E155817REF"></param>
+      <sql_template>
+        <![CDATA[
+SELECT * FROM (
+SELECT '%SCHEMA_NAME%.REF_CDMS' EREF_MDWD, COUNT(*) FROM %SCHEMA_NAME%.REF_CDMS UNION ALL
+SELECT '%SCHEMA_NAME%.REF_CPI', COUNT(*) FROM %SCHEMA_NAME%.REF_CPI UNION ALL
+SELECT '%SCHEMA_NAME%.REF_CTP_MSTR ', COUNT(*) FROM %SCHEMA_NAME%.REF_CTP_MSTR UNION ALL
+SELECT '%SCHEMA_NAME%.REF_SLSPRSN_HIER', COUNT(*) FROM %SCHEMA_NAME%.REF_SLSPRSN_HIER UNION ALL
+SELECT '%SCHEMA_NAME%.REF_PRSNL_MSTR', COUNT(*) FROM %SCHEMA_NAME%.REF_PRSNL_MSTR UNION ALL
+SELECT '%SCHEMA_NAME%.REF_PRSNL_MGR_HIER',COUNT(*) FROM %SCHEMA_NAME%.REF_PRSNL_MGR_HIER UNION ALL
+SELECT '%SCHEMA_NAME%.REF_PRSNL_DEPT_HIER', COUNT(*) FROM %SCHEMA_NAME%.REF_PRSNL_DEPT_HIER
+) ORDER BY 1;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+<worker name="VR_MDWP_TABLE_COUNTS">
+  <exec_dml>
+    <sqlp method="dml" >
+	  <param name="DB_INLINE_CONNECTOR" value="VR_MDWP"></param>
+      <sql_template>
+        <![CDATA[
+SELECT * FROM (		
+SELECT 'E155817REF.REF_CDMS' VR_MDWP, COUNT(*) FROM E155817REF.REF_CDMS UNION ALL
+SELECT 'E155817REF.REF_CPI', COUNT(*) FROM E155817REF.REF_CPI UNION ALL
+SELECT 'E155817REF.REF_CTP_MSTR ', COUNT(*) FROM E155817REF.REF_CTP_MSTR UNION ALL
+SELECT 'E155817REF.REF_SLSPRSN_HIER', COUNT(*) FROM E155817REF.REF_SLSPRSN_HIER UNION ALL
+SELECT 'E155817REF.REF_PRSNL_MSTR', COUNT(*) FROM E155817REF.REF_PRSNL_MSTR UNION ALL
+SELECT 'E155817REF.REF_PRSNL_MGR_HIER',COUNT(*) FROM E155817REF.REF_PRSNL_MGR_HIER UNION ALL
+SELECT 'E155817REF.REF_PRSNL_DEPT_HIER', COUNT(*) FROM E155817REF.REF_PRSNL_DEPT_HIER
+) ORDER BY 1;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker> 
+
+
+<worker1 name="CREF_BATCH">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="VR_MDWP"></param>
+	  <param name="TO_DB" value="CREF_MDWD"></param>
+	  <param name="ARRAYSIZE" value="2500"></param>
+	  <param name="COPYCOMMIT" value="2"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C155817REF.REF_FX
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+<worker1 name="CREF_BATCH2">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="VR_MDWP"></param>
+	  <param name="TO_DB" value="CREF_MDWD"></param>
+	  <param name="ARRAYSIZE" value="2500"></param>
+	  <param name="COPYCOMMIT" value="2"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+C155817REF.MAN_REF_TRAN_TYP
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+<worker1 name="EREF_BATCH">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="VR_MDWP"></param>
+	  <param name="TO_DB" value="EREF_MDWD"></param>
+	  <param name="EMAIL_TO" value="EMAIL_TO"></param>
+	  <param name="ARRAYSIZE" value="2500"></param>
+	  <param name="COPYCOMMIT" value="2"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+      <sql_template>
+        <![CDATA[
+E155817REF.REF_CDMS
+E155817REF.REF_CPI
+E155817REF.REF_CTP_MSTR
+E155817REF.REF_SLSPRSN_HIER
+E155817REF.REF_PRSNL_MSTR
+E155817REF.REF_PRSNL_MGR_HIER
+E155817REF.REF_PRSNL_DEPT_HIER
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+
+
+
+<worker1 name="COPY_TABLE_BATCH_BASIC">
+  <exec_dml>
+    <sqlp method="sql_plus_copy" >
+      <!--param name="BATCH_NAME" value="TABLE_BATCH_1"></param -->
+	  <param name="FROM_DB" value="MDW_MDWD"></param>
+	  <param name="TO_DB" value="MDW_MDWD"></param>
+	  <param name="EMAIL_TO" value="EMAIL_TO"></param>
+      <sql_template>
+        <![CDATA[
+MDW.zzz_delete_test
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1> 
+
+
+
+</etldataflow>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="COMPUTE_TABLE_STATS" >
+
+<globals>
+	<param name="ETLFLOW_DESCR" value="Computes table stats."></param>
+
+	<!-- PIPELINE execution type
+	SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>	  
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+	  
+	  
+	  <param name="TABLE_NAME" value="TEST"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	  <param name="IF_DEBUG" value="1"></param>
+
+</globals>
+
+
+<worker name="TAB_SIZE_BEFORE">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select table_name, sum(num_rows) row_cnt, sum (blocks) block_cnt 
+from all_tab_subpartitions 
+where table_name= '%TABLE_NAME%' 
+group by table_name 
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="TAB_ANALYZE">
+  <exec_dml>
+    <sqlp method="%DML_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+analyze table %TABLE_NAME% compute statistics
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="TAB_SIZE_AFTER">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select table_name, sum(num_rows) row_cnt, sum (blocks) block_cnt 
+from all_tab_subpartitions 
+where table_name= '%TABLE_NAME%' 
+group by table_name 
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+</etldataflow>

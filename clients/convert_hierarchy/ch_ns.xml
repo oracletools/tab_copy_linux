@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CONVERT_AJUSTED_LIST_TO_NESTED_SET">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+      <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value=""></param>
+
+	  <param name="FROM_DB" value="%AB_GMAD1%"></param>
+	  <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	   <param name="IF_TRUNCATE" value="0"></param>
+	  <!--sqlp attribute-->
+	  <param name="IF_SKIP_HEADER" value="0"></param>
+	  <param name="HIER_TAB_NAME1" value="PRL_HIER_MGD_SEG"></param>
+	  <param name="HIER_TAB_NAME" value="HIER_CONV"></param>
+
+</globals>
+
+
+<!-- Worker for adjusted list to nested set hierarchy transform-->
+<worker name="ESMARTREF.REF_CTP_GRAND_PRNT_LIST">
+  --
+  --	Spool your hierarchy to temp file
+  --
+  <exec_spool  name= "spool">
+    <sqlp method="%SPOOL_METHOD%" >
+	 <param name="FROM_DB" value="%AB_GMAD1%"></param>
+	 
+	 <param name="SPOOL_HEADER_SIZE" value="1"></param>
+	 <param name="FILTER1" value=" tree_lvl_no in (1,2,3,4,5,6,7)"></param>
+	 <param name="ORDER_BY1" value="BCC_CHLD DESC"></param>
+	  
+		<sql_template>
+        <![CDATA[ 
+AB95022.TEST_%HIER_TAB_NAME%
+]]>
+      </sql_template>	  
+    </sqlp>
+  </exec_spool>
+   --
+  --	Transform your hierarchy
+  --
+   <nested_set_transformer name="transform">
+	   <hierarchy method="%TRANSFORM_METHOD%" >
+	<!-- Start node-->
+		 <param name="ROOT_NODE_VALUE1" value="1"></param>
+		 <param name="ROOT_NODE_VALUE" value="Clothing"></param>
+    <!--Needed to identify hierarchy columns in input file
+		Default: CHILD and PARENT-->
+		 <param name="CHILD_COLUMN" value="BCC_CHLD"></param>
+		 <param name="PARENT_COLUMN" value="BCC_PRNT"></param>
+	<!--Needed for column order in output file
+		Default: LEFT and RIGHT-->
+		 <param name="LEFT_COLUMN" value="BCC_LEFT"></param>
+		 <param name="RIGHT_COLUMN" value="BCC_RIGHT"></param>
+	   </hierarchy>
+  </nested_set_transformer>  
+  --
+  --	Load transformed from temp file to DB
+  --
+   <db_publisher >
+   <sqlp method="%PUBLISHER_METHOD%" >
+     <param name="TO_DB" value="%AB_GMAD1%"></param>
+	 <param name="IF_TRUNCATE" value="1"></param>
+	 <param name="IF_DEBUG1" value="1"></param>
+	 <param name="IF_SHOW_SERVEROUTPUT1" value="1"></param>
+ 	<sql_template>
+        <![CDATA[ 
+AB95022.NESTED_%HIER_TAB_NAME%
+]]>
+    </sql_template>
+   </sqlp>
+  </db_publisher>    
+</worker>
+
+<!-- Worker for adjusted list to nested set hierarchy transform-->
+<worker1 name="ESMARTREF.REF_CTP_GRAND_PRNT_LIST">
+  --
+  --	Spool your hierarchy to temp file
+  --
+  <exec_spool  name= "spool">
+    <sqlp method="%SPOOL_METHOD%" >
+	 <param name="FROM_DB" value="%AB_GMAD1%"></param>
+	 
+	 <param name="SPOOL_HEADER_SIZE" value="1"></param>
+	 <param name="FILTER1" value=" tree_lvl_no in (1,2)"></param>
+	 <param name="ORDER_BY1" value="BCC_CHLD DESC"></param>
+	  
+		<sql_template>
+        <![CDATA[ 
+AB95022.TEST_%HIER_TAB_NAME%
+]]>
+      </sql_template>	  
+    </sqlp>
+  </exec_spool>
+  --
+  --	Transform your hierarchy
+  --
+   <nested_set_transformer name="transform">
+	   <hierarchy method="%TRANSFORM_METHOD%" >
+	<!-- Start node-->
+		 <param name="ROOT_NODE_VALUE1" value="1"></param>
+		 <param name="ROOT_NODE_VALUE" value="Clothing"></param>
+    <!--Needed to identify hierarchy columns in input file
+		Default: CHILD and PARENT-->
+		 <param name="CHILD_COLUMN" value="BCC_CHLD"></param>
+		 <param name="PARENT_COLUMN" value="BCC_PRNT"></param>
+	<!--Needed for column order in output file
+		Default: LEFT and RIGHT-->
+		 <param name="LEFT_COLUMN" value="BCC_LEFT"></param>
+		 <param name="RIGHT_COLUMN" value="BCC_RIGHT"></param>
+	   </hierarchy>
+  </nested_set_transformer>    
+  --
+  --	Load transformed from temp file to DB
+  --
+   <db_publisher >
+   <sqlp method="%PUBLISHER_METHOD%" >
+     <param name="TO_DB" value="%AB_GMAD1%"></param>
+	 <param name="IF_TRUNCATE" value="1"></param>
+	 <param name="IF_DEBUG1" value="1"></param>
+	 <param name="IF_SHOW_SERVEROUTPUT1" value="1"></param>
+ 	<sql_template>
+        <![CDATA[ 
+AB95022.NESTED_%HIER_TAB_NAME%
+]]>
+    </sql_template>
+   </sqlp>
+  </db_publisher>  
+</worker1>
+
+</etldataflow>
+

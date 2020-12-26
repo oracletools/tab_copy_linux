@@ -1,0 +1,717 @@
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  ('4-May-2012',
+ 33  '7-Jun-2012',
+ 34  '24-Jul-2012',
+ 35  '26-Jul-2012',
+ 36  '27-Jul-2012',
+ 37  '30-Jul-2012',
+ 38  '31-Jul-2012',
+ 39  '1-Aug-2012',
+ 40  '2-Aug-2012',
+ 41  '3-Aug-2012',
+ 42  '6-Aug-2012',
+ 43  '7-Aug-2012',
+ 44  '8-Aug-2012',
+ 45  '9-Aug-2012',
+ 46  '10-Aug-2012',
+ 47  '13-Aug-2012',
+ 48  '14-Aug-2012',
+ 49  '15-Aug-2012',
+ 50  '16-Aug-2012',
+ 51  '17-Aug-2012',
+ 52  '20-Aug-2012',
+ 53  '21-Aug-2012',
+ 54  '22-Aug-2012',
+ 55  '23-Aug-2012',
+ 56  '24-Aug-2012');
+and TRD_TRAN_DT = tvu.COB_DT
+                  *
+ERROR at line 28:
+ORA-00904: "TVU"."COB_DT": invalid identifier 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  ('4-May-2012',
+ 33  '7-Jun-2012',
+ 34  '24-Jul-2012',
+ 35  '26-Jul-2012',
+ 36  '27-Jul-2012',
+ 37  '30-Jul-2012',
+ 38  '31-Jul-2012',
+ 39  '1-Aug-2012',
+ 40  '2-Aug-2012',
+ 41  '3-Aug-2012',
+ 42  '6-Aug-2012',
+ 43  '7-Aug-2012',
+ 44  '8-Aug-2012',
+ 45  '9-Aug-2012',
+ 46  '10-Aug-2012',
+ 47  '13-Aug-2012',
+ 48  '14-Aug-2012',
+ 49  '15-Aug-2012',
+ 50  '16-Aug-2012',
+ 51  '17-Aug-2012',
+ 52  '20-Aug-2012',
+ 53  '21-Aug-2012',
+ 54  '22-Aug-2012',
+ 55  '23-Aug-2012',
+ 56  '24-Aug-2012');
+('4-May-2012',
+ *
+ERROR at line 32:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  ('04-May-2012',
+ 33  '07-Jun-2012',
+ 34  '24-Jul-2012',
+ 35  '26-Jul-2012',
+ 36  '27-Jul-2012',
+ 37  '30-Jul-2012',
+ 38  '31-Jul-2012',
+ 39  '01-Aug-2012',
+ 40  '02-Aug-2012',
+ 41  '03-Aug-2012',
+ 42  '06-Aug-2012',
+ 43  '07-Aug-2012',
+ 44  '08-Aug-2012',
+ 45  '09-Aug-2012',
+ 46  '10-Aug-2012',
+ 47  '13-Aug-2012',
+ 48  '14-Aug-2012',
+ 49  '15-Aug-2012',
+ 50  '16-Aug-2012',
+ 51  '17-Aug-2012',
+ 52  '20-Aug-2012',
+ 53  '21-Aug-2012',
+ 54  '22-Aug-2012',
+ 55  '23-Aug-2012',
+ 56  '24-Aug-2012');
+('04-May-2012',
+ *
+ERROR at line 32:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012');
+('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ *
+ERROR at line 32:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012');
+('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ *
+ERROR at line 32:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt in
+ 32  ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012');
+('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ *
+ERROR at line 32:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt ='04-May-2012';
+and cob_dt ='04-May-2012'
+            *
+ERROR at line 31:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and cob_dt ='04-May-12';
+and cob_dt ='04-May-12'
+            *
+ERROR at line 31:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and trunc(cob_dt) ='04-May-2012';
+and trunc(cob_dt) ='04-May-2012'
+                   *
+ERROR at line 31:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select /*parallel(tvu,4) */
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM CSMARTVOL.TRD_VOL_UNION PARTITION (JUN_121) A
+ 26     )  tvu
+ 27  where 1=1
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  AND VOL_EVNT_TYP = 'Settlement Volume'
+ 31  and tvu.cob_dt in
+ 32  ('04-May-2012',
+ 33  '07-Jun-2012',
+ 34  '24-Jul-2012',
+ 35  '26-Jul-2012',
+ 36  '27-Jul-2012',
+ 37  '30-Jul-2012',
+ 38  '31-Jul-2012',
+ 39  '01-Aug-2012',
+ 40  '02-Aug-2012',
+ 41  '03-Aug-2012',
+ 42  '06-Aug-2012',
+ 43  '07-Aug-2012',
+ 44  '08-Aug-2012',
+ 45  '09-Aug-2012',
+ 46  '10-Aug-2012',
+ 47  '13-Aug-2012',
+ 48  '14-Aug-2012',
+ 49  '15-Aug-2012',
+ 50  '16-Aug-2012',
+ 51  '17-Aug-2012',
+ 52  '20-Aug-2012',
+ 53  '21-Aug-2012',
+ 54  '22-Aug-2012',
+ 55  '23-Aug-2012',
+ 56  '24-Aug-2012');
+('04-May-2012',
+ *
+ERROR at line 32:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=1 and trunc(cob_dt) in
+ 28  ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ 29  and TRD_TRAN_DT = tvu.COB_DT
+ 30  and METRICS_CAT = 'Volumes'
+ 31  and VOL_EVNT_TYP = 'Settlement Volume';
+('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ *
+ERROR at line 28:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> ls -ltr
+SP2-0042: unknown command "ls -ltr" - rest of line ignored.
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=2 --and trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume';
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where 1=2 and trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ 28  and TRD_TRAN_DT = tvu.COB_DT
+ 29  and METRICS_CAT = 'Volumes'
+ 30  and VOL_EVNT_TYP = 'Settlement Volume';
+SQL> clear
+SQL> clear
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where --1=2 and
+ 28  trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ 29  and TRD_TRAN_DT = tvu.COB_DT
+ 30  and METRICS_CAT = 'Volumes'
+ 31  and VOL_EVNT_TYP = 'Settlement Volume';
+trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+                  *
+ERROR at line 28:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> select --+PARALLEL(TRD_VOL_UNION,8)
+  2  BLK_TRD_REF ,
+  3  BLTR_CD ,
+  4  COB_DT ,
+  5  CON_SETL_DT,
+  6  ENTP_TRD_REF_NO,
+  7  EXT_TRD_REF,
+  8  FO_TRD_REF ,
+  9  OPS_SETL_SYS_TRD_REF ,
+ 10  OPS_TRD_REF,
+ 11  TRD_REF_1,
+ 12  TRD_REF_2,
+ 13  TRD_REF_3,
+ 14  TRD_REF_4,
+ 15  TRD_REF_5
+ 16  from (
+ 17     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_121) a
+ 18      UNION ALL
+ 19     SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (aug_122) a
+ 20     union all
+ 21    SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jul_122) a
+ 22      union all
+ 23      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (may_121) a
+ 24      union all
+ 25      SELECT /*+FULL(a) */* FROM csmartvol.TRD_VOL_UNION partition (jun_121) a
+ 26     )  tvu
+ 27  where
+ 28  trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+ 29  and TRD_TRAN_DT = tvu.COB_DT
+ 30  and METRICS_CAT = 'Volumes'
+ 31  and VOL_EVNT_TYP = 'Settlement Volume';
+trunc(cob_dt) in ('04-May-2012','07-Jun-2012','24-Jul-2012','26-Jul-2012','27-Jul-2012','30-Jul-2012','31-Jul-2012','01-Aug-2012','02-Aug-2012','03-Aug-2012','06-Aug-2012','07-Aug-2012','08-Aug-2012','09-Aug-2012','10-Aug-2012','13-Aug-2012','14-Aug-2012','15-Aug-2012','16-Aug-2012','17-Aug-2012','20-Aug-2012','21-Aug-2012','22-Aug-2012','23-Aug-2012','24-Aug-2012')
+                  *
+ERROR at line 28:
+ORA-01858: a non-numeric character was found where a numeric was expected 
+
+
+SQL> pwd
+SP2-0042: unknown command "pwd" - rest of line ignored.
+SQL> disconnect
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.1.0.7.0 - 64bit Production
+With the Partitioning and Real Application Clusters options
+SQL> exit

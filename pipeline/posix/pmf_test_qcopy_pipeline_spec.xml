@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    env='dev'
+	env2='{$ETL_ENV}' 
+    LOG_ROOT="log/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib" 
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	FAILS_EMAIL_TO="AlexBuzunov@gmail.com"
+	SQL_LOADER_COPY="copy_table"
+	FAST_COPY_METHOD="sql_plus_copy"
+	DQ_EXPLAIN="dq_explain_plan"
+	SPOOL_TEST="spool"
+	SHARDED_SQL_LOADER_COPY="sharded_load"
+	
+	SELECT ="select"	
+	DML ="dml"
+	DDL_SPOOL_TEST="spool_ddl"
+	
+	CLONE_TABLE="clone_table"
+	
+	COPY_QUERY="copy_query_data"
+    />
+
+  <connector>
+        <!--source connector-->
+         <LG_SMARTC1B type1="inline" schema="LG16238" pword="***" sid="SMARTC1B" HOST="mapswdbcn1-vip.nam.nsroot.net" PORT="11150" /> 
+        <AD_SMARTC1B type1="inline" schema="AD45676" pword="***" sid="SMARTC1B" HOST="mapswdbcn2-vip.nam.nsroot.net" PORT="11150" /> 
+
+		 <CVOL_SMARTU1B type1="inline" schema="CSMARTVOL" pword="***" sid="SMARTU1B" HOST="mapswdbdn1.nam.nsroot.net" PORT="11150" /> 
+		<CVOL_SMARTU1B type1='inline' schema="CSMARTVOL" pword="/opt/pwp/3.0/bin/pwpl -a /u1/apps/smart/script/r2/config/access.cf -f /u1/apps/smart/DB_pwd/Volumes_DB_password.cf /u1/apps/smart/script/r2/decode_pswd.ksh -stream volumes -file /u1/apps/smart/DB_pwd/Volumes_DB_password.cf -hst mapswdbun2-vip.nam.nsroot.net -usr CSMARTVOL -exepath /u1/apps/smart/script/r2" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+  </connector>
+ 
+  <default>
+	  <env>
+		 <dev 	COPY_METHOD="%SQL_LOADER_COPY%" 
+				SPOOL_METHOD="%SPOOL_TEST%"
+				QUERY_SPOOL_METHOD="%SPOOL_QUERY%"
+				CLONE_TABLE="%CLONE_TABLE%"
+				DML_METHOD="%DML%"
+				QUERY_COPY_METHOD="%COPY_QUERY%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+ 
+		 </dev>
+
+	  </env>
+  </default>
+  <worker>
+	<exec_query_copy name="table_utils" module_name="table_utils" />
+  </worker>
+</test_spec>

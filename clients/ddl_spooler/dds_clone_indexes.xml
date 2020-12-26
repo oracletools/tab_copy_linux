@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CLONE_TABLE_INDEXES">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+  
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="PDEGREE" value="6"></param> 
+	  <param name="IF_DEBUG" value="1"></param> 
+	  
+	  <param name="IF_ASYNC_LOG" value="1"></param>
+	   <param name="FROM_TABLE" value="DEPOTS_SUMMARY"></param> -heap
+	   <param name="FROM_TABLE1" value="NOSTROS_SUMMARY"></param> -sp
+	   <param name="FROM_TABLE" value="NOSTROS_HISTORY"></param> -sp
+	   <param name="FROM_TABLE1" value="FAILS_REPORTS_HISTORY"></param> -sp
+	   <param name="TO_TABLE" value="DEL_TABLE2"></param>
+	   <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+
+</globals>
+
+
+<worker1 name="T_DDL_SPOOL_INDEXES">
+--spool indexes
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="TABLE_DLL_SPOOL_COLUMNS" value="OWNER, 'TABLE' OBJECT_TYPE,table_name OBJECT_NAME"></param>
+	 <param name="SPOOL_SCHEMA" value="CSMARTBSER"></param>
+	 <param name="IF_ADD_DROP_DML" value="1"></param>
+      <sql_template>
+        <![CDATA[
+SELECT distinct OWNER, 'INDEX' OBJECT_TYPE, index_name OBJECT_NAME from all_indexes 
+where   owner='%SPOOL_SCHEMA%'  and  table_name = '%FROM_TABLE%'; -- and rownum<3;
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool_ddl>
+</worker1>
+
+<worker name="T_DDL_SPOOL_INDEXES">
+--spool indexes
+  <exec_spool_ddl>
+    <sqlp 	method="%DDL_SPOOL_METHOD%" >
+	<param 	name="TABLE_DLL_SPOOL_COLUMNS" value="OWNER, 'TABLE' OBJECT_TYPE,table_name OBJECT_NAME"></param>
+	 <param name="SPOOL_SCHEMA" value="CSMARTBSER"></param>
+	 <param name="IF_ADD_DROP_DML" value="1"></param>	 
+	 <param name="INDEX_NAME1" value="'NOSTROS_HISTORY_IDX6'"></param>
+	  <param name="INDEX_NAME" value="index_name"></param>	 
+      <sql_template>
+        <![CDATA[
+SELECT distinct OWNER, 'INDEX' OBJECT_TYPE, index_name OBJECT_NAME, STATUS from all_indexes 
+where   owner='%SPOOL_SCHEMA%'  and  table_name = '%FROM_TABLE%' and index_name=%INDEX_NAME%; 
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool_ddl>
+
+   --publish indexes
+  <publisher >
+   <sqlp 	method="%PUBLISH_DDL%" >
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>   
+
+	   
+      <sql_template><![CDATA[]]></sql_template>   
+   </sqlp>
+  </publisher>  
+--validate create
+  <exec_dml>
+    <sqlp 	method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+set line 200
+
+SELECT OWNER,INDEX_NAME,TABLE_NAME,UNIQUENESS,COMPRESSION , STATUS
+FROM ALL_INDEXES where table_name= '%TO_TABLE%' and TABLE_OWNER='%SCHEMA_NAME%';
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>  
+
+
+  </worker>
+  
+ 
+  
+
+</etldataflow>

@@ -1,0 +1,867 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PIPED_ORA2PA_TVU_1_COPY_ASYNC">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Pipe TVU_1 from Oracle using partitions. 50 parallel inserts. 10k recs each."></param>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="TO_DB" value="%PADB_DEPOT%"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='10000'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  <!-- xpx 'toss_cache'; -->
+	  <param name="IF_CLEAR_CACHE" value="1"></param>
+	  
+	  <param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	  	
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+
+</globals>
+
+
+<worker1 name="CSMARTVOL.TRD_VOL_UNION_5.REC_COUNT_BEFORE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	
+	<param name="DESCR" value="Count recs in TRD_VOL_UNION_5 before insert."></param>
+      <sql_template>
+        <![CDATA[
+		SELECT COUNT(*)||'|cnt' cnt FROM %TO_TABLE%
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAY_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAY_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUN_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUN_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUN_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUN_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUL_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUL_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUL_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUL_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.AUG_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="AUG_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.AUG_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="AUG_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.SEP_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="SEP_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.SEP_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="SEP_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy> 
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.OCT_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="OCT_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.OCT_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="OCT_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.NOV_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="NOV_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.NOV_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="NOV_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.DEC_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="DEC_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.DEC_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="DEC_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JAN_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JAN_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JAN_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JAN_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.AUG_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="AUG_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAX_PARTITION">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAX_PARTITION"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.AUG_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="AUG_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAY_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAY_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.APR_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="APR_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.APR_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="APR_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.FEB_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="FEB_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAR_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAR_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAR_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAR_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAR_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAR_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAR_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.FEB_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="FEB_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.FEB_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="FEB_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JAN_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JAN_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JAN_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JAN_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.APR_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="APR_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.APR_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="APR_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAY_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAY_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.MAY_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="MAY_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUN_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUN_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUN_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUN_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUL_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUL_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUL_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUL_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.SEP_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="SEP_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.SEP_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="SEP_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.OCT_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="OCT_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.OCT_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="OCT_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.NOV_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="NOV_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.NOV_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="NOV_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.DEC_111">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="DEC_111"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.DEC_112">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="DEC_112"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JAN_121">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JAN_121"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JAN_122">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JAN_122"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker1 name="CSMARTVOL.TRD_VOL_UNION_5.REC_COUNT_AFTER">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	
+	<param name="DESCR" value="Count recs in TRD_VOL_UNION_5 after insert."></param>
+      <sql_template>
+        <![CDATA[
+		SELECT COUNT(*)||'|cnt' cnt FROM %TO_TABLE%
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+</etldataflow>

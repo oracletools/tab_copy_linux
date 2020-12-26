@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="CREF_2012_2_PROD2QA">
+<globals>
+
+
+      <param name="FIELD_TERMINATOR" value='|'></param>
+      <param name="LINE_TERMINATOR" value="~"></param>
+      <param name="FROM_DB1" value="%CSMARTREF_SMARTU1B%"></param>
+      <param name="TO_DB" value="%CSMARTREF_SMARTQ1%"></param>
+      <param name="TO_SCHEMA" value="CSMARTREF"></param>
+      <param name="LAME_DUCK" value='0'></param>
+      <param name="ARRAYSIZE" value="5000"></param>
+      <param name="COPYCOMMIT" value="4"></param>
+
+       <param name="IF_TRUNCATE" value='1'></param>
+
+</globals>
+
+<worker name="csmartref.MAN_REF_ASET_LVL_DATA">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_ASET_LVL_DATA
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="csmartref.MAN_REF_LGL_ENTY_DATA">
+  <exec_dml>
+    <sqlp   method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_LGL_ENTY_DATA
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="csmartref.MAN_REF_MKT_OF_SETL">
+  <exec_dml>
+    <sqlp   method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_MKT_OF_SETL
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="csmartref.man_ref_ops_own_hier">
+  <exec_dml>
+    <sqlp   method="%COPY_METHOD%" >
+     <sql_template>
+        <![CDATA[
+CSMARTREF.man_ref_ops_own_hier
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="csmartref.MAN_REF_MSSB_BR_CD">
+  <exec_dml>
+    <sqlp   method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_MSSB_BR_CD
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="csmartref.MAN_REF_LGL_ENTY_XREF">
+  <exec_dml>
+    <sqlp   method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_LGL_ENTY_XREF
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="csmartref.MAN_REF_TRAN_TYP">
+  <exec_dml>
+    <sqlp   method="%COPY_METHOD%"  >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_TRAN_TYP
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</etldataflow>

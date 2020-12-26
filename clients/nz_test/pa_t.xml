@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_TEST">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  <param name="TABLE_NAME" value="FXT_CTAS_TEST"></param>
+	  
+	   <param name="TABLE_NAME2" value="TRD_VOL_UNION_900_mil"></param>
+	   
+
+</globals>
+
+<worker name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% where  trans_id between 15 and 14000 order by 5 OFFSET 500 LIMIT 500]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME2% where  trd_vol_sid= 1012967 and  src_file_cd='TMLSALO' order by 5 OFFSET 1000 LIMIT 500; ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME2% where  trd_vol_sid= 1012967 and  src_file_cd='TMLSALO' order by 5 LIMIT 500; ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% where  trans_id between 15 and 14000 order by 5 LIMIT 500]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME% where  trans_id between 15 and 14000 ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT * FROM %TABLE_NAME2% where  trd_vol_sid= 1012967 and  src_file_cd='TMLSALO'; ]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT COUNT(*) FROM %TABLE_NAME% OFFSET 200000 LIMIT 1000;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT COUNT(*) FROM %TABLE_NAME2%;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="FXT_COUNT_STAR">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT COUNT(*) FROM %TABLE_NAME% LIMIT 1]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+</etldataflow>

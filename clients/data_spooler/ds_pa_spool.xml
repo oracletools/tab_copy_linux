@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_POC_REF_MAN">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+<worker name="CSMARTREF_SPOOL">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+      <sql_template>
+        <![CDATA[
+CSMARTREF.MAN_REF_ASET_LVL_DATA   
+CSMARTREF.MAN_REF_FIRM_ETPL       
+CSMARTREF.MAN_REF_FIRM_TMS        
+CSMARTREF.MAN_REF_LGL_ENTY_DATA   
+CSMARTREF.MAN_REF_LGL_ENTY_XREF   
+CSMARTREF.MAN_REF_MARKETSIDE_MAPNG
+CSMARTREF.MAN_REF_MKT_OF_SETL     
+CSMARTREF.MAN_REF_MSSB_BR_CD      
+CSMARTREF.MAN_REF_OPS_OWN_HIER    
+CSMARTREF.MAN_REF_PLAT_CLIENTS    
+CSMARTREF.MAN_REF_SOLAR           
+CSMARTREF.MAN_REF_STGY_TO_DESK    
+CSMARTREF.MAN_REF_TRAN_TYP        
+ESMARTREF.REF_CDMS                
+ESMARTREF.REF_CPI                 
+CSMARTREF.REF_ESALES              
+CSMARTREF.REF_FX                  
+CSMARTREF.REF_MNGD_SEG_HIER       
+CSMARTREF.REF_MNGD_SEG_XREF       
+CSMARTREF.REF_SECURE              
+ESMARTREF.REF_SLSPRSN_HIER        
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+
+
+</etldataflow>

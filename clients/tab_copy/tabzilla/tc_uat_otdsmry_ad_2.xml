@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="csmartotd.stg_otd_cwm2">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value='^|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AD_SMARTC1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTOTD"></param>
+	  
+	  <param name="TO_DB" value="%COTD_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTOTD"></param>	
+	  
+
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>	  
+
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"></param>
+
+</globals>
+
+ql
+--323960
+<worker name="P20140101">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140101"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--325780
+<worker name="P20140102">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140102"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--322840
+<worker name="P20140103">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140103"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--9523
+<worker name="P20140104">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140104"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--0
+<worker name="P20140105">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140105"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--331300
+<worker name="P20140106">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140106"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--330740
+<worker name="P20140107">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140107"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--335120
+<worker name="P20140108">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140108"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--340240
+<worker name="P20140109">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140109"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--339460
+<worker name="P20140110">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140110"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--9493
+<worker name="P20140111">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140111"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--20
+<worker name="P20140112">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140112"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--347600
+<worker name="P20140113">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140113"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--350460
+<worker name="P20140114">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140114"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--343760
+<worker name="P20140115">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140115"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--340040
+<worker name="P20140116">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140116"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--355580
+<worker name="P20140117">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140117"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--9407
+<worker name="P20140118">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140118"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--19
+<worker name="P20140119">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140119"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--381740
+<worker name="P20140120">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140120"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--373860
+<worker name="P20140121">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140121"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--372280
+<worker name="P20140122">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140122"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--369340
+<worker name="P20140123">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140123"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--372040
+<worker name="P20140124">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140124"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--9483
+<worker name="P20140125">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140125"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--9499
+<worker name="P20140126">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140126"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--385000
+<worker name="P20140127">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140127"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--384340
+<worker name="P20140128">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140128"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--166700
+<worker name="P20140129">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140129"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--384020
+<worker name="P20140130">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140130"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+--376640
+<worker name="P20140131">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+		 <param name="PARTITION" value="P20140131"></param>
+     <sql_template>
+        <![CDATA[CSMARTOTD.OTD_SMRY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+-xml
+
+</etldataflow>
+

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PIPED_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='1000000'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_1.SPOOL">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1 
+   
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker1 name="CSMARTREF_SPOOL">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>	
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_MNGD_SEG_HIER  
+   
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker1>
+
+
+
+</etldataflow>

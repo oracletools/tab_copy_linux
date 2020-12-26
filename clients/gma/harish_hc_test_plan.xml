@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test_plan name="harish_test_plan">
+	<test name="Harish_HC_ANLS_test">
+		<description>
+            variable xs refcursor
+            variable xsr refcursor
+            exec P_ENTL_HC_ANLS_GET_SMRY_VW(:xs, :xsr, IN_RPT_TYP=>'EXEC_SMRY', IN_VW_TYP => 'Regular', IN_PROD_CD => 'ALL', IN_RGN => 'ALL', IN_MO => 'Oct', IN_YR => '2009', IN_USER_SOE_ID =>null, IN_USER_GRP_ID => '1');
+            print xs
+            print xsr
+		</description>
+		<config
+			log_dest="LOG_ROOT"	
+			file_ext="txt"
+			delim =","
+			file_tmpl="{IN_RPT_TYP}.{IN_VW_TYP}.{IN_PROD_CD}.{IN_RGN}.{IN_MO}.{IN_YR}.{IN_USER_SOE_ID}.{IN_USER_GRP_ID}.{RC_NAME}"
+			test_mask="EXEC|GEN_CODE" 
+		/>
+		<procedure name="P_ENTL_HC_ANLS_GET_SMRY_VW" param_source="sql" connector="JUSER_QA">
+		   <sql descr="input parameters" connector="CUSER_GMAD">
+			   <![CDATA[
+					SELECT * FROM (SELECT d.rpt in_rpt_typ, vt.v in_vw_typ, prd.v in_prod_cd, rgn.v in_rgn,
+										   mo.v in_mo, yr.v in_yr, 'SR64878' in_user_soe_id, '1' in_user_grp_id
+									  FROM (SELECT v
+											  FROM TABLE (k_entl_get_lov.out_lovs ('HC_ANLS',
+																				   'VIEW_TYPE',
+																				   'ALL',
+																				   'ALL',
+																				   'ALL',
+																				   NULL,
+																				   1
+																				  )
+														 )) vt,
+										   (                                                      --SELECT 'ALL' v
+											  --FROM DUAL
+											--UNION ALL
+											SELECT v
+											  FROM TABLE (k_entl_get_lov.out_lovs ('HC_ANLS',
+																				   'MO',
+																				   'ALL',
+																				   'ALL',
+																				   'ALL',
+																				   'SR64878',
+																				   '1'
+																				  )
+														 )) mo,
+										   (                                                      --SELECT 'ALL' v
+											  --FROM DUAL
+											--UNION ALL
+											SELECT v
+											  FROM TABLE (k_entl_get_lov.out_lovs ('HC_ANLS',
+																				   'YR',
+																				   'ALL',
+																				   'ALL',
+																				   'ALL',
+																				   'SR64878',
+																				   '1'
+																				  )
+														 )) yr,
+										   (SELECT v
+											  FROM TABLE (k_entl_get_lov.out_lovs ('HC_ANLS',
+																				   'PROD',
+																				   'ALL',
+																				   'ALL',
+																				   'ALL',
+																				   'SR64878',
+																				   '1'
+																				  )
+														 )) prd,
+										   (SELECT v
+											  FROM TABLE (k_entl_get_lov.out_lovs ('HC_ANLS',
+																				   'RGN',
+																				   'ALL',
+																				   'ALL',
+																				   'ALL',
+																				   'SR64878',
+																				   '1'
+																				  )
+														 )) rgn,
+										   (SELECT 'MBR' rpt
+											  FROM DUAL
+											UNION ALL
+											SELECT 'SMRY'
+											  FROM DUAL
+											UNION ALL
+											SELECT 'EXEC_SMRY'
+											  FROM DUAL) d
+					) --WHERE rownum<5
+				]]>
+			</sql>		
+			<param name="OUT_SMRY_VW" in_out="OUT" type="REF CURSOR" />
+			<param name="OUT_SMRY_MD" in_out="OUT"  type="REF CURSOR" />
+			<param name="IN_RPT_TYP" in_out="IN" value="EXEC_SMRY" type="VARCHAR2" />
+			<param name="IN_VW_TYP" in_out="IN" 	value="PreEquity Markets" type="VARCHAR2" />
+			<param name="IN_PROD_CD" in_out="IN" 		value="Total Global Investor Sales" 	type="VARCHAR2" />
+			<param name="IN_RGN" in_out="IN" 	value="North America" 	type="VARCHAR2" />
+			<param name="IN_MO" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_YR" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_USER_SOE_ID" in_out="IN" value="SR64878" type="VARCHAR2" />
+			<param name="IN_USER_GRP_ID" in_out="IN" value="902" 	type="VARCHAR2" />
+		</procedure>
+	</test>
+
+	
+</test_plan>

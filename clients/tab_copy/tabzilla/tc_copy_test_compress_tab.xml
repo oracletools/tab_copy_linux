@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<etldataflow name="test_compress" pipeline_config="test_config.xml">
+  <globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	    
+    <param name="FIELD_TERMINATOR" value="|"/>
+    <param name="LINE_TERMINATOR" value="~"/>
+    <param name="FROM_DB" value="%test_DEV%"/>
+    <param name="TO_DB" value="%test_QA%"/>
+    <param name="TO_SCHEMA" value="CSMARTREF"/>
+    <param name="LAME_DUCK" value="0"/>
+    <param name="ARRAYSIZE" value="100000"/>
+    <param name="COPYCOMMIT" value="4"/>
+	--use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+    <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"/>
+    <param name="DPL_BINDSIZE" value="100000"/>
+	--use this to REBUILD unusable indexes.
+    <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"/>
+	
+  </globals>
+  
+
+  
+<worker name="COMPRESS_TABLE">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%test_QA%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+		<param name="TABLE_NAME" value="REF_DSMT_SID_COPY_DEMO"/>
+		<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on echo on termout on line 200
+select  'before' status, owner, table_name, compression ,   compress_for
+from all_tables c
+where  table_name ='%TABLE_NAME%' and owner='%SCHEMA_NAME%'
+/
+
+alter table %SCHEMA_NAME%.%TABLE_NAME% compress
+/
+	
+select  'after' status,owner, table_name, compression ,   compress_for
+from all_tables c
+where  table_name ='%TABLE_NAME%' and owner='%SCHEMA_NAME%'
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+  
+  <worker name="REF_DSMT_SID_COPY_DEMO">
+    <exec_copy>
+      <sqlp method="%COPY_METHOD%">
+        <param name="IGNORE_PARTITION" value="PARTITION_NAME"/>
+		<param name="TABLE_NAME" value="REF_DSMT_SID_COPY_DEMO"/>
+        <sql_template>
+<![CDATA[CSMARTREF.%TABLE_NAME%]]>          
+        </sql_template>
+        <param name="IF_COMPRESS" value="1"/>
+        <param name="IF_GATHER_STATS" value="1"/>
+        <param name="SKIP_INDEX_MAINTENANCE" value="FALSE"/>
+        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"/>
+      </sqlp>
+    </exec_copy>
+
+  </worker>
+  
+
+</etldataflow>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+ <worker name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table REF_SMC_TMP
+/
+
+insert --+append
+ into REF_SMC_TMP
+ select r.*,substr(reverse(r.smc_prod_id),1,1) rev from REF_SMC r
+ where r.ROWID between 'AAPMqLAA1AAAAMAAAA' and 'AAPMqLAA1AALND/CcQ'
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+<worker name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table REF_SMC_TMP_2
+/
+
+insert --+append
+ into REF_SMC_TMP_2
+ select r.*,substr(reverse(r.smc_prod_id),1,1) rev from REF_SMC r
+ where r.ROWID between 'AAPMqLAA2AAFwEAAAA' and 'AAPMqLAA3AAE6z/CcQ'
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+<worker name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table REF_SMC_TMP_3
+/
+
+insert --+append
+ into REF_SMC_TMP_3
+ select r.*,substr(reverse(r.smc_prod_id),1,1) rev from REF_SMC r
+ where r.ROWID between 'AAPMqLAA1AALNEAAAA' and 'AAPMqLAA2AAFtT/CcQ' 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+  
+ <worker1 name="STG_REF_SMC_ISSUER_ab">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table STG_REF_SMC_ISSUER_ab
+/
+
+
+insert --+append 
+into STG_REF_SMC_ISSUER_ab 
+SELECT I.ISSUERCOUNTRYOFRISK AS
+      ISS_CTRY,
+      I.ISSUERCOUNTRY
+    AS
+      ORIG_ISS_CTRY,
+      I.SMCI
+    AS
+      SMC_ISSUER_ID,
+      I.ISSUERCOUNTRYOFINCORPORATION
+    AS
+      ISSUER_CTRY_OF_INCORP,
+      I.ISSUERNAME
+    AS
+      SMC_ISSUER_NAM,
+      USER
+    AS
+      CRTD_BY,
+      systimestamp
+    AS
+      CRTD_TS,
+      USER
+    AS
+      LST_UPDT_BY,
+      systimestamp
+    AS
+      LST_UPDT_TS FROM C160970SMC.ISSUER@gmail.com I WHERE I.SMCI IN
+      (SELECT smci
+        FROM C160970SMC.ISSUER_LAST_UPDATE@gmail.com SLU
+        WHERE DDAMODIFIEDTS >  '07-AUG-12 03.19.13 AM'
+      )
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+
+</etldataflow>

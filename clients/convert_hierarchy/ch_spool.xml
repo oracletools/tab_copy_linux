@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="ESMARTREF.REF_CTP_GRAND_PRNT_LIST.SPOOL">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+      <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value=""></param>
+
+	  <param name="FROM_DB" value="%ESMARTREF_SMARTD1%"></param>
+	  <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	   <param name="IF_TRUNCATE" value="0"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="ESMARTREF.REF_CTP_GRAND_PRNT_LIST">
+  <exec_spool>
+    <sqlp method="%SPOOL_METHOD%" >
+	 <param name="FROM_DB" value="%AB_GMAD1%"></param>
+	 <param name="IF_INCLUDE_HEADER" value="1"></param>
+	 <param name="FILTER" value=" tree_lvl_no in (0,1,2)"></param>
+		<sql_template>
+        <![CDATA[ 
+C160970GMAPRL.PRL_HIER_MGD_SEG
+]]>
+      </sql_template>	  
+    </sqlp>
+  </exec_spool>
+
+</worker>
+	
+
+</etldataflow>
+

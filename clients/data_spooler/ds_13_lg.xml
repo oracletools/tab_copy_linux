@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SELECT_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTD1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="PDEGREE" value="6"></param> 
+	   <param name="IF_DEBUG" value="1"></param> 
+	  
+
+
+</globals>
+
+<worker1 name="T_TRUNCATE">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+truncate table  MASTER_MATCHED_RECORDS2;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker1>
+
+<worker name="CT_6">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPa+AAg', 'AAFCF6ABLAAMPbGAAG'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CT_23">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABKAANeC2AAq', 'AAFCF6ABKAANeC+AAN'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CT_37">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABLAAMPb6AAD', 'AAFCF6ABPAAJzp5AAZ'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+<worker name="CT_48">
+  <exec_select>
+    <sqlp 	method="%SELECT_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[
+begin z_fn13('AAFCF6ABJAACDSpAAJ', 'AAFCF6ABKAANeCCAAd'); end;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_select>
+</worker>
+
+</etldataflow>

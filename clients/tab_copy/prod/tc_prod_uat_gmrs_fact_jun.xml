@@ -1,0 +1,42 @@
+<etldataflow name="COPY-CSMARTVOL.GMRS_FACT">
+<globals>
+	  <param name="FIELD_TERMINATOR" value='`#'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%BK_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="1"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20120601"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT">
+  <exec_copy>
+    <sqlp       method="%COPY_METHOD%" >
+      <param name="PARTITION" value="PART_20120602"></param>
+      <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_FACT]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+
+
+</etldataflow>

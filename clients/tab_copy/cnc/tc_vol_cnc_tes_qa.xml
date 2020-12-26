@@ -1,0 +1,24 @@
+<etldataflow name="COPY-ESMARTVOL.RAW_TABLE_CNC_TES">
+<globals>
+          <param name="FLOW_TYPE" value="ASYNC"></param>
+	  <param name="FIELD_TERMINATOR" value='|^'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CVOL_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%EVOL_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA1" value="ESMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+
+</globals>
+
+<worker name="eSMARTVOL.RAW_TABLE_CNC_TES">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <sql_template>
+        <![CDATA[ESMARTVOL.RAW_TABLE_CNC_TES]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+</etldataflow>

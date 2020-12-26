@@ -1,0 +1,37 @@
+<etldataflow name="COPY-CSMARTVOL.IOWA_Q12011">
+<globals>
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%CVOL_SMARTP1B%"></param>	  
+	  <param name="TO_DB" value="%CVOL_SMARTQ1%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTVOL"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="100000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--Truncate table/partition before inserting -->
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  <!--sqlp attribute-->
+
+</globals>
+
+<worker name="CSMARTVOL.IOWA_Q1">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="FILTER" value="src_file_cd='IOWA' and cob_dt between '01-JAN-11' and '15-APR-11'"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.TRD_VOL_UNION]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+<worker name="CSMARTVOL.IOWA_1_Q1">
+  <exec_copy>
+    <sqlp 	method="%COPY_METHOD%" >
+      <param name="FILTER" value="src_file_cd='IOWA' and cob_dt between '01-JAN-11' and '15-APR-11'"></param>
+      <sql_template>
+        <![CDATA[CSMARTVOL.TRD_VOL_UNION_1]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+</etldataflow>

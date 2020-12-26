@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+	 UNLOAD ('SELECT * FROM public.trd_vol_union') TO '/home/paraccel/catec/padb-cluster.cate.217141.119421.370974435113457/public.trd_vol_union' WITH ROWIDS DISTSTYLE NONE ABSOLUTEPATH GZIP BINARY ;
+-->
+<etldataflow name="TVU_2011_4Q"  >
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="UNLOAD 1Q of 2011 and loaf it to TEST TABLE."></param>
+	  
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="TVU" value="TRD_VOL_UNION"></param>
+	  <param name="TO_TABLE" value="TVU_LOAD_TEST6"></param>
+	  
+	  <param name="FILTER" value="  where cob_dt between ''2011-02-01'' and  ''2011-06-01'' "></param>
+	  
+		<param name="NODE_LIMIT1" value="1111110"></param>
+		<param name="NODE_LIMIT1" value="555555"></param>
+		<param name="NODE_LIMIT" value="277777"></param>
+		<param name="LEADER_LIMIT" value="300M"></param>		
+</globals>
+
+
+<worker name="UNLOAD_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+		<param name="TO_TABLE" value="TVU_LOAD_TEST1"></param>
+		<param name="LEADER_UNLOAD" value="OFF"></param>
+      <sql_template>
+        <![CDATA[
+		--unload
+		set leader_unload=%LEADER_UNLOAD%;
+		Unload ('select * from %TVU% %FILTER%') to '/tmp/%TO_TABLE%_%LEADER_LIMIT%.gz' GZIP delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="LOAD_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="FROM_TABLE" value="TVU_LOAD_TEST1"></param>
+	 <param name="TO_TABLE" value="TVU_LOAD_TEST6"></param>	
+      <sql_template>
+        <![CDATA[copy %TO_TABLE% from '$disk/tmp/%FROM_TABLE%_%LEADER_LIMIT%.gz' GZIP parallel delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="COUNT_TARGET">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT count(*)||'|cnt' FROM %TO_TABLE%;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+</etldataflow>

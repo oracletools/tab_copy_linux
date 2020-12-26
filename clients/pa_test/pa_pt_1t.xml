@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PIPED_ORA2PA_TVU_1_COPY">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Pipe TVU_1 from Oracle using partitions. 50 consecutive inserts. 10k recs each."></param>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="TO_DB" value="%PADB_DEPOT%"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='10000'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  <!-- xpx 'toss_cache'; -->
+	  <param name="IF_CLEAR_CACHE" value="1"></param>
+	  <param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	  	
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+
+</globals>
+
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.REC_COUNT_BEFORE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	
+	<param name="DESCR" value="Count recs in TRD_VOL_UNION_5 before insert."></param>
+      <sql_template>
+        <![CDATA[
+		SELECT COUNT(*)||'|cnt' cnt FROM %TO_TABLE%
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUN_101">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUN_101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.JUN_102">
+  <exec_ora2pa_copy>
+    <psql 	method="%COPY_METHOD%" >
+	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+	<param name="TO_TABLE" value="TRD_VOL_UNION_5"></param>
+	<param name="PARTITION" value="JUN_102"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTVOL.TRD_VOL_UNION_1
+]]>
+      </sql_template>
+    </psql>
+  </exec_ora2pa_copy>
+</worker>
+
+<worker name="CSMARTVOL.TRD_VOL_UNION_5.REC_COUNT_AFTER">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	
+	<param name="DESCR" value="Count recs in TRD_VOL_UNION_5 after insert."></param>
+      <sql_template>
+        <![CDATA[
+		SELECT COUNT(*)||'|cnt' cnt FROM %TO_TABLE%
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+</etldataflow>

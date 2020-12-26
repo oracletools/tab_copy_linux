@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test_plan name="harish_test_plan">
+	<test name="Harish_P_ENTL_MBR_ANLS_GET_SMRY_VW_test">
+		<description>
+            variable xs refcursor
+            variable xsr refcursor
+            exec P_ENTL_MBR_ANLS_GET_SMRY_VW(:xs, :xsr, IN_SUB_RPT_NAM=>'MTHL_INCM_STMT', IN_OUTL_TYP=>'Pre-Outlook', IN_PROD=>'Commodities',IN_ROLLUP=>'Total',IN_RPT_MO=>'Oct',IN_RPT_YR=>'2009',IN_USER_SOE_ID=>'SR64878',IN_USER_GRP_ID=>'902',IN_RPT_DETL_LVL=>'Collapse')
+            print xs
+            print xsr
+		</description>
+		<config
+			log_dest="LOG_ROOT"	
+			file_ext="txt"
+			delim =","
+			file_tmpl="{IN_SUB_RPT_NAM}.{IN_PROD}.{IN_ROLLUP}.{IN_OUTL_TYP}.{IN_RPT_MO}.{IN_RPT_YR}.{IN_USER_SOE_ID}.{IN_USER_GRP_ID}.{RC_NAME}"
+			test_mask="EXEC|GEN_CODE" 
+		/>
+		<procedure name="P_ENTL_MBR_ANLS_GET_SMRY_VW" param_source="sql" connector="JUSER_QA">
+		   <sql descr="input parameters" connector="CUSER_GMAD">
+			   <![CDATA[
+					SELECT * FROM (SELECT 'MTHL_INCM_STMT' in_sub_rpt_nam, ot.v in_outl_typ, prd.v in_prod,
+						   rlp.v in_rollup, mo.v in_rpt_mo, yr.v in_rpt_yr,
+						   NULL in_user_soe_id, '1' in_user_grp_id
+					  FROM (SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'OTLK_GRP',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '902'
+																  )
+										 )) ot,
+						   (SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'ROLL_GRP',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '1'
+																  )
+										 )) rlp,
+						   (SELECT 'ALL' v
+							  FROM DUAL
+							UNION ALL
+							SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'MO',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '1'
+																  )
+										 )) mo,
+						   (SELECT 'ALL' v
+							  FROM DUAL
+							UNION ALL
+							SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'YR',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '1'
+																  )
+										 )) yr,
+						   (
+							SELECT v
+							  FROM TABLE (k_entl_get_lov.out_lovs ('MBR',
+																   'REVN_PROD_GRP',
+																   'ALL',
+																   'ALL',
+																   'ALL',
+																   'SR64878',
+																   '1'
+																  )
+										 )) prd
+					) --WHERE rownum<100
+				]]>
+			</sql>		
+			<param name="OUT_MBR_SMRY_VW" in_out="OUT" type="REF CURSOR" />
+			<param name="OUT_MBR_SMRY_RSDATA" in_out="OUT"  type="REF CURSOR" />
+			<param name="IN_SUB_RPT_NAM" in_out="IN" value="MTHL_INCM_STMT" type="VARCHAR2" />
+			<param name="IN_OUTL_TYP" in_out="IN" 	value="Pre-Outlook" type="VARCHAR2" />
+			<param name="IN_PROD" in_out="IN" 		value="ALL" 	type="VARCHAR2" />
+			<param name="IN_ROLLUP" in_out="IN" 	value="Total" 	type="VARCHAR2" />
+			<param name="IN_RPT_MO" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_RPT_YR" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_USER_SOE_ID" in_out="IN" value="DS11779" type="VARCHAR2" />
+			<param name="IN_USER_GRP_ID" in_out="IN" value="902" 	type="VARCHAR2" />
+		</procedure>
+	</test>
+
+	
+</test_plan>

@@ -1,0 +1,142 @@
+SMARTP2 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapdb01p.nam.nsroot.net)(PORT = 1551))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = SMARTP2)
+    )
+  )
+
+SMARTU2 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdb01u.nam.nsroot.net)(PORT = 1551))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = SMARTU2)
+    )
+  )
+
+SMARTC2 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdb01c.nam.nsroot.net)(PORT = 1551))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = SMARTC2)
+    )
+  )
+
+SMARTDEV =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = lab7-dl380-15)(PORT = 1522))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = SMARTDEV)
+    )
+  )
+GMAC1B =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+       (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbcn2-vip.nam.nsroot.net)(PORT = 11150))
+       (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbcn1-vip.nam.nsroot.net)(PORT = 11150))
+   )
+   (ENABLE = BROKEN)
+   (CONNECT_DATA =
+       (SERVICE_NAME = GMAC1 )
+   )  )
+
+GMAU1A=
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbun1-vip.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = GMAU1A))
+  )
+
+SMARTQ1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbdn1.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = SMARTQ1))
+  )
+SMARTD1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbdn1.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = SMARTD1))
+  )
+
+SMARTU1B =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbun2-vip.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = SMARTU1B))
+  )
+SMARTP1B_ =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapmwdbpn2-vip.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = SMARTP1B))
+  )
+
+
+SMARTP_B =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+       (ADDRESS = (PROTOCOL = TCP)(HOST = mapmwdbpn2-vip.nam.nsroot.net)(PORT = 11150))
+       (ADDRESS = (PROTOCOL = TCP)(HOST = mapmwdbpn1-vip.nam.nsroot.net)(PORT = 11150))
+   )
+   (ENABLE = BROKEN)
+   (CONNECT_DATA =
+       (SERVICE_NAME = SMARTP_B )
+        (failover_mode=(type=select)(method=basic))
+   )  )
+
+SMARTC1B =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbcn2-vip.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = SMARTC1B))
+  )
+
+GMAP1A =
+
+  (DESCRIPTION =
+
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapmwdbpn1-vip.nam.nsroot.net)(PORT = 11150))
+
+    (CONNECT_DATA = (SID = GMAP1A))
+
+  )
+
+ 
+
+GMAQ1 =
+
+  (DESCRIPTION =
+
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbdn1.nam.nsroot.net)(PORT = 11150))
+
+    (CONNECT_DATA = (SID = GMAQ1))
+
+  )
+
+GMAD1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapswdbdn1.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = GMAD1))
+  )
+
+GMAP1B =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mapmwdbpn2-vip.nam.nsroot.net)(PORT = 11150))
+    (CONNECT_DATA = (SID = GMAP1B))
+  )
+GMAP2 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = icgcmamwdb1p.nam.nsroot.net)(PORT = 1551))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = GMAP2)
+    )
+  )
+GMAU2 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = icgcmaswdb1u.nam.nsroot.net)(PORT = 1551))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = GMAU2)
+    )
+  )

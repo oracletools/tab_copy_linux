@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SPOOL_BK94994_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%CSMARTBSER_SMARTQ1%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="INSERT_04">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_04) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='04';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_01">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_01) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='01';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_16">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_16) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='16';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_05">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_05) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='05';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_23">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_23) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='23';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_09">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_09) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='09';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_12">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_12) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='12';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_22">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_22) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='22';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_10">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_10) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='10';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_24">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_24) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='24';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_40">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_40) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='40';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_00">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_00) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='00';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_07">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_07) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='07';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_33">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_33) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='33';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_02">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_02) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='02';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_03">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_03) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='03';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_14">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_14) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='14';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_06">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_06) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='06';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_08">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_08) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='08';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+<worker name="INSERT_15">
+  <exec_dml>
+    <table_utils method="%DML_METHOD%" >
+      <sql_template>
+        <![CDATA[
+insert --+append
+     into DEV_FIN_11_f2 PARTITION (part_15) (deal,  transactionid,  affirmationperson,  affirmationteam,  businessline,  businessunitmanager,  confirmationstatus,  confirmationsubstatus,
+  age,  confirmcategory,  confirmid,  confirmstatlastmodified,  confirmstatlastmodifiedby,  createdtimestamp,  deskname,  earlyterminationdate,  generator,
+  generatorteam,  lasteconomicmodification,  linkedconfirmed,  matcher,  matcherteam,  middleofficehead,  modificationflag,  previousworkflowstep,  product,
+  productcontroller,  producttype,  reconstatus,  reviewer,  reviewerteam,  sentflag,  specialhandling,  state,  stateversionnumber,  strategy,
+  strategycode,  substrategy,  tradeterminationreason,  tradingdeskhead,  workflowstep,  verbalstatus,  typeofconfirm  )
+select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='15';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_dml>
+</worker>
+
+
+
+</etldataflow>

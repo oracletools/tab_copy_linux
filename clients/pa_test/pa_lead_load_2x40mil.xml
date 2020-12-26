@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PA_LEAD_LOAD_2X40M_SYNC"  >
+<globals>
+
+	  <param name="ETLFLOW_DESCR" value="Leader LOAD 2 sets of 40mil records from TVU table."></param>
+	  
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  
+	  <param name="FROM_TABLE" value="TRD_VOL_UNION"></param>
+	  <param name="TO_TABLE" value="TVU_LOAD_TEST3"></param>
+		<param name="NODE_LIMIT1" value="1111110"></param>
+		<param name="NODE_LIMIT" value="555555"></param>
+		<param name="NODE_LIMIT" value="40000000"></param>
+		<param name="NODE_LIMIT1" value="277777"></param>
+		<param name="NODE_LIMIT" value="10K"></param>
+		
+</globals>
+
+<worker1 name="TRUNCATE_TARGET">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[TRUNCATE TABLE %TO_TABLE%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+<worker1 name="COUNT_SOURCE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[SELECT count(*) FROM %FROM_TABLE%]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+<worker1 name="UNLOAD_2010">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	  <param name="TO_TABLE" value="TVU_LOAD_TEST0"></param>
+	   <param name="FILTER" value="  where cob_dt between ''2010-09-01'' and  ''2011-01-01'' "></param>
+      <sql_template>
+        <![CDATA[Unload ('select * from %FROM_TABLE% %FILTER% LIMIT %NODE_LIMIT%') to '/tmp/%TO_TABLE%_%NODE_LIMIT%.gz' GZIP delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+<worker1 name="UNLOAD_2011">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <param name="TO_TABLE" value="TVU_LOAD_TEST1"></param>
+	  <param name="FILTER" value="  where cob_dt between ''2011-02-01'' and  ''2011-06-01'' "></param>
+      <sql_template>
+        <![CDATA[Unload ('select * from %FROM_TABLE% %FILTER% LIMIT %NODE_LIMIT%') to '/tmp/%TO_TABLE%_%NODE_LIMIT%.gz' GZIP delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="LOAD_2010">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="TO_TABLE" value="TVU_LOAD_TEST0"></param>
+	
+	<!-- parallel load -->
+	<param name="PARALLEL_LOAD" value="parallel"></param>
+	<param name="DISK_PATH" value="$disk"></param>
+	
+	<!-- leader load -->
+	<param name="PARALLEL_LOAD" value=""></param>
+	<param name="DISK_PATH" value=""></param>
+	
+      <sql_template>
+        <![CDATA[
+		--copy
+		copy %TO_TABLE% from '%DISK_PATH%/tmp/%TO_TABLE%_%NODE_LIMIT%.gz'  GZIP %PARALLEL_LOAD% delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+<worker1 name="LOAD_2011">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="TO_TABLE" value="TVU_LOAD_TEST1"></param>
+	
+	<!-- parallel load -->
+	<param name="PARALLEL_LOAD" value="parallel"></param>
+	<param name="DISK_PATH" value="$disk"></param>
+	
+	<!-- leader load -->
+	<param name="PARALLEL_LOAD" value=""></param>
+	<param name="DISK_PATH" value=""></param>	
+	
+      <sql_template>
+        <![CDATA[
+		--copy
+		copy %TO_TABLE% from '%DISK_PATH%/tmp/%TO_TABLE%_%NODE_LIMIT%.gz'  GZIP %PARALLEL_LOAD% delimiter '|';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="COUNT_TARGET_COUNTS">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="TO_TABLE" value="TVU_LOAD_TEST0"></param>
+	<param name="TO_TABLE2" value="TVU_LOAD_TEST1"></param>
+      <sql_template>
+        <![CDATA[SELECT '%TO_TABLE%' tab_name, count(*) cnt FROM %TO_TABLE% UNION ALL SELECT '%TO_TABLE2%' tab_name,  count(*) FROM %TO_TABLE2%;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+</etldataflow>

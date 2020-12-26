@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+
+
+  <process_spec
+    env='delete'
+	env2='{$ETL_ENV}'
+       LOG_ROOT="log/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib" 
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	VOL_EMAIL_TO="AlexBuzunov@gmail.com"
+	SQL_LOADER_COPY="sql_echo_loader"
+	FAST_COPY_METHOD="sql_plus_copy"
+	DQ_EXPLAIN="dq_explain_plan"
+	SELECT ="select"	
+	SPOOL_TEST="spool"
+       DELETE ="select"
+   />
+
+  <connector>
+        <!--source connector-->
+        <SMARTD1 type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+  </connector>
+ 
+  <default>
+	  <env>
+               <delete DELETE_METHOD="%DELETE%" >  
+                 <param name="EMAIL_TO" value='%VOL_EMAIL_TO%'></param>
+	          <param name="FROM_DB" value="%SMARTD1%"></param>
+               </delete>
+
+		 <dev COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%VOL_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%SMARTD1%"></param>
+ 
+		 </dev>
+	
+	  </env>
+
+
+  </default>
+
+  <worker>
+    <!--worker name has to be unique -->
+	<exec_dml name="sqlp" module_name="sql_utils" />	
+    <!--worker name has to be unique -->
+	<exec_copy name="sqlp" module_name="sql_utils" />
+  </worker>
+</test_spec>

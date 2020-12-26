@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="TEST">
+<globals>
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="TO_DB" value="%CSMARTREF_SMARTQ1%"></param>
+	  
+	  <param name="TO_SCHEMA" value="CSMARTREF"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="40000"></param>
+	  <!--Truncate table/partition before inserting -->
+i	  <param name="IF_TRUNCATE" value="0"></param>	  
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+
+
+	  <!--sqlp attribute-->
+
+</globals>
+
+--sql
+
+
+
+
+<worker name="REF_SMC_2">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhAAmAAKOy3AAa' AND 'AAY6OhABHAAHzD+AAM'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_3">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhABHAAHzD+AAN' AND 'AAY6OhABHAAKEYTAAO'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_9">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhAGEAAGm3AAAP' AND 'AAY6OhAGEAAHqVWAAS'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_10">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhAGEAAHqVWAAT' AND 'AAY6OhAGEAAKWD/AAe'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_4">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhABHAAKEYTAAP' AND 'AAY6OhABIAAGeykAAD'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_5">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhABIAAGeykAAE' AND 'AAY6OhABIAAJZ8OAAd'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_1">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhAAkAAAhlIAAA' AND 'AAY6OhAAmAAKOy3AAZ'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_6">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhABIAAJZ8OAAe' AND 'AAY6OhABJAAJEMmAAM'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="REF_SMC_8">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhABJAALDk3AAP' AND 'AAY6OhAGEAAGm3AAAO'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+	
+<worker1 name="REF_SMC_7">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >
+	<param name="NUM_OF_SHARDS" value=""></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="FILTER" value=" ROWID BETWEEN 'AAY6OhABJAAJEMmAAN' AND 'AAY6OhABJAALDk3AAO'"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+<worker1 name="REF_SMC">
+  <exec_dml>
+    <sqlp 	method="%COPY_METHOD%" >	
+	<param name="NUM_OF_SHARDS" value="5"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+	 <param name="TO_TABLE" value="REF_SMC_LOAD"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTREF.REF_SMC
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+
+</etldataflow>

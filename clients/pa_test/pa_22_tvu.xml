@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="22_TVU_GROUP_BY_COB_DT">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="6.	TVU grouping on trade dt. Query average daily transactions per given month across a year. Order by transaction count. Filter for min transaction count (having)"></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION_900_mil"></param>
+
+	   
+
+</globals>
+
+<worker1 name="BUY_CURR_TMLSALO_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Count first to know offset."></param>
+      <sql_template>
+        <![CDATA[SELECT count(*) FROM %TABLE_NAME% WHERE src_file_cd='TMLSALO';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+
+
+<worker1 name="22_TVU_GROUPBY_COBDT">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Group by COB_DT. Get first 20 recs"></param>
+      <sql_template>
+        <![CDATA[SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from (SELECT * FROM trd_vol_union_900_mil LIMIT 50000000) t group by cob_dt ) t LIMIT 20;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="22_TVU_GROUPBY_COBDT_HAVING">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Group by COB_DT. Get first 20 recs"></param>
+      <sql_template>
+        <![CDATA[SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm from (SELECT * FROM trd_vol_union_900_mil LIMIT 50000000) t group by cob_dt having count(*)>100000 ) t LIMIT 20;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker1 name="22_TVU_GB_COBDT_HAVING_ORDER">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Group by COB_DT +HAVING +ORDER. Get first 20 recs"></param>
+      <sql_template>
+        <![CDATA[SELECT * FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm 
+		from (SELECT * FROM trd_vol_union_900_mil LIMIT 50000000) t group by cob_dt having count(*)>100000 ) t order by cnt_all LIMIT 20;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="22_TVU_GB_COBDT_HAVING_MINTC">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Group by COB_DT +HAVING +MIN TC. Get first 20 recs"></param>
+      <sql_template>
+        <![CDATA[
+SELECT * FROM (SELECT t.*, min(cnt_all) over() min_cnt FROM( select cob_dt, count(*) cnt_all, sum(lcl_ccy_amt::FLOAT)::FLOAT sm 
+from (SELECT * FROM trd_vol_union_900_mil LIMIT 50000000) t 
+group by cob_dt having count(*)>100000 ) t ) tt WHERE min_cnt=cnt_all LIMIT 20;
+]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+	
+</etldataflow>

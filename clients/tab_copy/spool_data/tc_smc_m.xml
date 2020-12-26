@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="SMC_COMPLIANCE">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table SMC_COMPLIANCE
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+insert --+append
+into SMC_COMPLIANCE
+ select --+CACHE(ss) 
+ M.SMCP, M.NASDTRACEFLAG,substr(reverse(m.smcp),1,1) rev from C160970SMC.COMPLIANCE@gmail.com M,
+ (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      ) ss
+      where M.SMCP=ss.smcp
+/
+
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_COMPLIANCE',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'ALL',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+
+</etldataflow>

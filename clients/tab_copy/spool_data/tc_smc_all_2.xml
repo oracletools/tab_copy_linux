@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+  
+<worker name="SMC_MR_II_C_E_P">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table smc_mr_ii_c_e_p
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append 
+into smc_mr_ii_c_e_p ap
+SELECT --+parallel(4)
+    SLU.SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+    v.CONTRACTTYPE, v.INSTRUMENTLISTINGLEVEL, v.ISGLOBALPRIMARY, substr(reverse(SLU.SMCP),1,1)
+ FROM (
+  SELECT  nvl(v.SMCP,E.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+v.CONTRACTTYPE, E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY
+FROM (select
+nvl(v.SMCP,C.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+C.CONTRACTTYPE --, substr(reverse(nvl(v.SMCP,C.SMCP)),1,1) rev
+from (select
+  nvl(v.SMCP,II.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, II.COUPONDIVIDENDRATE,II.COUPONDIVIDENDTYPE
+  --substr(reverse(nvl(v.SMCP,II.SMCP)),1,1) rev
+  from (
+  select
+  NVL(R.SMCP,M.SMCP) SMCP, R.CURRENTMATURITYDATE,M.NASDTRACEFLAG,substr(reverse(NVL(R.SMCP,M.SMCP)),1,1) rev FROM
+  (select R.smcp, R.CURRENTMATURITYDATE, substr(reverse(R.smcp),1,1) rev from C160970SMC.REDEMPTION@gmail.com
+  R) R
+  FULL OUTER JOIN
+ (select M.SMCP, M.NASDTRACEFLAG from C160970SMC.COMPLIANCE@gmail.com
+ M) M
+      on (R.SMCP=M.SMCP) ) v
+      full outer join
+       C160970SMC.INCOME_INFORMATION@gmail.com II
+       on (v.SMCP=II.SMCP)) v
+       full outer join
+ C160970SMC.CONTRACT_INFORMATION@gmail.com C
+ on (v.SMCP=C.SMCP) ) v
+ full outer join C160970SMC.EXCHANGE_LISTING_INFO@gmail.com E
+  on (v.SMCP=E.SMCP)) v
+  full outer join
+  (SELECT
+        smcp,  DDAMODIFIEDTS
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      --WHERE DDAMODIFIEDTS > (sysdate -1)
+      ) slu
+      on (v.SMCP=SLU.SMCP)
+	  where DDAMODIFIEDTS > (sysdate -1)
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="SMC_XX_ss">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_cx_x_s
+/
+		
+insert --+append
+into del_cx_x_s
+ select --+parallel(4)
+ss.SMCP, v.*,substr(reverse(ss.SMCP),1,1) rev from (
+select 
+nvl(cx.SMCP_CX,x.SMCP_x) smcp_xx, cx.*, x.* from
+(SELECT
+        /*+ PARALLEL(CX,4)  INDEX_FFS(CX, PK_DEPOT_XREF  )*/
+        SMCP SMCP_CX,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'FII'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_SCR_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'MSDC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_MSD_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SCSP'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SCR_CUSIP,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'IRIC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS IRIC,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SMBS'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS MSD_SMBOL --,
+		--substr(reverse(smcp),1,1) rev
+      FROM C160970SMC.DEPOT_XREF@gmail.com
+      CX
+      WHERE XREFCODE IN ( 'FII','MSDC','SCSP','IRIC','SMBS')
+	  and smcp in (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > (sysdate -1)
+      )
+      GROUP BY SMCP) cx
+      full outer join
+      (SELECT
+        /*+ PARALLEL (X,4) INDEX_FFS(X, PK_XREF )*/
+        X.SMCP SMCP_x,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'GMIT'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS GMI,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'CSP'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS CSP,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'ISN'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS ISN,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'RIC'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS RIC,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'SDL'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS SDL,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'CCD'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS CCD,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BBPK'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BBPK,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BUN'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BUN,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BCSP'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BCSP,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BBT'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BBT,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'GRIC'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS GRIC --,
+	--	substr(reverse(smcp),1,1) rev
+      FROM C160970SMC.XREF@gmail.com  X
+      WHERE DFLAG   = 'N'
+      AND XREFCODE IN ('BUN','BCSP','BBPK','CCD','SDL','RIC','ISN','CSP','GMIT','BBT','GRIC')
+	  and smcp in (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > (sysdate -1)
+      )
+      GROUP BY X.SMCP) X
+      on (cx.smcp_cx=x.smcp_x)) v
+      right outer join
+      (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp,DDAMODIFIEDTS
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      --WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      ) ss
+      on (v.smcp_xx=ss.smcp)   
+      WHERE DDAMODIFIEDTS > (sysdate -1)
+/
+
+commit
+/
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'DEL_CX_X_S',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+<worker name="SMC_p_ss_i">
+<exec_select>
+<table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table DEL_P_I_S
+/
+		
+insert --+append
+into DEL_P_I_S
+ select --+parallel
+ P.*, 
+ (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+  I.ISSUERCOUNTRY,I.SMCI,I.ISSUERCOUNTRYOFINCORPORATION, I.ISSUERNAME, substr(reverse(SMC_PROD_ID),1,1) rev
+from C160970SMC.ISSUER@gmail.com I
+right outer join
+( select --+ parallel(4) index_ffs_(P PK_PRODUCT  ) driving_site(ss)
+P.SMCP    AS      SMC_PROD_ID,ISSUERSMCI,COUNTRY,
+      --SMC_SCR_KEY,
+      --SMC_MSD_KEY,
+       P.SHORTDESCRIPTION    AS      PROD_SHRT_DESC,      P.DESCRIPTION    AS      PROD_LNG_DESC,      P.OPERATIONALINDICATOR    AS      OPER_IND,      P.ISDUMMYPRODUCT    AS      IS_DUMMY_PROD,      P.MARKETSECTORDESCRIPTION    AS      MKT_SECT_DESC,
+      P.SECURITYTYPELEVEL1    AS      SCR_TYP_LVL_1,      P.SECURITYTYPELEVEL2    AS      SCR_TYP_LVL_2,      P.SERIES    AS      SERIES,
+      -- (        CASE        WHEN I.ISSUERCOUNTRYOFRISK IS NULL THEN          CASE          WHEN P.COUNTRY IS NULL THEN            'UNALLOCATED'          ELSE            P.COUNTRY          END        ELSE          I.ISSUERCOUNTRYOFRISK        END )    AS      ISS_CTRY,
+      P.ISSUECURRENCY    AS      ISS_CCY,
+      --E.INSTRUMENTLISTINGLEVEL    AS      INSM_LSTG_LVL,
+       P.MARKET    AS      MKT,
+      --C.CONTRACTTYPE    AS      CON_TYP,
+      P.MARKETSEGMENT    AS      MKT_SEG,
+P.ISINDEFAULT    AS      IS_IN_DFLT
+--,substr(reverse(p.smcp),1,1) rev
+from   C160970SMC.PRODUCT@gmail.com  P
+full outer join
+  (SELECT
+        smcp,  DDAMODIFIEDTS
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      --WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      ) slu
+      on (P.SMCP=SLU.SMCP)
+	  where DDAMODIFIEDTS > (sysdate -1)) p
+         on (I.SMCI=P.ISSUERSMCI)
+/
+
+commit
+/
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'DEL_P_I_S',
+method_opt => 'FOR COLUMNS SMC_PROD_ID',
+granularity => 'ALL',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+</exec_select>
+</worker>
+
+--16 min
+<worker1 name="SMC_XX_MIX">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_xx_mix
+/
+
+insert --+append
+into del_xx_mix
+SELECT --+parallel(4)
+xx.*,mix.* from (select --+parallel(4)
+ss.SMCP, v.* from (
+select
+nvl(cx.SMCP_CX,x.SMCP_x) smcp_xx, cx.*, x.* from
+(SELECT
+        /*+ PARALLEL(CX,4)  INDEX_FFS(CX, PK_DEPOT_XREF  )*/
+        SMCP SMCP_CX,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'FII'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_SCR_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'MSDC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_MSD_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SCSP'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SCR_CUSIP,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'IRIC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS IRIC,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SMBS'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS MSD_SMBOL --,
+		--substr(reverse(smcp),1,1) rev
+      FROM C160970SMC.DEPOT_XREF@gmail.com
+      CX
+      WHERE XREFCODE IN ( 'FII','MSDC','SCSP','IRIC','SMBS')
+	  and smcp in (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      )
+      GROUP BY SMCP) cx
+      full outer join
+      (SELECT
+        /*+ PARALLEL (X,4) INDEX_FFS(X, PK_XREF )*/
+        X.SMCP SMCP_x,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'GMIT'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS GMI,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'CSP'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS CSP,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'ISN'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS ISN,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'RIC'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS RIC,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'SDL'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS SDL,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'CCD'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS CCD,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BBPK'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BBPK,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BUN'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BUN,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BCSP'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BCSP,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BBT'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BBT,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'GRIC'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS GRIC --,
+	--	substr(reverse(smcp),1,1) rev
+      FROM C160970SMC.XREF@gmail.com  X
+      WHERE DFLAG   = 'N'
+      AND XREFCODE IN ('BUN','BCSP','BBPK','CCD','SDL','RIC','ISN','CSP','GMIT','BBT','GRIC')
+	  and smcp in (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      )
+      GROUP BY X.SMCP) X
+      on (cx.smcp_cx=x.smcp_x)) v
+      full outer join
+      (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp,DDAMODIFIEDTS
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      --WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      ) ss
+      on (v.smcp_xx=ss.smcp)
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM')
+      xx
+      full outer join
+      (
+  SELECT nvl(v.SMCP,E.SMCP) SMCP_mix, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+v.CONTRACTTYPE, E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY
+FROM (select
+nvl(v.SMCP,C.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+C.CONTRACTTYPE --, substr(reverse(nvl(v.SMCP,C.SMCP)),1,1) rev
+from (select
+  nvl(v.SMCP,II.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, II.COUPONDIVIDENDRATE,II.COUPONDIVIDENDTYPE
+  --substr(reverse(nvl(v.SMCP,II.SMCP)),1,1) rev
+  from (
+  select
+  NVL(R.SMCP,M.SMCP) SMCP, R.CURRENTMATURITYDATE,M.NASDTRACEFLAG,substr(reverse(NVL(R.SMCP,M.SMCP)),1,1) rev FROM
+  (select R.smcp, R.CURRENTMATURITYDATE, substr(reverse(R.smcp),1,1) rev from C160970SMC.REDEMPTION@gmail.com
+  R) R
+  FULL OUTER JOIN
+ (select M.SMCP, M.NASDTRACEFLAG from C160970SMC.COMPLIANCE@gmail.com
+ M) M
+      on (R.SMCP=M.SMCP) ) v
+      full outer join
+       C160970SMC.INCOME_INFORMATION@gmail.com II
+       on (v.SMCP=II.SMCP)) v
+       join
+ C160970SMC.CONTRACT_INFORMATION@gmail.com C
+ on (v.SMCP=C.SMCP) ) v
+ full outer join C160970SMC.EXCHANGE_LISTING_INFO@gmail.com E
+  on (v.SMCP=E.SMCP)
+  ) mix
+    on(xx.smcp_xx=mix.SMCP_mix)    
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1> 
+ 
+--15 min
+<worker1 name="SMC_XX_MIX">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_xx_mix
+/
+
+insert --+append
+into del_xx_mix
+SELECT --+parallel(4)
+xx.*,mix.* from (select --+parallel(4)
+ss.SMCP, v.* from (
+select
+nvl(cx.SMCP_CX,x.SMCP_x) smcp_xx, cx.*, x.* from
+(SELECT
+        /*+ PARALLEL(CX,4)  INDEX_FFS(CX, PK_DEPOT_XREF  )*/
+        SMCP SMCP_CX,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'FII'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_SCR_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'MSDC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_MSD_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SCSP'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SCR_CUSIP,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'IRIC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS IRIC,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SMBS'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS MSD_SMBOL --,
+		--substr(reverse(smcp),1,1) rev
+      FROM C160970SMC.DEPOT_XREF@gmail.com
+      CX
+      WHERE XREFCODE IN ( 'FII','MSDC','SCSP','IRIC','SMBS')
+	  and smcp in (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      )
+      GROUP BY SMCP) cx
+      full outer join
+      (SELECT
+        /*+ PARALLEL (X,4) INDEX_FFS(X, PK_XREF )*/
+        X.SMCP SMCP_x,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'GMIT'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS GMI,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'CSP'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS CSP,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'ISN'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS ISN,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'RIC'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS RIC,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'SDL'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS SDL,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'CCD'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS CCD,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BBPK'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BBPK,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BUN'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BUN,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BCSP'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BCSP,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'BBT'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS BBT,
+        MAX(
+        CASE
+          WHEN X.XREFCODE = 'GRIC'
+          THEN X.XREFVALUE
+          ELSE NULL
+        END) AS GRIC --,
+	--	substr(reverse(smcp),1,1) rev
+      FROM C160970SMC.XREF@gmail.com  X
+      WHERE DFLAG   = 'N'
+      AND XREFCODE IN ('BUN','BCSP','BBPK','CCD','SDL','RIC','ISN','CSP','GMIT','BBT','GRIC')
+	  and smcp in (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      )
+      GROUP BY X.SMCP) X
+      on (cx.smcp_cx=x.smcp_x)) v
+      full outer join
+      (SELECT
+        /*+ PARALLEL(SLU, 4) INDEX_FFS(SLU,PK_SECURITY_LAST_UPDATE )*/
+        smcp,DDAMODIFIEDTS
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      --WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      ) ss
+      on (v.smcp_xx=ss.smcp)
+      WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM')
+      xx
+      full outer join
+      (
+SELECT --+parallel(4)
+    SLU.SMCP SMCP_mix, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+    v.CONTRACTTYPE, v.INSTRUMENTLISTINGLEVEL, v.ISGLOBALPRIMARY --, substr(reverse(SLU.SMCP),1,1)
+ FROM (
+  SELECT nvl(v.SMCP,E.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+v.CONTRACTTYPE, E.INSTRUMENTLISTINGLEVEL, E.ISGLOBALPRIMARY
+FROM (select
+nvl(v.SMCP,C.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, v.COUPONDIVIDENDRATE,v.COUPONDIVIDENDTYPE,
+C.CONTRACTTYPE --, substr(reverse(nvl(v.SMCP,C.SMCP)),1,1) rev
+from (select
+  nvl(v.SMCP,II.SMCP) SMCP, v.CURRENTMATURITYDATE,v.NASDTRACEFLAG, II.COUPONDIVIDENDRATE,II.COUPONDIVIDENDTYPE
+  --substr(reverse(nvl(v.SMCP,II.SMCP)),1,1) rev
+  from (
+  select
+  NVL(R.SMCP,M.SMCP) SMCP, R.CURRENTMATURITYDATE,M.NASDTRACEFLAG,substr(reverse(NVL(R.SMCP,M.SMCP)),1,1) rev FROM
+  (select R.smcp, R.CURRENTMATURITYDATE, substr(reverse(R.smcp),1,1) rev from C160970SMC.REDEMPTION@gmail.com
+  R) R
+  FULL OUTER JOIN
+ (select M.SMCP, M.NASDTRACEFLAG from C160970SMC.COMPLIANCE@gmail.com
+ M) M
+      on (R.SMCP=M.SMCP) ) v
+      full outer join
+       C160970SMC.INCOME_INFORMATION@gmail.com II
+       on (v.SMCP=II.SMCP)) v
+       join
+ C160970SMC.CONTRACT_INFORMATION@gmail.com C
+ on (v.SMCP=C.SMCP) ) v
+ full outer join C160970SMC.EXCHANGE_LISTING_INFO@gmail.com E
+  on (v.SMCP=E.SMCP)) v
+  full outer join
+  (SELECT
+        smcp,  DDAMODIFIEDTS
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com  SLU
+      --WHERE DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM'
+      ) slu
+      on (v.SMCP=SLU.SMCP)
+	  where DDAMODIFIEDTS > '07-AUG-12 03.19.13 AM') mix
+    on(xx.smcp_xx=mix.SMCP_mix)
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1> 
+
+</etldataflow>

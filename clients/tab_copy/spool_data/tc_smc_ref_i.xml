@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+--1.38
+ <worker name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table DEL_REF_I
+/
+
+insert --+append
+into DEL_REF_I 
+SELECT T.SMC_PROD_ID AS SMC_PROD_ID,
+      T.SMC_SCR_KEY      AS SMC_SCR_KEY,
+      T.SMC_MSD_KEY      AS SMC_MSD_KEY,
+      T.PROD_SHRT_DESC   AS PROD_SHRT_DESC,
+      T.PROD_LNG_DESC    AS PROD_LNG_DESC,
+      CAST(T.OPER_IND AS      CHAR(1)) OPER_IND,
+      CAST(T.IS_DUMMY_PROD AS CHAR(1)) IS_DUMMY_PROD,
+      T.MKT_SECT_DESC   AS MKT_SECT_DESC,
+      T.SCR_TYP_LVL_1   AS SCR_TYP_LVL_1,
+      T.SCR_TYP_LVL_2   AS SCR_TYP_LVL_2,
+      T.SERIES          AS SERIES,
+      R.ISS_CTRY        AS ISS_CTRY,
+      T.ISS_CCY         AS ISS_CCY,
+      T.INSM_LSTG_LVL   AS INSM_LSTG_LVL,
+      T.MKT             AS MKT,
+      T.CON_TYP         AS CON_TYP,
+      T.MKT_SEG         AS MKT_SEG,
+      T.GMI_TKR         AS GMI_TKR,
+      T.MAT_MO          AS MAT_MO,
+      T.MAT_YR          AS MAT_YR,
+      T.CUSIP           AS CUSIP,
+      T.ISIN            AS ISIN,
+      T.RIC             AS RIC,
+      T.SEDOL           AS SEDOL,
+      T.COM_CD          AS COM_CD,
+      T.BLMBRG_PK       AS BLMBRG_PK,
+      T.BLMBRG_UNIQ_KEY AS BLMBRG_UNIQ_KEY,
+      CAST(T.NASD_TRCE_FLAG AS CHAR(1)) NASD_TRCE_FLAG,
+      CAST(T.IS_IN_DFLT AS     CHAR(1)) IS_IN_DFLT,
+      R.CRTD_BY                 AS CRTD_BY,
+      R.CRTD_TS                 AS CRTD_TS,
+      R.LST_UPDT_BY             AS LST_UPDT_BY,
+      R.LST_UPDT_TS             AS LST_UPDT_TS,
+      T.SCR_CUSIP               AS SCR_CUSIP,
+      T.BLMBRG_CUSIP            AS BLMBRG_CUSIP,
+      R.ORIG_ISS_CTRY           AS ORIG_ISS_CTRY,
+      'U'                       AS IND_KEY,
+      R.SMC_ISSUER_ID           AS SMC_ISSUER_ID,
+      R.ISSUER_CTRY_OF_INCORP   AS ISSUER_CTRY_OF_INCORP,
+      R.SMC_ISSUER_NAM          AS SMC_ISSUER_NAM,
+      T.PROD_ISSUE_STA          AS PROD_ISSUE_STA,
+      T.SCR_TYP_LVL_3           AS SCR_TYP_LVL_3,
+      T.GLBL_LCK_IND            AS GLBL_LCK_IND,
+      T.CHILLED_STATUS          AS CHILLED_STATUS,
+      T.COUPON_DIV_RT           AS COUPON_DIV_RT,
+      T.COUPON_DIV_TYP          AS COUPON_DIV_TYP,
+      T.DAYS_TO_SETL            AS DAYS_TO_SETL,
+      T.ISS_DT                  AS ISS_DT,
+      T.BLMBRG_TCKR             AS BLMBRG_TCKR,
+      T.MSD_SMBOL               AS MSD_SMBOL,
+      T.IRIC                    AS IRIC,
+      T.REC_SRC                 AS REC_SRC,
+      T.IS_WTFAST               AS IS_WTFAST,
+      T.IS_3C7                  AS IS_3C7,
+      T.IS_CEDEL                AS IS_CEDEL,
+      T.IS_PLEDGECHILL          AS IS_PLEDGECHILL,
+      T.IS_SEGREGATIONCHILL     AS IS_SEGREGATIONCHILL,
+      T.IS_FEDBOOKENTRY         AS IS_FEDBOOKENTRY,
+      T.IS_DEPOSITCHIL          AS IS_DEPOSITCHIL,
+      T.Is_DTCCDelete           AS Is_DTCCDelete,
+      T.Is_NSCC                 AS Is_NSCC,
+      T.Is_Reorg                AS Is_Reorg,
+      T.Is_Seg100               AS Is_Seg100,
+      T.Is_CODFast              AS Is_CODFast,
+      T.Is_CNSEligible          AS Is_CNSEligible,
+      T.Is_WTchill              AS Is_WTchill,
+      T.Is_interDepositoryChill AS Is_interDepositoryChill,
+      T.PTMLevy_Indicator       AS PTMLevy_Indicator,
+      T.Is_DTCRegistered        AS Is_DTCRegistered,
+      T.IS_DTC                  AS IS_DTC,
+      T.IS_DTCCinterimStatus    AS IS_DTCCinterimStatus,
+      T.Is_CodChill             AS Is_CodChill,
+      T.Is_Communication        AS Is_Communication,
+      T.Is_Dochill              AS Is_Dochill,
+      T.Is_CustodyService       AS Is_CustodyService,
+      T.Is_Euroclear            AS Is_Euroclear,
+      T.Is_Salomon              AS Is_Salomon,
+      T.Is_ReorgDeposit         AS Is_ReorgDeposit,
+      T.UKStampDuty_Market      AS UKStampDuty_Market,
+      T.Is_DTCFrozen            AS Is_DTCFrozen,
+      T.Is_FedFund              AS Is_FedFund,
+      T.Is_BookEntry            AS Is_BookEntry,
+      T.Is_EDSEligible          AS Is_EDSEligible,
+      --Release 4.1
+      T.GRIC             AS GRIC,
+      T.IS_GLOBALPRIMARY AS IS_GLOBALPRIMARY FROM STG_REF_SMC_ISSUER_ab R 
+      full outer JOIN (select * from REF_SMC r where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ') T 
+      ON (R.SMC_ISSUER_ID=T.SMC_ISSUER_ID)
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+ <worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table REF_SMC_TMP
+/
+
+insert --+append
+ into REF_SMC_TMP
+ select r.*,substr(reverse(r.smc_prod_id),1,1) rev from REF_SMC r
+ where r.ROWID between 'AAPMqLAA1AAAAMAAAA' and 'AAPMqLAA1AALND/CcQ'
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+<worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table REF_SMC_TMP_2
+/
+
+insert --+append
+ into REF_SMC_TMP_2
+ select r.*,substr(reverse(r.smc_prod_id),1,1) rev from REF_SMC r
+ where r.ROWID between 'AAPMqLAA2AAFwEAAAA' and 'AAPMqLAA3AAE6z/CcQ'
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+<worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table REF_SMC_TMP_3
+/
+
+insert --+append
+ into REF_SMC_TMP_3
+ select r.*,substr(reverse(r.smc_prod_id),1,1) rev from REF_SMC r
+ where r.ROWID between 'AAPMqLAA1AALNEAAAA' and 'AAPMqLAA2AAFtT/CcQ' 
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+  
+ <worker1 name="STG_REF_SMC_ISSUER_ab">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table STG_REF_SMC_ISSUER_ab
+/
+
+
+insert --+append 
+into STG_REF_SMC_ISSUER_ab 
+SELECT I.ISSUERCOUNTRYOFRISK AS
+      ISS_CTRY,
+      I.ISSUERCOUNTRY
+    AS
+      ORIG_ISS_CTRY,
+      I.SMCI
+    AS
+      SMC_ISSUER_ID,
+      I.ISSUERCOUNTRYOFINCORPORATION
+    AS
+      ISSUER_CTRY_OF_INCORP,
+      I.ISSUERNAME
+    AS
+      SMC_ISSUER_NAM,
+      USER
+    AS
+      CRTD_BY,
+      systimestamp
+    AS
+      CRTD_TS,
+      USER
+    AS
+      LST_UPDT_BY,
+      systimestamp
+    AS
+      LST_UPDT_TS FROM C160970SMC.ISSUER@gmail.com I WHERE I.SMCI IN
+      (SELECT smci
+        FROM C160970SMC.ISSUER_LAST_UPDATE@gmail.com SLU
+        WHERE DDAMODIFIEDTS >  '07-AUG-12 03.19.13 AM'
+      )
+/
+
+commit
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+
+</etldataflow>

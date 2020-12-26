@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="Q921.14_1">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Line #15 on Q-921 list."></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_MAP%"></param>
+	  <param name="SCHEMA_NAME" value="PARACCEL"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION"></param>
+
+	   
+
+</globals>
+
+<worker name="Q14_TVU_CLEAR_CACHE">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Clear cache."></param>
+      <sql_template>
+       <![CDATA[
+	   xpx 'toss_cache';
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+	  
+
+<worker name="Q14_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Query from Q-921 list."></param>
+	<param name="TVU_LIMIT" value="100000"></param>
+	<param name="TVU" value="TRD_VOL_UNION"></param>
+      <sql_template>
+        <![CDATA[
+                SELECT COUNT(*)||'|cnt' cnt FROM (
+        SELECT
+          SUM(TRD_VOL_UNION.TRD_CNT),
+          SUM(TRD_VOL_UNION.ITEM_CNT),
+          SUM(TRD_VOL_UNION.NEW_ITEM_CNT),
+          TRD_VOL_UNION.COB_DT,
+          TRD_VOL_UNION.TRD_TRAN_DT,
+          TRD_VOL_UNION.CON_SETL_DT,
+          TRD_VOL_UNION.SETL_VOL_IND,
+          TRD_VOL_UNION.EXEC_VOL_IND,
+          TRD_VOL_UNION.FEED_SRC_SYS,
+          TRD_VOL_UNION.CTP_NAM,
+          REF_ESALES.CPI,
+          REF_ESALES.MNEMONIC,
+          REF_ESALES.MG_NAME,
+          REF_ESALES.MG_NUMBER,
+          REF_ESALES.GP_NUMBER,
+          REF_ESALES.GP_NAME,
+          TRD_VOL_UNION.ISIN,
+          TRD_VOL_UNION.CUSIP,
+          TRD_VOL_UNION.OPS_SETL_SYS_TRD_REF,
+          TRD_VOL_UNION.OPS_TRD_REF,
+          TRD_VOL_UNION.METRICS_CAT,
+          TRD_VOL_UNION.VOL_EVNT_TYP,
+          TRD_VOL_UNION.BUY_SELL,
+          TRD_VOL_UNION.ASET_LVL_ONE_CD,
+          TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+          TRD_VOL_UNION.ASET_LVL_TWO_CD,
+          TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+          TRD_VOL_UNION.ASET_LVL_THR_CD,
+          TRD_VOL_UNION.ASET_LVL_THR_DESC,
+          TRD_VOL_UNION.INTL_PROD_DESC,
+          TRD_VOL_UNION.SETL_LOCA,
+          TRD_VOL_UNION.PRC,
+          TRD_VOL_UNION.EXEC_TYP,
+          TRD_VOL_UNION.CTP_CPI_ACCT_NO
+        FROM
+          (SELECT * FROM TRD_VOL_UNION ) TRD_VOL_UNION,
+          REF_ESALES
+        WHERE
+          ( REF_ESALES.ACCOUNT_ID(+)=TRD_VOL_UNION.CTP_UID_GRD  )
+          AND
+          (
+           TRD_VOL_UNION.CON_SETL_DT  BETWEEN  '2010/01/01 00:00:00'  AND  '2011/01/01 00:00:00'    AND
+           TRD_VOL_UNION.FEED_SRC_SYS  NOT IN  ( 'TML','OASYS','FLEXCUBELOANS'  )
+           AND
+           (
+                REF_ESALES.MG_NUMBER  IN  ( '55449','55077'  )
+                OR
+                TRD_VOL_UNION.CTP_CPI_ACCT_NO  IN  ( '30492331','30492338','30492339','30492379','30492990','30494801','34990205','34990212','522927P6','5369033T','5369073P','5369199E','5369201W','5369258H','5369295E','5369377D','536940C1','5369556N','5369557N','5369588E','53696271'  )
+                OR
+                REF_ESALES.CPI  IN  ( '30492331','30492338','30492339','30492379','30492990','30494801','34990205','34990212','522927P6','5369033T','5369073P','5369199E','5369201W','5369258H','5369295E','5369377D','536940C1','5369556N','5369557N','5369588E','53696271'  )
+           )
+           AND
+           TRD_VOL_UNION.METRICS_CAT  IN  ( 'Volumes'  )
+          )
+        GROUP BY
+          TRD_VOL_UNION.COB_DT,
+          TRD_VOL_UNION.TRD_TRAN_DT,
+          TRD_VOL_UNION.CON_SETL_DT,
+          TRD_VOL_UNION.SETL_VOL_IND,
+          TRD_VOL_UNION.EXEC_VOL_IND,
+          TRD_VOL_UNION.FEED_SRC_SYS,
+          TRD_VOL_UNION.CTP_NAM,
+          REF_ESALES.CPI,
+          REF_ESALES.MNEMONIC,
+          REF_ESALES.MG_NAME,
+          REF_ESALES.MG_NUMBER,
+          REF_ESALES.GP_NUMBER,
+          REF_ESALES.GP_NAME ,
+          TRD_VOL_UNION.ISIN,
+          TRD_VOL_UNION.CUSIP,
+          TRD_VOL_UNION.OPS_SETL_SYS_TRD_REF,
+          TRD_VOL_UNION.OPS_TRD_REF,
+          TRD_VOL_UNION.METRICS_CAT,
+          TRD_VOL_UNION.VOL_EVNT_TYP,
+          TRD_VOL_UNION.BUY_SELL,
+          TRD_VOL_UNION.ASET_LVL_ONE_CD,
+          TRD_VOL_UNION.ASET_LVL_ONE_DESC,
+          TRD_VOL_UNION.ASET_LVL_TWO_CD,
+          TRD_VOL_UNION.ASET_LVL_TWO_DESC,
+          TRD_VOL_UNION.ASET_LVL_THR_CD,
+          TRD_VOL_UNION.ASET_LVL_THR_DESC,
+          TRD_VOL_UNION.INTL_PROD_DESC,
+          TRD_VOL_UNION.SETL_LOCA,
+          TRD_VOL_UNION.PRC,
+          TRD_VOL_UNION.EXEC_TYP,
+          TRD_VOL_UNION.CTP_CPI_ACCT_NO
+          ) t ;		
+		]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+</etldataflow>

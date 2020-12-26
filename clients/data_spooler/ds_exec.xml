@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="EXEC_DML" >
+
+<globals>
+	<param name="ETLFLOW_DESCR" value="Compress partitioned table"></param>
+
+	<!-- PIPELINE execution type
+	SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="ASYNC"></param>	  
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTREF_SMARTD1%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTREF"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME1" value="TRD_VOL_UNION"></param>
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+
+</globals>
+
+<worker name="IA_all">
+
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_all
+/
+
+
+CREATE TABLE DEL_MERGE_all (
+SMC_PROD_ID,
+SMC_SCR_KEY,
+SMC_MSD_KEY,
+PROD_SHRT_DESC,
+PROD_LNG_DESC,
+OPER_IND,
+IS_DUMMY_PROD,
+MKT_SECT_DESC,
+SCR_TYP_LVL_1,
+SCR_TYP_LVL_2,
+SERIES,
+ISS_CTRY,
+ISS_CCY,
+INSM_LSTG_LVL,
+MKT,
+CON_TYP,
+MKT_SEG,
+GMI_TKR,
+MAT_MO,
+MAT_YR,
+CUSIP,
+ISIN,
+RIC,
+SEDOL,
+COM_CD,
+BLMBRG_PK,
+BLMBRG_UNIQ_KEY,
+NASD_TRCE_FLAG,
+IS_IN_DFLT,
+CRTD_BY,
+CRTD_TS,
+LST_UPDT_BY,
+LST_UPDT_TS,
+SCR_CUSIP,
+BLMBRG_CUSIP,
+ORIG_ISS_CTRY,
+IND_KEY,
+SMC_ISSUER_ID,
+ISSUER_CTRY_OF_INCORP,
+SMC_ISSUER_NAM,
+PROD_ISSUE_STA,
+SCR_TYP_LVL_3,
+GLBL_LCK_IND,
+CHILLED_STATUS
+-- ,PRIMARY KEY (SMC_PROD_ID)
+)
+partition by list  (smc_prod_id)
+(
+PARTITION REF_SMC_DEFAULT VALUES (DEFAULT)
+) NOLOGGING AS
+SELECT
+NVL2(R.SMC_PROD_ID, NVL(T.SMC_PROD_ID,R.SMC_PROD_ID), T.SMC_PROD_ID)
+SMC_PROD_ID,
+NVL2(R.SMC_SCR_KEY, NVL(T.SMC_SCR_KEY,R.SMC_SCR_KEY), T.SMC_SCR_KEY)
+SMC_SCR_KEY,
+NVL2(R.SMC_MSD_KEY, NVL(T.SMC_MSD_KEY,R.SMC_MSD_KEY), T.SMC_MSD_KEY)
+SMC_MSD_KEY,
+NVL2(R.PROD_SHRT_DESC, NVL(T.PROD_SHRT_DESC,R.PROD_SHRT_DESC), T.PROD_SHRT_DESC) PROD_SHRT_DESC,
+NVL2(R.PROD_LNG_DESC, NVL(T.PROD_LNG_DESC,R.PROD_LNG_DESC), T.PROD_LNG_DESC)
+PROD_LNG_DESC,
+CAST(NVL2(R.OPER_IND, NVL(T.OPER_IND,R.OPER_IND), T.OPER_IND) AS CHAR(1))
+OPER_IND,
+CAST(NVL2(R.IS_DUMMY_PROD, NVL(T.IS_DUMMY_PROD,R.IS_DUMMY_PROD),
+T.IS_DUMMY_PROD) AS CHAR(1))   IS_DUMMY_PROD,
+NVL2(R.MKT_SECT_DESC, NVL(T.MKT_SECT_DESC,R.MKT_SECT_DESC), T.MKT_SECT_DESC)
+MKT_SECT_DESC,
+NVL2(R.SCR_TYP_LVL_1, NVL(T.SCR_TYP_LVL_1,R.SCR_TYP_LVL_1), T.SCR_TYP_LVL_1)
+SCR_TYP_LVL_1,
+NVL2(R.SCR_TYP_LVL_2, NVL(T.SCR_TYP_LVL_2,R.SCR_TYP_LVL_2), T.SCR_TYP_LVL_2)
+SCR_TYP_LVL_2,
+NVL2(R.SERIES, NVL(T.SERIES,R.SERIES), T.SERIES)  SERIES,
+NVL2(R.ISS_CTRY, NVL(T.ISS_CTRY,R.ISS_CTRY), T.ISS_CTRY)  ISS_CTRY,
+NVL2(R.ISS_CCY, NVL(T.ISS_CCY,R.ISS_CCY), T.ISS_CCY)  ISS_CCY,
+NVL2(R.INSM_LSTG_LVL, NVL(T.INSM_LSTG_LVL,R.INSM_LSTG_LVL), T.INSM_LSTG_LVL)
+INSM_LSTG_LVL,
+NVL2(R.MKT, NVL(T.MKT,R.MKT), T.MKT)  MKT,
+NVL2(R.CON_TYP, NVL(T.CON_TYP,R.CON_TYP), T.CON_TYP)  CON_TYP,
+NVL2(R.MKT_SEG, NVL(T.MKT_SEG,R.MKT_SEG), T.MKT_SEG)  MKT_SEG,
+NVL2(R.GMI_TKR, NVL(T.GMI_TKR,R.GMI_TKR), T.GMI_TKR)  GMI_TKR,
+NVL2(R.MAT_MO, NVL(T.MAT_MO,R.MAT_MO), T.MAT_MO)  MAT_MO,
+NVL2(R.MAT_YR, NVL(T.MAT_YR,R.MAT_YR), T.MAT_YR)  MAT_YR,
+NVL2(R.CUSIP, NVL(T.CUSIP,R.CUSIP), T.CUSIP)  CUSIP,
+NVL2(R.ISIN, NVL(T.ISIN,R.ISIN), T.ISIN)  ISIN,
+NVL2(R.RIC, NVL(T.RIC,R.RIC), T.RIC)  RIC,
+NVL2(R.SEDOL, NVL(T.SEDOL,R.SEDOL), T.SEDOL)  SEDOL,
+NVL2(R.COM_CD, NVL(T.COM_CD,R.COM_CD), T.COM_CD)  COM_CD,
+NVL2(R.BLMBRG_PK, NVL(T.BLMBRG_PK,R.BLMBRG_PK), T.BLMBRG_PK)  BLMBRG_PK,
+NVL2(R.BLMBRG_UNIQ_KEY, NVL(T.BLMBRG_UNIQ_KEY,R.BLMBRG_UNIQ_KEY),
+T.BLMBRG_UNIQ_KEY)  BLMBRG_UNIQ_KEY,
+CAST(NVL2(R.NASD_TRCE_FLAG, NVL(T.NASD_TRCE_FLAG,R.NASD_TRCE_FLAG),
+T.NASD_TRCE_FLAG) AS CHAR(1))  NASD_TRCE_FLAG,
+CAST(NVL2(R.IS_IN_DFLT, NVL(T.IS_IN_DFLT,R.IS_IN_DFLT), T.IS_IN_DFLT) AS
+CHAR(1))   IS_IN_DFLT,
+NVL2(R.CRTD_BY, NVL(T.CRTD_BY,R.CRTD_BY), T.CRTD_BY)  CRTD_BY,
+NVL2(R.CRTD_TS, NVL(T.CRTD_TS,R.CRTD_TS), T.CRTD_TS)  CRTD_TS,
+NVL2(R.LST_UPDT_BY, NVL(T.LST_UPDT_BY,R.LST_UPDT_BY), T.LST_UPDT_BY)
+LST_UPDT_BY,
+NVL2(R.LST_UPDT_TS, NVL(T.LST_UPDT_TS,R.LST_UPDT_TS), T.LST_UPDT_TS)
+LST_UPDT_TS,
+NVL2(R.SCR_CUSIP, NVL(T.SCR_CUSIP,R.SCR_CUSIP), T.SCR_CUSIP)  SCR_CUSIP,
+NVL2(R.BLMBRG_CUSIP, NVL(T.BLMBRG_CUSIP,R.BLMBRG_CUSIP), T.BLMBRG_CUSIP)
+BLMBRG_CUSIP,
+NVL2(R.ORIG_ISS_CTRY, NVL(T.ORIG_ISS_CTRY,R.ORIG_ISS_CTRY), T.ORIG_ISS_CTRY)
+ORIG_ISS_CTRY,
+NVL2(R.IND_KEY, NVL(T.IND_KEY,R.IND_KEY), T.IND_KEY)  IND_KEY,
+NVL2(R.SMC_ISSUER_ID, NVL(T.SMC_ISSUER_ID,R.SMC_ISSUER_ID), T.SMC_ISSUER_ID)
+SMC_ISSUER_ID,
+NVL2(R.ISSUER_CTRY_OF_INCORP,
+NVL(T.ISSUER_CTRY_OF_INCORP,R.ISSUER_CTRY_OF_INCORP), T.ISSUER_CTRY_OF_INCORP)
+ISSUER_CTRY_OF_INCORP,
+NVL2(R.SMC_ISSUER_NAM, NVL(T.SMC_ISSUER_NAM,R.SMC_ISSUER_NAM), T.SMC_ISSUER_NAM)SMC_ISSUER_NAM,
+NVL2(R.PROD_ISSUE_STA, NVL(T.PROD_ISSUE_STA,R.PROD_ISSUE_STA), T.PROD_ISSUE_STA)PROD_ISSUE_STA,
+NVL2(R.SCR_TYP_LVL_3, NVL(T.SCR_TYP_LVL_3,R.SCR_TYP_LVL_3), T.SCR_TYP_LVL_3)
+SCR_TYP_LVL_3,
+NVL2(R.GLBL_LCK_IND, NVL(T.GLBL_LCK_IND,R.GLBL_LCK_IND), T.GLBL_LCK_IND)
+GLBL_LCK_IND,
+NVL2(R.CHILLED_STATUS, NVL(T.CHILLED_STATUS,R.CHILLED_STATUS), T.CHILLED_STATUS)CHILLED_STATUS
+FROM TMP_REF_SMC_COPY_CTAS T LEFT OUTER JOIN REF_SMC R on
+(T.SMC_PROD_ID=R.SMC_PROD_ID);
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<flow name="all">
+--sql
+ --144904
+<worker name="IA_1">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_1
+/
+create table DEL_MERGE_1 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAjAAEDcAAAA' AND 'AAHFj+AAjAAH2YnAPo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --141440
+<worker name="IA_4">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_4
+/
+create table DEL_MERGE_4 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAkAABWiAAAA' AND 'AAHFj+AAkAAFXV/APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --146944
+<worker name="IA_2">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_2
+/
+create table DEL_MERGE_2 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAjAAH6qAAAA' AND 'AAHFj+AAjAALUv/APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --145704
+<worker name="IA_6">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_6
+/
+create table DEL_MERGE_6 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAkAAIXQAAAA' AND 'AAHFj+AAlAAAuN/APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --145280
+<worker name="IA_7">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_7
+/
+create table DEL_MERGE_7 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAlAAAuuAAAA' AND 'AAHFj+AAlAAE/3/APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --143016
+<worker name="IA_3">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_3
+/
+create table DEL_MERGE_3 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAjAAOICAAAA' AND 'AAHFj+AAkAABUR/APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --141992
+<worker name="IA_0">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_0
+/
+create table DEL_MERGE_0 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAjAAB8KAAAA' AND 'AAHFj+AAjAAD/T/APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+ --150144
+<worker name="IA_5">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+drop table DEL_MERGE_5
+/
+create table DEL_MERGE_5 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.ROWID BETWEEN 'AAHFj+AAkAAFhOAAAA' AND 'AAHFj+AAkAAIS//APo'
+and T.SMC_PROD_ID is null;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</flow>
+
+
+<flow>
+
+<worker name="IA_23">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_23
+/
+
+create table DEL_MERGE_23 as
+SELECT /*+INDEX1(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.rowid between 'AAHFj+AAjAAH6qAAAA' and 'AAHFj+AAjAAOICAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="IA_12">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_all
+/
+
+
+create table DEL_MERGE_all as
+SELECT /*+INDEX(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+--and  R.rowid between 'AAHFcKAAjAAEBcAAAA' and 'AAHFcKAAjAAHhAAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+<worker name="IA_12">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_12
+/
+
+
+create table DEL_MERGE_12 as
+SELECT /*+INDEX(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.rowid between 'AAHFcKAAjAAEBcAAAA' and 'AAHFcKAAjAAHhAAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="IA_23">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_23
+/
+
+create table DEL_MERGE_23 as
+SELECT /*+INDEX(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.rowid between 'AAHFcKAAjAAHhAAAAA' and 'AAHFcKAAjAALMwAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="IA_34">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_34
+/
+
+create table DEL_MERGE_34 as
+SELECT /*+INDEX(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.rowid between 'AAHFcKAAjAALMwAAAA' and 'AAHFcKAAkAABtgAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="IA_45">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_45
+/
+
+create table DEL_MERGE_45 as
+SELECT /*+INDEX(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.rowid between 'AAHFcKAAkAABtgAAAA' and 'AAHFcKAAkAAFlOAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="IA_67">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+drop table DEL_MERGE_67
+/
+
+
+create table DEL_MERGE_67 as
+SELECT /*+INDEX(T,SYS_C001212975)*/ R.* --, T.SMC_PROD_ID s2  
+FROM TMP_REF_SMC_COPY_CTAS T , REF_SMC R 
+WHERE (T.SMC_PROD_ID(+)=R.SMC_PROD_ID)
+and  R.rowid between 'AAHFcKAAkAAI6kAAAA' and 'AAHFcKAAlAAA9EAAAA'
+and T.SMC_PROD_ID is null;
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+</flow>
+<flow>
+<worker name="IA_1">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+truncate table TMP_REF_SMC_COPY_CTAS_1
+/
+
+INSERT /*+ APPEND */ INTO TMP_REF_SMC_COPY_CTAS_1
+   SELECT --FULL(P) FULL(S) FULL(I)
+        /*+ FULL(P)  use_nl(P)  parallel(R,4) parallel(P) parallel(I,4) parallel(E,8) parallel(S,4) driving_site(P) */
+        --P.rowid rid,
+        DISTINCT P.SMCP                    AS SMC_PROD_ID,
+        FII.XREFVALUE             AS SMC_SCR_KEY,
+        MSD.XREFVALUE             AS SMC_MSD_KEY,
+        P.SHORTDESCRIPTION        AS PROD_SHRT_DESC,
+        P.DESCRIPTION             AS PROD_LNG_DESC,
+        P.OPERATIONALINDICATOR    AS OPER_IND,
+        P.ISDUMMYPRODUCT          AS IS_DUMMY_PROD,
+        P.MARKETSECTORDESCRIPTION AS MKT_SECT_DESC,
+        P.SECURITYTYPELEVEL1      AS SCR_TYP_LVL_1,
+        P.SECURITYTYPELEVEL2      AS SCR_TYP_LVL_2,
+        P.SERIES                  AS SERIES,
+        (
+        CASE
+            WHEN I.ISSUERCOUNTRYOFRISK IS NULL
+            THEN
+                CASE
+                    WHEN P.COUNTRY IS NULL
+                    THEN 'UNALLOCATED'
+                    ELSE P.COUNTRY
+                END
+            ELSE I.ISSUERCOUNTRYOFRISK
+        END )                                     AS ISS_CTRY,
+        P.ISSUECURRENCY                           AS ISS_CCY,
+        E.INSTRUMENTLISTINGLEVEL                  AS INSM_LSTG_LVL,
+        P.MARKET                                  AS MKT,
+        C.CONTRACTTYPE                            AS CON_TYP,
+        P.MARKETSEGMENT                           AS MKT_SEG,
+        piv.GMI                             AS GMI_TKR,
+        TO_CHAR ( R.CURRENTMATURITYDATE, 'MM' )   AS MAT_MO,
+        TO_CHAR ( R.CURRENTMATURITYDATE, 'YYYY' ) AS MAT_YR,
+        piv.CSP                             AS CUSIP,
+        piv.ISN                             AS ISIN,
+        piv.RIC                             AS RIC,
+        piv.SDL                             AS SEDOL,
+        piv.CCD                             AS COM_CD,
+        piv.BBPK                            AS BLMBRG_PK,
+        piv.BUN                             AS BLMBRG_UNIQ_KEY,
+        M.NASDTRACEFLAG                           AS NASD_TRCE_FLAG,
+        P.ISINDEFAULT                             AS IS_IN_DFLT,
+        USER                                      AS CRTD_BY,
+        systimestamp                              AS CRTD_TS,
+        USER                                      AS LST_UPDT_BY,
+        systimestamp                              AS LST_UPDT_TS,
+        ----'I' as IND_KEY,
+        SCSP.XREFVALUE AS SCR_CUSIP,
+        piv.BCSP AS BLMBRG_CUSIP,
+        (
+        CASE
+            WHEN I.ISSUERCOUNTRY IS NULL
+            THEN
+                CASE
+                    WHEN P.COUNTRY IS NULL
+                    THEN 'UNALLOCATED'
+                    ELSE P.COUNTRY
+                END
+            ELSE I.ISSUERCOUNTRY
+        END )                          AS ORIG_ISS_CTRY,
+        'I'                            AS IND_KEY,
+        I.SMCI                         AS SMC_ISSUER_ID,
+        I.ISSUERCOUNTRYOFINCORPORATION AS ISSUER_CTRY_OF_INCORP,
+        I.ISSUERNAME                   AS SMC_ISSUER_NAM,
+        P.ISSUESTATUS                  AS PROD_ISSUE_STA,
+        P.SECURITYTYPELEVEL3           AS SCR_TYP_LVL_3,
+        S.ISDTCGLOBALLOCK              AS GLBL_LCK_IND,
+        S.ISDTCCCHILL                  AS CHILLED_STATUS
+    FROM --(SELECT /*+driving_site(P) */ * FROM C160970SMC.PRODUCT@gmail.com P )
+    C160970SMC.PRODUCT@gmail.com SAMPLE(0.1)
+     P,
+        C160970SMC.ISSUER@gmail.com I,
+        C160970SMC.EXCHANGE_LISTING_INFO@gmail.com E,
+        C160970SMC.CONTRACT_INFORMATION@gmail.com C,
+        C160970SMC.COMPLIANCE@gmail.com M,
+        C160970SMC.REDEMPTION@gmail.com R,
+        (SELECT /*+ PARALLEL(X) */ * FROM C160970SMC.DEPOT_XREF@gmail.com X WHERE XREFCODE = 'FII'
+        ) FII,
+        (SELECT /*+ PARALLEL(X) */  * FROM C160970SMC.DEPOT_XREF@gmail.com X WHERE XREFCODE = 'MSDC'
+        ) MSD,
+        (SELECT /*+ PARALLEL(X) */  * FROM C160970SMC.DEPOT_XREF@gmail.com X WHERE XREFCODE = 'SCSP'
+        ) SCSP,
+        DEL_V_PIVOT2 piv,
+        C160970SMC.SETTLEMENT@gmail.com S
+        WHERE P.ISSUERSMCI = I.SMCI(+)
+    --and  P.rowid between  'AABm98AAiAACefYAAN'and 'AABm98AAiAACfkAABB'  --10
+   -- and  P.ROWID BETWEEN 'AABm98AAKAAM2CIAAO' AND 'AABm98AA1AAGsn+AAZ'
+    --and  P.ROWID BETWEEN 'AABm98AAfAACJOZAAI' AND 'AABm98AAgAACHZXABG'
+   -- and  P.ROWID BETWEEN 'AABm98AAfAACJOZAAI' AND 'AABm98AAgAACHZXABG' --17 -10%
+and  P.ROWID BETWEEN	'AABm98AAdAAKTJyAAi' and	'AABm98AAhAACYiZABP'
+--1	AABm98AAKAAM2CIAAO	AABm98AAdAAKTJyAAh	936994
+--3	AABm98AAhAACYiZABU	AABm98AA1AAGsn6ABK	936993
+   -- AABm98AAlAACgDUABH	AABm98AAlAACgDUABH
+     AND P.SMCP         = E.SMCP(+)
+    AND P.SMCP         = R.SMCP(+)
+    AND P.SMCP         = FII.SMCP(+)
+    AND P.SMCP         = MSD.SMCP(+)
+    AND P.SMCP         = C.SMCP(+)
+    AND P.SMCP         = M.SMCP(+)
+    AND P.SMCP         = piv.SMCP(+)
+    AND P.SMCP         = SCSP.SMCP(+)
+    AND P.SMCP         = S.SMCP(+)
+    AND P.SMCP        IN
+        (SELECT /*+ PARALLEL1(SLU, 4)*/ --LASTMODIFIEDTS,
+        smcp
+        FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com SLU
+        WHERE DDAMODIFIEDTS > to_date('19-JAN-12 12.00.00 AM','DD-MON-RR HH:MI:SS AM'))
+    ;
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+<worker name="PR_SMC_AB1">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+CREATE TABLE DEL_MERGE AS
+SELECT /*+ PARALLEL1(T) PARALLEL1(T) */ R.* FROM TMP_REF_SMC_COPY_CTAS T FULL OUTER JOIN ref_smc R on (T.SMC_PROD_ID=R.SMC_PROD_ID)
+/
+
+exit;
+/
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="PR_SMC_AB1">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+BEGIN PR_SMC_AB3; END;
+/
+
+exit;
+/
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+<worker1 name="REF_SMC_MERGE">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+create table del_ref_smc_2 NOCOMPRESS as select  /*+ PARALLEL(R) */ * from ref_smc R;
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="CTAS_REF_SMC">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+create table del_ref_smc_2 NOCOMPRESS as select  /*+ PARALLEL(R) */ * from ref_smc R;
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="DRP_TAB">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	<param name="IF_DEBUG" value="1"></param>
+      <sql_template>
+        <![CDATA[
+SELECT COUNT(*) cnt FROM DUAL
+/
+
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="DRP_TAB">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+DROP TABLE pk1_ref_smc;
+
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+<worker1 name="CRT_TAB">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+CREATE TABLE pk1_ref_smc (
+  SMC_PROD_ID ,
+  --rnk,
+  RID ,
+  CONSTRAINT supplier_pk PRIMARY KEY (SMC_PROD_ID,RID)
+  )as
+  select /*+PARALLEL(R)*/   SMC_PROD_ID,
+  --RANK() OVER (PARTITION BY SMC_PROD_ID order by rowid)
+  --rownum rnk, 
+  rowid rid
+  from ref_smc R;
+
+ 
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+</flow>
+
+</etldataflow>

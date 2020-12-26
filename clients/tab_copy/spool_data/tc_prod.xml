@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SPOOL_BK94994_TEST">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB1" value="%CSMARTBSER_SMARTQ1%"></param>
+	  <param name="FROM_DB" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+<worker name="STG_OTC_CWM.SPOOL_06">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='06';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_05">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='05';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_12">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='12';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_14">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='14';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_10">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='10';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_22">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='22';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_33">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='33';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_40">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='40';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_23">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='23';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_01">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='01';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_04">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='04';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_03">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='03';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_16">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='16';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_08">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='08';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_24">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='24';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_15">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='15';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+<worker name="STG_OTC_CWM.SPOOL_00">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='00';
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+<worker name="STG_OTC_CWM.SPOOL_07">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='07';
+	 
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+<worker name="STG_OTC_CWM.SPOOL_09">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='09';
+	 
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+<worker name="STG_OTC_CWM.SPOOL_02">
+  <exec_query_spool>
+    <table_utils 	method="%QUERY_SPOOL_METHOD%" >
+     	<param name="IF_COMPRESSED_SPOOL" value="0"></param>
+      <sql_template>
+        <![CDATA[ select  D.deal,D.transactionid,D.affirmationperson,D.affirmationteam,D.businessline,D.businessunitmanager,D.confirmationstatus,D.confirmationsubstatus,D.age,D.
+confirmcategory,D.confirmid,D.confirmstatlastmodified,D.confirmstatlastmodifiedby,D.createdtimestamp,D.deskname,D.
+earlyterminationdate,D.generator,D.generatorteam,D.lasteconomicmodification,D.linkedconfirmed,D.matcher,D.matcherteam,D.
+middleofficehead,D.modificationflag,D.previousworkflowstep,D.product,D.productcontroller,D.producttype,D.reconstatus,D.reviewer,D.reviewerteam,D.
+sentflag,D.specialhandling,D.state,D.stateversionnumber,D.strategy,D.strategycode,D.substrategy,D.tradeterminationreason,D.
+tradingdeskhead,D.workflowstep,D.verbalstatus,D.typeofconfirm from (
+SELECT --+PARALLEL
+   --MAX (rid) KEEP (DENSE_RANK FIRST ORDER BY D.confirmid) OVER (PARTITION BY D.deal , D.transactionid) mrid,
+   ROW_NUMBER ()  OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn,
+  d.*
+    FROM  (select d.*
+    --ROW_NUMBER () OVER (PARTITION BY D.DEAL , D.TRANSACTIONID ORDER BY D.confirmid, crtd_dt DESC) rn
+    from CSMARTVOL.STG_OTC_CWM d
+     )d
+     ) d where rn=1 and UPPER(SUBSTR(TRIM(deal), 1, 2)) ='02';
+	 
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_query_spool>
+</worker>
+
+
+</etldataflow>

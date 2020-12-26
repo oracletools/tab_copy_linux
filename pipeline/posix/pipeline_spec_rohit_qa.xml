@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    env='dev'
+	env2='{$ETL_ENV}' 
+    LOG_ROOT="log/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib" 
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	VOL_EMAIL_TO="AlexBuzunov@gmail.com"
+	SQL_LOADER_COPY="copy_table"
+	FAST_COPY_METHOD="sql_plus_copy"
+	DQ_EXPLAIN="dq_explain_plan"
+	SPOOL_TEST="spool"
+	SHARDED_SQL_LOADER_COPY="sharded_load"
+	
+	SELECT ="select"	
+	DML ="dml"
+	DDL_SPOOL_TEST="spool_ddl"
+	DDL_PUBLISH_TEST="publish_ddl"
+
+	CLONE_TABLE="clone_table"
+	
+	SAFE_TABLE_COPY="safe_copy"
+	SPOOL_QUERY="spool_query_data"
+	COPY_QUERY="copy_query_data"
+    />
+
+  <connector>
+        <!--source connector-->
+		<CCNC_SMARTP1B type1='inline' schema="RM52242" pword="***" sid="SMARTP1B" host = "localhost"  PORT = "11150"/>
+        <!--target connectors-->
+        <CCNC_SMARTQ1 type1='inline' schema="CSMARTCNC" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+  </connector>
+ 
+  <default>
+	  <env>
+		 <safe_copy SAFE_TABLE_COPY="%SAFE_TABLE_COPY%" >
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		 </safe_copy>
+		 
+		 <clone_table CLONE_TABLE="%CLONE_TABLE%" >
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		 </clone_table>
+
+		 <dev 	COPY_METHOD="%SQL_LOADER_COPY%" 
+				SPOOL_METHOD="%SPOOL_TEST%"
+				QUERY_SPOOL_METHOD="%SPOOL_QUERY%"
+				CLONE_TABLE="%CLONE_TABLE%"
+				DML_METHOD="%DML%"
+				QUERY_COPY_METHOD="%COPY_QUERY%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%CCNC_SMARTP1B%"></param>
+ 
+		 </dev>
+
+		 
+		 <spool_ddl DDL_SPOOL_METHOD="%DDL_SPOOL_TEST%"
+					PUBLISH_DDL="%DDL_PUBLISH_TEST%"
+					DML_METHOD="%DML%"
+					SELECT_METHOD="%SELECT%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		 </spool_ddl>
+		 
+		 <spool SPOOL_METHOD="%SPOOL_TEST%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		 </spool>
+		 
+		 <select SELECT_METHOD="%SELECT%" COPY_METHOD="%SQL_LOADER_COPY%">  
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%CCNC_SMARTP1B%"></param>
+ 
+		 </select>	  
+		 
+		 <dev_copy COPY_METHOD="%FAST_COPY_METHOD%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%CCNC_SMARTP1B%"></param>
+ 
+		 </dev_copy>
+
+		 <qa COPY_METHOD="%FAST_COPY_METHOD%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%CCNC_SMARTP1B%"></param>	  
+		 </qa>
+
+		 <uat COPY_METHOD="%FAST_COPY_METHOD%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%CCNC_SMARTP1B%"></param>	  
+		 </uat>		 
+		 
+		 <prod COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%CCNC_SMARTP1B%"></param>
+		 </prod>	 
+	  </env>
+  </default>
+  
+  <worker>
+    <!--worker name has to be unique -->
+	<exec_dml1 name="sqlp" module_name="sql_utils" />	
+    <!--worker name has to be unique -->
+	<exec_copy1 name="sqlp" module_name="sql_utils" />
+		
+	<exec_sharded_copy name="sqlp" module_name="sql_utils" />
+	<exec_spool_ddl name="sqlp" module_name="sql_utils" />
+	<publisher name="sqlp" module_name="sql_utils" />
+	<exec_select1 name="sqlp" module_name="sql_utils" />	
+	<exec_clone_table name="table_utils" module_name="table_utils" />	
+	<exec_safe_copy name="table_utils" module_name="table_utils" />	
+	<exec_dml name="table_utils" module_name="table_utils" />	
+	<exec_copy name="table_utils" module_name="table_utils" />
+	<exec_select name="table_utils" module_name="table_utils" />
+	<exec_spool name="table_utils" module_name="table_utils" />
+	<exec_query_spool name="table_utils" module_name="table_utils" />
+	<exec_query_copy name="table_utils" module_name="table_utils" />
+	
+  </worker>
+</test_spec>

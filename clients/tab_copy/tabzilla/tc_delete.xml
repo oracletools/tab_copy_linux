@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="DELETE_SMARTD1_TRD_VOL_UNION_UNION1_SMRY">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  <param name="DB_CONNECTOR" value="%SMARTD1%"></param>
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+</globals>
+
+<worker name="DELETE_TRADE_VOL_UNION">
+  <exec_dml>
+    <sqlp method="%DELETE_METHOD%" >
+      <param name="DB_CONNECTOR1" value="SMARTD1"></param>
+      <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+      <sql_template>
+        <![CDATA[SELECT /*+ parallel(t) */ COUNT(*) FROM CSMARTVOL.TRD_VOL_UNION t WHERE COB_DT BETWEEN '28-JUL-11' AND '6-AUG-11';]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>  
+
+<worker1 name="DELETE_TRADE_VOL_UNION_1">
+  <exec_dml>
+    <sqlp method="%DELETE_METHOD%" >
+      <param name="DB_CONNECTOR1" value="%SMARTD1%"></param>
+      <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+      <sql_template>
+        <![CDATA[DELETE * FROM CSMARTVOL.TRD_VOL_UNION_1 WHERE COB_DT BETWEEN '28-JUL-11' AND '6-AUG-11';COMMIT;]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>  
+
+
+<worker1 name="DELETE_TRD_VOL_DLY_SMRY">
+  <exec_dml>
+    <sqlp method="%DELETE_METHOD%" >
+      <param name="DB_CONNECTOR1" value="SMARTD1"></param>
+      <param name="SCHEMA_NAME" value="CSMARTVOL"></param>
+      <sql_template>
+        <![CDATA[DELETE * FROM CSMARTVOL.TRD_VOL_DLY_SMRY WHERE COB_DT BETWEEN '28-JUL-11' AND '6-AUG-11';COMMIT;]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>  
+
+
+</etldataflow>

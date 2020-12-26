@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="AB_COMPRESS_PART_TAB_W_IND" >
+
+<globals>
+	<param name="ETLFLOW_DESCR" value="Compress partitioned table with global and local index."></param>
+
+	<!-- PIPELINE execution type
+	SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>	  
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME1" value="TRD_VOL_UNION"></param>
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+
+</globals>
+
+
+<worker name="CREATE_TABLE">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="0"></param>
+      <sql_template>
+        <![CDATA[
+drop table AB_PART_TEST_W_INDEX;
+
+CREATE TABLE AB_PART_TEST_W_INDEX (
+COUNTERPARTY_ACCOUNT_NUMBER,
+COUNTERPARTY_NAME,
+POSTING_DATE,
+MODIFIED_DATE,
+MATCHED_DATE,
+COB_DATE,
+VALUE_DATE,
+ITEM_STATE,
+MATCH_STATUS,
+REASON_CODE,
+MATCH_USER,
+AMOUNT_LOCAL_CCY,
+LOCAL_CURRENCY,
+AMOUNT_USD_EQUIV,
+DEBIT_CREDIT,
+GL_ACCOUNT_NUMBER,
+GL_SUB_ACCOUNT,
+LEGAL_ENTITY_ID,
+LEGAL_ENTITY_NAME,
+NOSTRO_CODE,
+NOSTRO_NAME,
+CASH_ACCOUNT_NAME,
+CASH_ACCOUNT_NUMBER,
+CUSTOMER_SERVICE_LOCATION,
+OWNERSHIP_CODE,
+DEPARTMENT_CONTACT,
+LAST_UPDATED_BY_ID,
+LAST_UPDATED_BY_NAME,
+NARRATIVE,
+PRODUCT_GROUP,
+DEPARTMENT,
+CLERK_ID,
+CLERK_NAME,
+INTERNAL_REFERENCE,
+EXTERNAL_REFERENCE,
+ADDITIONAL_REFERENCE,
+MATCH_ID,
+CASE_ID,
+OLDID,
+OLDMATCHID,
+GENERIC_REFERENCE_FIELD_1,
+GENERIC_REFERENCE_FIELD_2,
+GENERIC_REFERENCE_FIELD_3,
+GENERIC_REFERENCE_FIELD_4,
+GENERIC_REFERENCE_FIELD_5,
+POOLID,
+BALANCE_POOL_NAME,
+COMPANY_NAME,
+DIVISION_NAME,
+FIRM_UNIQUE_ID_GRD,
+WORKING_DAY_AGE_VALUE_DATE,
+WORKING_DAY_AGE_ENTRY_DATE,
+CALENDAR_AGE_ENTRY_DATE,
+CALENDAR_AGE_VALUE_DATE,
+FED_AGE_VALUE_DATE,
+FED_AGE_ENTRY_DATE,
+SOURCESYSTEM,
+SYSTEM_ID,
+COUNTERPARTY_MNEMONIC,
+COUNTERPARTY_PARENT_ID,
+COUNTERPARTY_PARENT_NAME,
+COUNTERPARTY_PARENT_MNEMONIC,
+COUNTERPARTY_REF_UNQ_ID_GRD,
+COUNTERPARTY_ULT_PARENT_ID,
+COUNTERPARTY_ULT_PARENT_NAME,
+COUNTERPARTY_ID,
+COUNTERPARTY_ULT_PARENT_MNIC,
+COUNTERPARTY_GFCID,
+COUNTERPARTY_CREDIT_RATING,
+FIRM_ACCOUNT,
+SALESPERSON_NAME,
+DESK_NAME,
+STRATEGY_ID,
+STRATEGY_NAME,
+RESPONSIBLE_PERSON,
+RESPONSIBLE_MANAGER,
+ITEM_ID,
+EXCEPTION_STATUS,
+BREAK_EVENT_TYPE,
+METRICS_CATEGORY,
+FRIDAY_INDICATOR,
+NEW_ITEM_INDICATOR,
+COB_FX_RATE_KEY,
+BREAK_TYPE,
+AGE_BAND,
+UNIQUE_ID,
+ACCOUNT_TYPE,
+ASSOCIATED_FILE,
+ITEM_COUNT,
+UNMATCHED_ITEM_COUNT,
+MATCHED_ITEM_COUNT,
+AMOUNT_CALC_USD,
+CREATED_BY,
+CREATED_TIMESTAMP,
+RESOLVED_INDICATOR,
+RESOLVED_DATE,
+MEASUREMENT_TYPE,
+OPERATIONS_AGE_BAND,
+SRC_FILE_CD,
+AMOUNT_CALC_USD_CAT,
+MATCHED_REPORT_DATE,
+JRULES_RULE_ID,
+NET_ID,
+NETTED_BY,
+NETTEDBY_TS,
+OASYS_DEAL,
+RECONTXN_DESC,
+ACCOUNT_POOL,
+BACKDATED_ACTIVITY_ID,
+CUSTOMER_MNEMONIC,
+DEAL,
+DTCC_CLS_FUNDING,
+DTCC_ELIGIBLE,
+FIRM_MNEMONIC,
+MNGR_LEVEL_THREE,
+OPERATIONS_FILE,
+TRANSACTION_ID,
+TRANOUC,
+UNIQUE_POOLID,
+MANUAL_MATCH_COUNT,
+CBM_INDICATOR,
+DEALER_ID,
+COUNTERPARTY_SHORT_NAME,
+TRADING_DESK,
+WOW_NEW_ITEM_IND,
+WOW_RSLVD_IND,
+CBM_SOURCE,
+CBM_MNEMONIC,
+CBM_ACCOUNT_NAME,
+BALANCE_POOL_CNTRY,
+RECONCILER,
+TLM_EXTRT_DATE,
+CBM_REF_COB,
+COUNTERPARTY_MGMNT_GRP,
+COUNTERPARTY_IDENTIFIER,
+SRC_GLBLID_NMBR,
+SRC_MATCH_NMBR,
+AGE_BAND_ENTRY_DATE,
+GOC_CD,
+IMAGE_URL  )
+PARTITION BY LIST (local_currency) (
+PARTITION EUR VALUES ('EUR'),
+PARTITION NGN VALUES ('GBP'),
+PARTITION RUR VALUES ('RUR'),
+PARTITION RON VALUES ('RON'),
+PARTITION KWD VALUES ('KWD'))
+AS SELECT * FROM NOSTROS_HISTORY where rownum<10000
+and local_currency in ('EUR', 'GBP','RUR','RON','KWD')
+/
+
+
+drop index IND_TEST_local
+/
+
+create index IND_TEST_local on AB_PART_TEST_W_INDEX(NETTED_BY) local
+/
+
+
+drop index IND_TEST_global
+/
+
+create index IND_TEST_global on AB_PART_TEST_W_INDEX(debit_credit) global
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="INDEX_STATUS_BEFORE">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select index_name, index_type, compression, partitioned local,
+status
+from all_indexes
+where index_name in (select index_name
+from user_indexes
+where table_name = 'AB_PART_TEST_W_INDEX'
+)
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="IND_PART_STATUS_BEFORE">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select index_name,partition_name, compression, status
+from user_ind_partitions
+where index_name in (select index_name
+from user_indexes
+where table_name = 'AB_PART_TEST_W_INDEX'
+)
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="TAB_PART_STATUS_BEFORE">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select  partition_name, compression ,  subpartition_count sub_part, compress_for
+from all_tab_partitions c
+where  table_name = 'AB_PART_TEST_W_INDEX'
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="AB_COMPRESS_AB_PART_TEST">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+BEGIN AB_COMPRESS_TABLE2.compress_part_table(
+						p_table_name 	=> 'AB_PART_TEST_W_INDEX',
+						p_table_owner 	=> 'CSMARTBSER',
+						--p_part_name 	=> 'P20091130',
+						--p_subpart_name 	=> 'P20091130_P_CEEMEA', -- P20091130_P_CEEMEA
+						p_index_name 	=> NULL --'IND_TEST' -- 'NOSTROS_HISTORY_IDX2'
+											); 
+END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="INDEX_STATUS_AFTER">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select index_name, index_type, compression, partitioned local,
+status
+from all_indexes
+where index_name in (select index_name
+from user_indexes
+where table_name = 'AB_PART_TEST_W_INDEX'
+)
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="IND_PART_STATUS_AFTER">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select index_name,partition_name, compression, status
+from user_ind_partitions
+where index_name in (select index_name
+from user_indexes
+where table_name = 'AB_PART_TEST_W_INDEX'
+)
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="TAB_PART_STATUS_AFTER">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+select  partition_name, compression ,  subpartition_count sub_part, compress_for
+from all_tab_partitions c
+where  table_name = 'AB_PART_TEST_W_INDEX'
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+</etldataflow>

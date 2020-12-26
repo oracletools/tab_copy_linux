@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+  
+<worker name="SMC_MR_II_C_E_P">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_cx_1
+/
+
+--ALTER SESSION ENABLE PARALLEL DML
+--/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+--alter session set PARALLEL_MIN_PERCENT=50
+--/
+
+insert --+append 
+into  del_cx_1 
+ SELECT
+        /*+ PARALLEL (4) */
+        s.SMCP,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'FII'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_SCR_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'MSDC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SMC_MSD_KEY,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SCSP'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS SCR_CUSIP,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'IRIC'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS IRIC,
+        MAX(
+        CASE
+          WHEN CX.XREFCODE = 'SMBS'
+          THEN CX.XREFVALUE
+          ELSE NULL
+        END) AS MSD_SMBOL
+      FROM ( select * from C160970SMC.DEPOT_XREF@gmail.com where XREFCODE IN ( 'FII','MSDC','SCSP','IRIC','SMBS') ) CX,(SELECT
+        /*+ PARALLEL1(SLU, 4)*/
+        smcp
+      FROM C160970SMC.SECURITY_LAST_UPDATE@gmail.com SLU
+      WHERE DDAMODIFIEDTS > sysdate-1 
+      ) s
+      WHERE  S.SMCP = cx.SMCP(+)  
+      GROUP BY s.SMCP        
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+/*
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+ownname => user,
+tabname => 'SMC_MR_II_C_E_P',
+method_opt => 'FOR COLUMNS SMCP',
+granularity => 'PARTITION',
+cascade => TRUE,
+degree => DBMS_STATS.DEFAULT_DEGREE);
+end;
+/
+*/
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+
+
+</etldataflow>

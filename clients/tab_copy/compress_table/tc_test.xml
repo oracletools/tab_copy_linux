@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="COMPRESS_TEST">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="^|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA1" value="CSMARTVOL"></param>
+	  
+	  <param name="TO_DB1" value="%CVOL_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA1" value="CSMARTVOL"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+	  <param name="G_EXECUTE" value="True"></param>
+	  <param name="P_LIMIT" value="1"></param>
+</globals>
+
+
+<worker name="COMPRESS_HEAP_TABLE">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >		
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+
+BEGIN
+  COMPRESS_TABLE.g_execute:=%G_EXECUTE%;
+  COMPRESS_TABLE.g_fix_bitmap_ORA_14646:=True;
+  COMPRESS_TABLE.g_gather_table_stats:=True;
+  COMPRESS_TABLE.g_index_auto_maintenance:=False;
+  COMPRESS_TABLE.run_t_batch(USER,%P_LIMIT%);
+END;
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>  
+
+<worker name="COMPRESS_SUBPARTITIONED_TABLE">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >		
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+
+BEGIN
+  COMPRESS_TABLE.g_execute:=%G_EXECUTE%;
+  COMPRESS_TABLE.g_fix_bitmap_ORA_14646:=True;
+  COMPRESS_TABLE.g_gather_table_stats:=True;
+  COMPRESS_TABLE.g_index_auto_maintenance:=True;
+  COMPRESS_TABLE.run_sp_batch(USER,%P_LIMIT%);
+END;
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>  
+  
+
+
+<worker name="COMPRESS_PARTITIONED_TABLE">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >		
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+
+BEGIN
+  COMPRESS_TABLE.g_execute:=%G_EXECUTE%;
+  COMPRESS_TABLE.g_fix_bitmap_ORA_14646:=False;
+  COMPRESS_TABLE.g_gather_table_stats:=True;
+  COMPRESS_TABLE.g_index_auto_maintenance:=True;
+  COMPRESS_TABLE.run_p_batch(USER,%P_LIMIT%);
+END;
+/
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker> 
+
+
+
+</etldataflow>

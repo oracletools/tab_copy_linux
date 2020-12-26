@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PARACCELL_POC_FRH_PROD_0">
+<globals>
+
+
+          <param name="FIELD_TERMINATOR" value="'|'"></param>
+          <param name="LINE_TERMINATOR" value="''"></param>
+
+          <param name="FROM_DB" value="%AB95022_SMARTP1B%"></param>
+          <param name="LAME_DUCK" value='0'></param>
+          <param name="ARRAYSIZE" value="5000"></param>
+          <param name="COPYCOMMIT" value="4"></param>
+          <!--sqlp attribute-->
+
+</globals>
+ 
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20100101">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20100101"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20100827">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20100827"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20100901">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20100901"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20100922">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20100922"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20100924">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20100924"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101001">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101001"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101011">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101011"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101022">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101022"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101104">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101104"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101130">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101130"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101201">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101201"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101202">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101202"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101203">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101203"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+<worker name="CSMARTBSER.FAILS_REPORTS_HISTORY.P20101214">
+  <exec_spool>
+    <sqlp 	method="%SPOOL_METHOD%" >
+     <param name="PARTITION" value="P20101214"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.FAILS_REPORTS_HISTORY
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_spool>
+</worker>
+
+</etldataflow>
+

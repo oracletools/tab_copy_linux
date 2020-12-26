@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="FAILS">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%AD_SMARTC1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  
+	  <param name="TO_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="TO_SCHEMA" value="CSMARTBSER"></param>		  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+                        --use these 2 to ensure index maintenance in DIRECT non-parallel mode load mode
+                        <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"></param>
+
+
+                        <param name="DPL_BINDSIZE" value="100000"></param>
+                        --use this to REBUILD unusable indexes.
+                        <param name="IF_REBUILD_UNUSABLE_INDEXES" value="1"></param>
+</globals>
+
+
+
+<worker name="GMRS">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+         <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_PMA_ITEM_MAP]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<!--
+<worker name="GMRS">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+         <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.GMRS_ITEM_MSTR]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="DU16JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140616"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DT_DS018 = '16-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.DEPOTS_UNION]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FRH03JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140603"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '03-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH04JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140604"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '04-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH05JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140605"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '05-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH06JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140606"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '06-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH09JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140609"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '09-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH10JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140610"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '10-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH11JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140611"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '11-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH12JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140612"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '12-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH13JUN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140613"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '13-JUN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FRH30MAY">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140530"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '30-MAY-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH21MAY">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140521"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '21-MAY-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH20MAY">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140520"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '20-MAY-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FRH19MAY">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140519"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '19-MAY-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH26MAY">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140526"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '26-MAY-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FR13MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140313"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '13-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH14MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140314"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '14-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FR14MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140314"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '14-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR24APR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140424"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '24-APR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FRH12MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140312"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '12-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH11MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140311"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '11-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="FR27MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140327"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '27-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FRH26MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140326"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '26-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FR26MAR">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140326"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '26-MAR-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker name="FR01JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140101"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '01-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR14JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140114"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '14-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR13JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140113"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '13-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR10JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140110"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '10-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR09JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140109"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '09-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR08JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140108"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '08-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR07JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140107"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '07-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR06JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140106"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '06-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+<worker name="FR05JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140105"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '05-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker name="FR03JAN">
+  <exec_dml>
+    <sqlp       method="%COPY_METHOD%" >
+         <param name="NUM_OF_SHARDS" value="20"></param>
+     <param name="IF_DPL_SERIAL" value="0"></param>
+         <param name="TO_TABLE1" value=""></param>
+         <param name="PARTITION" value="P20140103"></param>
+         <param name="IF_TRUNCATE" value="1"></param>
+          <param name="FILTER1" value="WHERE COB_DATE = '03-JAN-14'"></param>
+     <sql_template>
+        <![CDATA[CSMARTBSER.FAILS_REPORTS_HISTORY]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+-->
+
+
+</etldataflow>

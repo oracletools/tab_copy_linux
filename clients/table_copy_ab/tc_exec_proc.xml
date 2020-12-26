@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="AB_COMPRESS_TAB" >
+
+<globals>
+	<param name="ETLFLOW_DESCR" value="Executes procedure"></param>
+
+	<!-- PIPELINE execution type
+	SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>	  
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME1" value="TRD_VOL_UNION"></param>
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+
+</globals>
+
+
+<worker1 name="AB_COMPRESS_HEAP_TAB">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+BEGIN AB_COMPRESS_TABLE.compress_heap_table(
+						p_table_name 	=> 'AB_HEAP_TEST',
+						p_table_owner 	=> 'CSMARTBSER',
+						--p_part_name 	=> 'P20091130',
+						--p_subpart_name 	=> 'P20091130_P_CEEMEA', -- P20091130_P_CEEMEA
+						p_index_name 	=> NULL -- 'NOSTROS_HISTORY_IDX2'
+											); 
+END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+<worker1 name="AB_COMPRESS_HEAP_TAB_W_INDEX">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+BEGIN AB_COMPRESS_TABLE.compress_heap_table(
+						p_table_name 	=> 'AB_HEAP_TEST_W_INDEX',
+						p_table_owner 	=> 'CSMARTBSER',
+						--p_part_name 	=> 'P20091130',
+						--p_subpart_name 	=> 'P20091130_P_CEEMEA', -- P20091130_P_CEEMEA
+						p_index_name 	=> NULL --'IND_TEST' -- 'NOSTROS_HISTORY_IDX2'
+											); 
+END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker name="AB_COMPRESS_AB_PART_TEST">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+BEGIN AB_COMPRESS_TABLE.compress_part_table(
+						p_table_name 	=> 'AB_PART_TEST',
+						p_table_owner 	=> 'CSMARTBSER',
+						--p_part_name 	=> 'P20091130',
+						--p_subpart_name 	=> 'P20091130_P_CEEMEA', -- P20091130_P_CEEMEA
+						p_index_name 	=> NULL --'IND_TEST' -- 'NOSTROS_HISTORY_IDX2'
+											); 
+END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+<worker1 name="AB_COMPRESS_TAB">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+BEGIN AB_COMPRESS_TABLE2.compress_part_table(
+						p_table_name 	=> 'NOSTROS_HISTORY',
+						p_table_owner 	=> 'CSMARTBSER',
+						p_part_name 	=> 'P20091130',
+						--p_subpart_name 	=> 'P20091130_P_CEEMEA', -- P20091130_P_CEEMEA
+						p_index_name 	=> 'NOSTROS_HISTORY_IDX2'
+											); 
+END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+</etldataflow>

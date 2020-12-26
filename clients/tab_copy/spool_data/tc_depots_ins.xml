@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%CSMARTBSER_SMARTU1B%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="CSMARTBSER"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+
+<worker name="ins1_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+		
+		
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 16
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+
+
+
+exec p_nostros_reconportal_cbmnd_ab (in_sourcesystem =>'RECONPORTAL-COMBINED', in_src_file_cd  =>'UM', in_file_name => ' RECONPORTAL_ITEM_UM_20130513.psv' , p_dop=>8);
+
+--exec p_nostros_reconportal_cbmnd_a3(in_sourcesystem =>'RECONPORTAL-COMBINED', in_src_file_cd  =>'UM', in_file_name => ' RECONPORTAL_ITEM_UM_20130513.psv' , p_dop=>8);
+
+
+--exec p_depots_target_ins_ab_2(P_SOURCE_SYSTEM=>'RECONPORTAL-COMBINED', P_COB_DATE=>'28-MAY-13',P_SRC_FILE_CD=>'AM', p_dop=>8);
+
+--exec p_depots_target_ins_ab_00(P_SOURCE_SYSTEM=>'RECONPORTAL-COMBINED', P_COB_DATE=>'28-MAY-13',P_SRC_FILE_CD=>'AM');
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker>
+
+
+<worker1 name="ins1_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+		
+		
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 16
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert /*+APPEND NOLOGGING*/ into ins_CSMARTBSER_DEPOTS_HISTORY1 --CSMARTBSER.DEPOTS_HISTORY PARTITION (P20130329) 
+(CTP_ID_PP_DS001,
+  CTP_NAM_PP_DS002,
+  CTP_MNEMNC_PP_DS003,
+  CTP_PRNT_ID_PP_DS004,
+  CTP_PRNT_NAM_PP_DS005,
+  CTP_PRNT_MNEMNC_PP_DS006,
+  CTP_ULT_PRNT_ID_PP_DS007,
+  CTP_ULT_PRNT_NAM_PP_DS008,
+  CTP_ULT_PRNT_MNEMNC_PP_DS009,
+  CTP_ACCT_NO_PP_DS010,
+  CTP_GFCID_GRD_DS011,
+  CTP_CR_RTNG_DS012,
+  VAL_DT_DS013,
+  POST_DT_DS014,
+  MDFY_DT_DS015,
+  MTCH_DT_DS016,
+  MAT_DT_DS017,
+  COB_DT_DS018,
+  ITEM_STE_DS019,
+  MTCH_STE_DS020,
+  RESN_CD_DS021,
+  MTCH_USER_DS022,
+  QTY_CNTRCT_DS023,
+  AMT_CNTRCT_LCL_CCY_DS024,
+  LCL_CCY_DS025,
+  AMT_CNTRCT_USD_DS026,
+  CURR_MV_LCL_DS027,
+  SRC_MTM_VAL_USD_DS028,
+  BUY_SELL_DS029,
+  LNG_SHRT_DS030,
+  LGL_ENTY_PP_DS033,
+  LGL_ENTY_NAM_PP_DS034,
+  DEP_CD_DS035,
+  DEP_NAM_DS036,
+  STK_ACCT_NAM_DS037,
+  STK_ACCT_NO_DS038,
+  BRK_TYP_DS039,
+  FIRM_ACCT_DS040,
+  SLSPRSN_NAM_DS041,
+  DESK_NAM_OP_DS042,
+  STGY_ID_OP_DS043,
+  STGY_NAM_OP_DS044,
+  CUST_SERV_LOCA_DS045,
+  LST_UPDT_BY_ID_DS047,
+  LST_UPDT_BY_NAM_DS048,
+  NARR_DS049,
+  PROD_GRP_OP_050,
+  DEPT_OP_051,
+  RESP_PERS_OP_DS052,
+  RESP_MGR_OP_DS053,
+  CLRK_ID_OP_DS054,
+  CLRK_NAM_OP_DS055,
+  CUSIP_CD_DS056,
+  ISIN_CD_DS057,
+  SEDOL_CD_DS058,
+  COM_CD_DS059,
+  BLTR_CD_DS060,
+  INTL_PROD_ID_DS066,
+  INTL_PROD_DESCR_DS067,
+  POOL_ID_SIFMA_DS068,
+  CUS_CUSIP_SIFMA_DS069,
+  SCR_SECT_DS070,
+  TKR_SYMB_SIFMA_DS071,
+  DUAL_LSTD_IND_DS072,
+  FIRM_ISSD_SCR_IND_DS074,
+  ASET_LVL1_CD_PP_DS075,
+  INTL_REF_DS078,
+  EXT_REF_DS079,
+  ADDN_REF_DS080,
+  ITEM_ID_DS081,
+  MTCH_ID_DS082,
+  VAL_CAL_DAY_AGE_DS083,
+  VAL_WRKNG_DAY_AGE_DS084,
+  VAL_FED_AGE_DS085,
+  ENTR_CAL_DAY_AGE_DS086,
+  ENTR_WRKNG_DAY_AGE_DS087,
+  ENTR_FED_AGE_DS088,
+  ITEM_CNT_DS089,
+  UMCH_ITEM_CNT_DS090,
+  MTCH_ITEM_CNT_DS091,
+  MTCH_CNT_DS092,
+  CASE_ID_DS093,
+  EXCP_TYP_DS094,
+  OLD_ID_DS095,
+  OLD_MTCH_ID_DS096,
+  GNRC_REF_FLD_1_DS097,
+  GNRC_REF_FLD_2_DS098,
+  GNRC_REF_FLD_3_DS099,
+  GNRC_REF_FLD_4_DS100,
+  BAL_POOL_ID_DS102,
+  BAL_POOL_NAM_DS103,
+  CO_NAM_DS104,
+  SRC_SYS_DS105,
+  MTM_PRC_USD_GRD_DS108,
+  SMRT_MTM_VAL_USD_DS110,
+  MTM_PRC_DS116,
+  MTRCS_CAT_DS118,
+  FRI_IND_DS119,
+  NEW_ITEM_IND_DS120,
+  RSLV_IND_DS121,
+  UNIQ_ID_DS122,
+  FIRM_UNIQ_ID_GRD_DS124,
+  AGE_BND_DS125,
+  ASET_LVL_KEY_DS126,
+  OWN_CD_DS127,
+  RSLV_DT_DS129,
+  CTP_IMS_ACCT_NO_DS130,
+  CTP_CPI_ACCT_NO_DS131,
+  AMT_CALC_USD_DS132,
+  POSN_TYP_DS133,
+  SCR_UNIQ_ID_PP_DS134,
+  SCR_UNIQ_ID_GRD_DS135,
+  ASET_LVL1_DESCR_PP_DS136,
+  ASET_LVL2_CD_PP_DS137,
+  ASET_LVL2_DESCR_PP_DS138,
+  ASET_LVL3_CD_PP_DS139,
+  ASET_LVL3_DESCR_PP_DS140,
+  MTM_FX_KEY_DS141,
+  EVNT_TYP_DS142,
+  CTP_UNIQ_ID_PP_DS143,
+  FIRM_UINQ_ID_PP_DS144,
+  FIRM_IMS_ACCT_NO_DS145,
+  FIRM_CPI_ACCT_NO_DS146,
+  FIRM_MNEMNC_DS147,
+  MCRCTRL_CD_DS148,
+  FO_KEY_DS149,
+  AGE_TO_MTCH_DS150,
+  FX_RT_KEY_DS151,
+  MTM_KEY_DS152,
+  CTP_GFCID_PP_DS153,
+  MEND_IND_DS154,
+  RSLV_ITEM_CNT_DS155,
+  NEW_ITEM_CNT_DS156,
+  LATE_ENTR_ITEM_CNT_DS157,
+  LGL_ENTY_KEY_DS158,
+  DR_CR_DS159,
+  SCR_NAM_DS160,
+  LCL_CCY_DUAL_DS161,
+  CURR_MV_LCL_DUAL_DS162,
+  CURR_MV_USD_DUAL_DS163,
+  MTM_VAL_LCL_CCY_DS164,
+  ACCT_TYP_DS170,
+  OPS_AGE_BND_DS171,
+  MSRMNT_TYP_DS172,
+  SRC_FILE_CD,
+  SECURITY_STATUS_DS173,
+  JRULES_RULE_ID,
+  MTM_UNIT_TRADE_DS174,
+  MTM_UNIT_PRICE_DS175,
+  DERIV_SCRID_IND_DS176,
+  SRC_SEC_PRC_DS177,
+  SRC_EXRAT_DS179,
+  SRC_PRC_FACT_DS178,
+  PRCD_IND_DS101,
+  PRC_DT_DS180,
+  LST_PRC_DT_DS181,
+  SCR_CCY_DS182,
+  SMC_UNIQUE_ID_DS184,
+  ABS_RECON_DS185,
+  STL_PRC_IND_DS183,
+  AMT_CALC_USD_CAT_DS186,
+  WOW_NEW_ITEM_IND_DS187,
+  WOW_RSLVD_ITEM_IND_DS188,
+  AGE_BND_ENTRY_DT_DS189,
+  QUICK_REC_IND_DS195,
+  DEPT_CHNG_DATE_DS190,
+  DEPT_AGE_DS191,
+  DEPT_CHNG_CNT_DS192,
+  MSRMNT_CHNG_DATE_DS193,
+  MSRMNT_AGE_DS194,
+  RULES_FIRED_DS196 ,
+  AS_OF_IND_DS197 ,
+  STRIKE_PRC_DS198,
+  BREAK_AGE_DS199,
+  EXPIRY_MONTH_DS200,
+	EXPIRY_YEAR_DS201,
+	CNTRCT_TYPE_DS202,
+	CNTRCT_SETL_TYPE_DS203,
+	GOC_CD_DS204,
+	WORKING_AGE_BAND_DS205,
+	CASH_BREAK_TYPE_DS206,
+	SOURCING_LEVEL_DS207,
+  DT_REC_FRM_GMI_DS208,
+  RECON_RGN_DS209,
+  OWN_RGN_DS210,
+  RECON_LOC_DS211,
+  INVEST_TEAM_DS212,
+  BRK_CASER_DS213,
+  BRK_CASED_DT_DS214,
+  RECON_APPROVAL_DT_DS215,
+  MGR_APPROVAL_DT_DS216,
+  RPT_RUN_DT_DS217,
+  MGR_APPROVAL_DS218,
+  SALESPERSON_ID_DS219,
+  CCY_IND_DS221,
+  CLR_RGN_DS222,
+  SESSION_ID_DS223,
+  OWN_CD_QUICKREC_DS224,
+  OPS_TRD_REF_DS225,
+  ALLOCATION_DS226,
+  SETL_DT_CONT_DS227,
+  TRD_DT_DS228,
+  UPLOAD_DT_DS229,
+  FAILS_UNIQID_DS230,
+  DPT_CNTCT_DS231,
+  gl_key_ds232 ,
+  gl_code_ds233,
+  LATE_ENTRY_IND_DS224,
+  SDI_DS235,
+  ASST_ID_SEC_DS236,
+  GNRC_REF_FLD_5_DS237,
+  GNRC_REF_FLD_6_DS238,
+  GNRC_REF_FLD_7_DS239,
+  GNRC_REF_FLD_8_DS240,
+  GNRC_REF_FLD_9_DS241,
+  GNRC_REF_FLD_10_DS242,
+  GNRC_REF_FLD_11_DS243,
+  GNRC_REF_FLD_12_DS244,
+  GNRC_REF_FLD_13_DS245
+  )
+select --+FULL(v) 
+* from select_depots_staging_tbl2_0 v
+WHERE cob_dt_ds018= '29-MAR-13'
+and src_sys_ds105 ='TLM-RECON-OPS' 
+and src_file_cd = 'UM';
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+  
+<worker1 name="ins1_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+		
+		
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 16
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert /*+APPEND NOLOGGING*/ into ins_CSMARTBSER_DEPOTS_HISTORY0 --CSMARTBSER.DEPOTS_HISTORY PARTITION (P20130329) 
+(CTP_ID_PP_DS001,
+  CTP_NAM_PP_DS002,
+  CTP_MNEMNC_PP_DS003,
+  CTP_PRNT_ID_PP_DS004,
+  CTP_PRNT_NAM_PP_DS005,
+  CTP_PRNT_MNEMNC_PP_DS006,
+  CTP_ULT_PRNT_ID_PP_DS007,
+  CTP_ULT_PRNT_NAM_PP_DS008,
+  CTP_ULT_PRNT_MNEMNC_PP_DS009,
+  CTP_ACCT_NO_PP_DS010,
+  CTP_GFCID_GRD_DS011,
+  CTP_CR_RTNG_DS012,
+  VAL_DT_DS013,
+  POST_DT_DS014,
+  MDFY_DT_DS015,
+  MTCH_DT_DS016,
+  MAT_DT_DS017,
+  COB_DT_DS018,
+  ITEM_STE_DS019,
+  MTCH_STE_DS020,
+  RESN_CD_DS021,
+  MTCH_USER_DS022,
+  QTY_CNTRCT_DS023,
+  AMT_CNTRCT_LCL_CCY_DS024,
+  LCL_CCY_DS025,
+  AMT_CNTRCT_USD_DS026,
+  CURR_MV_LCL_DS027,
+  SRC_MTM_VAL_USD_DS028,
+  BUY_SELL_DS029,
+  LNG_SHRT_DS030,
+  LGL_ENTY_PP_DS033,
+  LGL_ENTY_NAM_PP_DS034,
+  DEP_CD_DS035,
+  DEP_NAM_DS036,
+  STK_ACCT_NAM_DS037,
+  STK_ACCT_NO_DS038,
+  BRK_TYP_DS039,
+  FIRM_ACCT_DS040,
+  SLSPRSN_NAM_DS041,
+  DESK_NAM_OP_DS042,
+  STGY_ID_OP_DS043,
+  STGY_NAM_OP_DS044,
+  CUST_SERV_LOCA_DS045,
+  LST_UPDT_BY_ID_DS047,
+  LST_UPDT_BY_NAM_DS048,
+  NARR_DS049,
+  PROD_GRP_OP_050,
+  DEPT_OP_051,
+  RESP_PERS_OP_DS052,
+  RESP_MGR_OP_DS053,
+  CLRK_ID_OP_DS054,
+  CLRK_NAM_OP_DS055,
+  CUSIP_CD_DS056,
+  ISIN_CD_DS057,
+  SEDOL_CD_DS058,
+  COM_CD_DS059,
+  BLTR_CD_DS060,
+  INTL_PROD_ID_DS066,
+  INTL_PROD_DESCR_DS067,
+  POOL_ID_SIFMA_DS068,
+  CUS_CUSIP_SIFMA_DS069,
+  SCR_SECT_DS070,
+  TKR_SYMB_SIFMA_DS071,
+  DUAL_LSTD_IND_DS072,
+  FIRM_ISSD_SCR_IND_DS074,
+  ASET_LVL1_CD_PP_DS075,
+  INTL_REF_DS078,
+  EXT_REF_DS079,
+  ADDN_REF_DS080,
+  ITEM_ID_DS081,
+  MTCH_ID_DS082,
+  VAL_CAL_DAY_AGE_DS083,
+  VAL_WRKNG_DAY_AGE_DS084,
+  VAL_FED_AGE_DS085,
+  ENTR_CAL_DAY_AGE_DS086,
+  ENTR_WRKNG_DAY_AGE_DS087,
+  ENTR_FED_AGE_DS088,
+  ITEM_CNT_DS089,
+  UMCH_ITEM_CNT_DS090,
+  MTCH_ITEM_CNT_DS091,
+  MTCH_CNT_DS092,
+  CASE_ID_DS093,
+  EXCP_TYP_DS094,
+  OLD_ID_DS095,
+  OLD_MTCH_ID_DS096,
+  GNRC_REF_FLD_1_DS097,
+  GNRC_REF_FLD_2_DS098,
+  GNRC_REF_FLD_3_DS099,
+  GNRC_REF_FLD_4_DS100,
+  BAL_POOL_ID_DS102,
+  BAL_POOL_NAM_DS103,
+  CO_NAM_DS104,
+  SRC_SYS_DS105,
+  MTM_PRC_USD_GRD_DS108,
+  SMRT_MTM_VAL_USD_DS110,
+  MTM_PRC_DS116,
+  MTRCS_CAT_DS118,
+  FRI_IND_DS119,
+  NEW_ITEM_IND_DS120,
+  RSLV_IND_DS121,
+  UNIQ_ID_DS122,
+  FIRM_UNIQ_ID_GRD_DS124,
+  AGE_BND_DS125,
+  ASET_LVL_KEY_DS126,
+  OWN_CD_DS127,
+  RSLV_DT_DS129,
+  CTP_IMS_ACCT_NO_DS130,
+  CTP_CPI_ACCT_NO_DS131,
+  AMT_CALC_USD_DS132,
+  POSN_TYP_DS133,
+  SCR_UNIQ_ID_PP_DS134,
+  SCR_UNIQ_ID_GRD_DS135,
+  ASET_LVL1_DESCR_PP_DS136,
+  ASET_LVL2_CD_PP_DS137,
+  ASET_LVL2_DESCR_PP_DS138,
+  ASET_LVL3_CD_PP_DS139,
+  ASET_LVL3_DESCR_PP_DS140,
+  MTM_FX_KEY_DS141,
+  EVNT_TYP_DS142,
+  CTP_UNIQ_ID_PP_DS143,
+  FIRM_UINQ_ID_PP_DS144,
+  FIRM_IMS_ACCT_NO_DS145,
+  FIRM_CPI_ACCT_NO_DS146,
+  FIRM_MNEMNC_DS147,
+  MCRCTRL_CD_DS148,
+  FO_KEY_DS149,
+  AGE_TO_MTCH_DS150,
+  FX_RT_KEY_DS151,
+  MTM_KEY_DS152,
+  CTP_GFCID_PP_DS153,
+  MEND_IND_DS154,
+  RSLV_ITEM_CNT_DS155,
+  NEW_ITEM_CNT_DS156,
+  LATE_ENTR_ITEM_CNT_DS157,
+  LGL_ENTY_KEY_DS158,
+  DR_CR_DS159,
+  SCR_NAM_DS160,
+  LCL_CCY_DUAL_DS161,
+  CURR_MV_LCL_DUAL_DS162,
+  CURR_MV_USD_DUAL_DS163,
+  MTM_VAL_LCL_CCY_DS164,
+  ACCT_TYP_DS170,
+  OPS_AGE_BND_DS171,
+  MSRMNT_TYP_DS172,
+  SRC_FILE_CD,
+  SECURITY_STATUS_DS173,
+  JRULES_RULE_ID,
+  MTM_UNIT_TRADE_DS174,
+  MTM_UNIT_PRICE_DS175,
+  DERIV_SCRID_IND_DS176,
+  SRC_SEC_PRC_DS177,
+  SRC_EXRAT_DS179,
+  SRC_PRC_FACT_DS178,
+  PRCD_IND_DS101,
+  PRC_DT_DS180,
+  LST_PRC_DT_DS181,
+  SCR_CCY_DS182,
+  SMC_UNIQUE_ID_DS184,
+  ABS_RECON_DS185,
+  STL_PRC_IND_DS183,
+  AMT_CALC_USD_CAT_DS186,
+  WOW_NEW_ITEM_IND_DS187,
+  WOW_RSLVD_ITEM_IND_DS188,
+  AGE_BND_ENTRY_DT_DS189,
+  QUICK_REC_IND_DS195,
+  DEPT_CHNG_DATE_DS190,
+  DEPT_AGE_DS191,
+  DEPT_CHNG_CNT_DS192,
+  MSRMNT_CHNG_DATE_DS193,
+  MSRMNT_AGE_DS194,
+  RULES_FIRED_DS196 ,
+  AS_OF_IND_DS197 ,
+  STRIKE_PRC_DS198,
+  BREAK_AGE_DS199,
+  EXPIRY_MONTH_DS200,
+	EXPIRY_YEAR_DS201,
+	CNTRCT_TYPE_DS202,
+	CNTRCT_SETL_TYPE_DS203,
+	GOC_CD_DS204,
+	WORKING_AGE_BAND_DS205,
+	CASH_BREAK_TYPE_DS206,
+	SOURCING_LEVEL_DS207,
+  DT_REC_FRM_GMI_DS208,
+  RECON_RGN_DS209,
+  OWN_RGN_DS210,
+  RECON_LOC_DS211,
+  INVEST_TEAM_DS212,
+  BRK_CASER_DS213,
+  BRK_CASED_DT_DS214,
+  RECON_APPROVAL_DT_DS215,
+  MGR_APPROVAL_DT_DS216,
+  RPT_RUN_DT_DS217,
+  MGR_APPROVAL_DS218,
+  SALESPERSON_ID_DS219,
+  CCY_IND_DS221,
+  CLR_RGN_DS222,
+  SESSION_ID_DS223,
+  OWN_CD_QUICKREC_DS224,
+  OPS_TRD_REF_DS225,
+  ALLOCATION_DS226,
+  SETL_DT_CONT_DS227,
+  TRD_DT_DS228,
+  UPLOAD_DT_DS229,
+  FAILS_UNIQID_DS230,
+  DPT_CNTCT_DS231,
+  gl_key_ds232 ,
+  gl_code_ds233,
+  LATE_ENTRY_IND_DS224,
+  SDI_DS235,
+  ASST_ID_SEC_DS236,
+  GNRC_REF_FLD_5_DS237,
+  GNRC_REF_FLD_6_DS238,
+  GNRC_REF_FLD_7_DS239,
+  GNRC_REF_FLD_8_DS240,
+  GNRC_REF_FLD_9_DS241,
+  GNRC_REF_FLD_10_DS242,
+  GNRC_REF_FLD_11_DS243,
+  GNRC_REF_FLD_12_DS244,
+  GNRC_REF_FLD_13_DS245
+  )
+select --+FULL(v) 
+* from select_depots_staging_tbl2_1 v
+WHERE cob_dt_ds018= '29-MAR-13'
+and src_sys_ds105 ='TLM-RECON-OPS' 
+and src_file_cd = 'UM';
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+<worker1 name="ins1_0">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+		
+		
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 8
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert /*+APPEND NOLOGGING*/ into ins_CSMARTBSER_DEPOTS_HISTORY
+select --+FULL(v) parallel(4)
+* from select_depots_staging_tbl2_0 v
+WHERE cob_dt_ds018= '29-MAR-13'
+and src_sys_ds105 ='TLM-RECON-OPS' 
+and src_file_cd = 'UM';
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+  
+<worker1 name="ins1_1">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+		
+		
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 8
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert /*+APPEND NOLOGGING*/ into ins_CSMARTBSER_DEPOTS_HISTORY
+select --+FULL(v) parallel(4)
+* from select_depots_staging_tbl2_1 v
+WHERE cob_dt_ds018= '29-MAR-13'
+and src_sys_ds105 ='TLM-RECON-OPS' 
+and src_file_cd = 'UM';
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+  
+<worker1 name="ins2">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 8
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+		
+insert /*+APPEND*/ into ins_CSMARTBSER_DEPOTS_UNION
+select --+FULL(v) parallel(4)
+* from select_DEPOTS_STAGING_TBL2 v
+WHERE cob_dt_ds018= '29-MAR-13'
+and src_sys_ds105 ='TLM-RECON-OPS' 
+and src_file_cd = 'UM';
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+  
+<worker1 name="ins3">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTBSER_SMARTU1B%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+      <sql_template>
+        <![CDATA[
+set serveroutput on timing on
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+ALTER SESSION FORCE PARALLEL QUERY PARALLEL 8
+/
+		
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+		
+INSERT /*+APPEND*/ INTO csmartbser.depots_previous_cob
+  (
+    UNIQUE_ID,
+    COB_DATE,
+    ETL_SRC_FILE_ID,
+    SRC_FILE_CD,
+    DEPARTMENT,
+    DEPT_CHNG_DATE,
+    DEPT_CHNG_AGE,
+    DEPT_CHNG_CNT,
+    MSRMNT_DATE,
+    MSRMNT_AGE,
+    MEASUREMENT_TYPE
+  )
+  select --+FULL(v) p
+    UNIQ_ID_DS122,
+    COB_DT_DS018,
+    SRC_SYS_DS105,
+    SRC_FILE_CD,
+    DEPT_OP_051,
+    DEPT_CHNG_DATE_DS190,
+    DEPT_AGE_DS191,
+    DEPT_CHNG_CNT_DS192,
+    MSRMNT_CHNG_DATE_DS193,
+    MSRMNT_AGE_DS194,
+    MSRMNT_TYP_DS172
+  from select_DEPOTS_STAGING_TBL2 v
+WHERE cob_dt_ds018= '29-MAR-13'
+and src_sys_ds105 ='TLM-RECON-OPS' 
+and src_file_cd = 'UM';
+
+commit;
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+</worker1>
+
+
+
+</etldataflow>

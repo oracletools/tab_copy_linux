@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<etldataflow name="test" pipeline_config="test_config.xml">
+  <globals>
+    <param name="FIELD_TERMINATOR" value="|"/>
+    <param name="LINE_TERMINATOR" value="~"/>
+    <param name="FROM_DB" value="%test%"/>
+    <param name="TO_DB" value="%test%"/>
+    <param name="TO_SCHEMA" value="CSMARTVOL"/>
+    <param name="LAME_DUCK" value="0"/>
+    <param name="ARRAYSIZE" value="100000"/>
+    <param name="COPYCOMMIT" value="4"/>
+    <!--Truncate table/partition before inserting -->
+    <param name="IF_TRUNCATE" value="0"/>
+    <!--sqlp attribute-->
+  </globals>
+  <worker name="ABC_AS_SONOF_LINES_STG_DAILY">
+    <exec_copy>
+      <sqlp method="%COPY_METHOD%">
+        <param name="IGNORE_PARTITION" value="PARTITION_NAME"/>
+        <sql_template>
+<![CDATA[ESMARTABC.ABC_AS_SONOF_LINES_STG_DAILY]]>          
+        </sql_template>
+      </sqlp>
+    </exec_copy>
+  </worker>
+</etldataflow>

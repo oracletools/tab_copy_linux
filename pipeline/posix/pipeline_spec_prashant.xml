@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_spec>
+  <process_spec
+    env='dev'
+	env2='{$ETL_ENV}'
+    	LOG_ROOT="log/"
+	TMPDIR="tmp/"
+	REFS_PATH="refs"
+	binaries_path ="lib" 
+	template_path ="lib/template"
+	test_home ="test/"
+	DEV_EMAIL_TO1="prashant5.sawant@gmail.com"
+	DEV_EMAIL_TO="AlexBuzunov@gmail.com"
+	EMAIL_TO="AlexBuzunov@gmail.com"
+	VOL_EMAIL_TO="AlexBuzunov@gmail.com"
+	SQL_LOADER_COPY="sql_echo_loader"
+	FAST_COPY_METHOD="sql_plus_copy"
+	DQ_EXPLAIN="dq_explain_plan"	
+    />
+
+  <connector>
+        <!--source connector-->
+        <PS_SMARTP1B type1='inline' schema="PS56255" pword="***" sid="SMARTP1B" host = "localhost"  PORT = "11150"/>
+        <!--target connectors-->
+        <CVOL_SMARTQ1 type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTQ1" host = "localhost"  PORT = "11150"/>
+        <CVOL_SMARTD1 type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTD1" host = "localhost"  PORT = "11150"/>
+        <CVOL_SMARTU1B type1='inline' schema="CSMARTVOL" pword="***" sid="SMARTU1B" host = "localhost"  PORT = "11150"/>
+
+   </connector>
+ 
+  <default>
+	  <env>
+	  
+		 <vol COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%VOL_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%PS_SMARTP1B%"></param>
+ 		 </vol>
+
+ 		 <dev COPY_METHOD="%SQL_LOADER_COPY%">
+		  <param name="EMAIL_TO" value='%DEV_EMAIL_TO%'></param>
+		  <param name="FROM_DB" value="%PS_SMARTP1B%"></param>
+ 		 </dev>
+
+	  </env>
+  </default>
+  <worker>
+    <!--worker name has to be unique -->
+	<exec_dml name="sqlp" module_name="sql_utils" />	
+    <!--worker name has to be unique -->
+	<exec_copy name="sqlp" module_name="sql_utils" />
+  </worker>
+</test_spec>

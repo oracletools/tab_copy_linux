@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<etldataflow name="333" pipeline_config="pipeline_config_140224_210403.xml">
+  <globals>
+    <param name="FLOW_TYPE" value="SYNC"/>
+    <param name="FIELD_TERMINATOR" value="|"/>
+    <param name="LINE_TERMINATOR" value="~"/>
+    <param name="FROM_DB" value="%CSMARTREF_SMARTQ1%"/>
+    <param name="TO_DB" value="%CSMARTREF_SMARTD1%"/>
+    <param name="LAME_DUCK" value="1000"/>
+    <param name="ARRAYSIZE" value="100000"/>
+    <param name="COPYCOMMIT" value="4"/>
+    <param name="SKIP_INDEX_MAINTENANCE" value="TRUE"/>
+    <param name="DPL_BINDSIZE" value="100000"/>
+    <param name="IF_REBUILD_UNUSABLE_INDEXES" value="0"/>
+    <param name="IF_SHOW_SERVEROUTPUT" value="1"/>
+  </globals>
+  <CallBefore/>
+  <worker name="22">
+    <exec_copy>
+      <sqlp method="%COPY_METHOD%">
+        <param name="IF_TRUNCATE" value="0"/>
+        <param name="NUM_OF_SHARDS1" value=""/>
+        <param name="IF_DPL_SERIAL1" value="0"/>
+        <param name="TO_SCHEMA1" value="CSMARTREF"/>
+        <param name="TO_TABLE1" value="REF_DSMT_SID_COPY_DEMO"/>
+        <sql_template>
+<![CDATA[CSMARTREF.REF_DSMT_SID_COPY_DEMO]]>        </sql_template>
+      </sqlp>
+    </exec_copy>
+  </worker>
+  <CallAfter/>
+</etldataflow>

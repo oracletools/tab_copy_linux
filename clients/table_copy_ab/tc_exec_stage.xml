@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="ab_p_ins_stage_data" >
+
+<globals>
+	<param name="ETLFLOW_DESCR" value="Ececutes ab_p_ins_stage_data procedure"></param>
+
+	<!-- PIPELINE execution type
+	SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="SYNC"></param>	  
+
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%CSMARTBI_SMARTU1B%"></param>
+	  <param name="SCHEMA_NAME" value="CSMARTBSER"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME1" value="TRD_VOL_UNION"></param>
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+
+</globals>
+
+
+<worker name=" csmartbi.p_ins_stage_data">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+DECLARE
+p_cntrl_ts VARCHAR2(255);
+BEGIN  csmartbi.ab_p_ins_stage_data('01-AUG-11', '01-AUG-11' , 'N', p_cntrl_ts); 
+END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker>
+
+
+
+<worker1 name="ab_p_ins_stage_data">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+DECLARE
+p_cntrl_ts VARCHAR2(255);
+BEGIN ab_p_ins_stage_data('08/01/2011', '08/02/2011', 'N', p_cntrl_ts); END;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+<worker1 name="ab_p_ins_stage_data">
+  <exec_dml>
+    <sqlp method="%SELECT_METHOD%" >
+	<param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+      <sql_template>
+        <![CDATA[
+SELECT /*+ parallel (trade, 8)*/
+trade.lgl_enty_key,
+trade.ctp_uid_grd,
+trade.fo_goc,
+CSMARTBI.TRADE_VOLUME_FACT_SEQ.nextval,
+trade.slsprsn_id,
+trade.own_cd,
+trade.tran_typ,
+Nvl(trade.metrics_cat, 'Unallocated'),
+NVL(trade.buy_sell, 'Unallocated') buy_sell,
+NVL(trade.trd_sta,'Unallocated'),
+Nvl(trade.exch, 'Unallocated'),
+trade.mkt_of_setl_cd,
+trade.actl_mkt_of_setl_cd,
+trade.aset_lvl_key,
+trade.cob_dt,
+trade.con_setl_dt,
+trade.trd_tran_dt,
+NVL(trade.vol_evnt_typ, 'Unallocated'),
+Nvl(trade.stp_type, 'Unallocated'),
+Nvl(trade.src_file_cd, 'Unallocated'),
+Nvl(trade.feed_src_sys, 'Unallocated'),
+Nvl(trade.blk_vs_aloc, 'Unallocated'),
+Nvl(trade.bltr_cd, 'Unallocated'),
+Nvl(trade.fo_book_sys, 'Unallocated'),
+Nvl(trade.trdr_id, 'Unallocated'),
+Nvl(trade.lcl_ccy, 'Unallocated'),
+Nvl(trade.firm_acct_mnemonic, 'Unallocated'),
+Nvl(trade.mssb_ind, 'Unallocated'),
+Nvl(trade.tran_exec_meth, 'Unallocated'),
+Nvl(trade.setl_loca, 'Unallocated'),
+Nvl(trade.trdr_nam, 'Unallocated'),
+Nvl(trade.trd_entr_user_desk_rgn, 'Unallocated'),
+Nvl(trade.strat_code, 'Unallocated'),
+trade.is_holiday,
+trade.vol_cash_smry_sid,
+trade.bo_os_setl_trd_cnt,
+trade.post_compressed_setl_cnt,
+trade.pre_compressed_setl_cnt,
+trade.item_cnt,
+trade.os_new_trd_val,
+trade.os_new_trd_cnt,
+trade.os_new_trd_qty,
+trade.fo_os_net_qty,
+trade.fo_new_trd_cnt,
+trade.fo_outrt_canc_trd_cnt,
+trade.fo_canc_corr_trd_cnt,
+trade.fo_os_net_usd_amt,
+trade.bo_new_trd_cnt,
+trade.bo_os_trd_cnt,
+trade.bo_outrt_canc_trd_cnt,
+trade.bo_canc_corr_trd_cnt,
+trade.qty,
+trade.con_qty,
+trade.calc_usd_amt,
+trade.late_entr_age,
+          trade.late_entr_item_cnt,
+trade.lcl_ccy_amt,
+          trade.con_lcl_ccy_amt
+      FROM
+csmartvol.vw_vol_smry_cash trade WHERE trade.cob_dt BETWEEN '08/01/2011' AND
+'08/02/2011' AND 1=2;
+/
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_dml>
+</worker1>
+
+
+
+</etldataflow>

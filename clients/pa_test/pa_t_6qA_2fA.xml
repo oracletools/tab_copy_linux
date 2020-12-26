@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="T_6QA_2FA_ASYNC">
+<globals>
+
+	<param name="ETLFLOW_DESCR" value="Exec shell cmd."></param>
+
+	<!-- PIPELINE execution type
+	 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	<param name="FLOW_TYPE" value="ASYNC"></param>
+
+	<param name="FIELD_TERMINATOR" value="'|'"></param>
+	<param name="LINE_TERMINATOR" value="''"></param>
+
+	<param name="DB_CONNECTOR" value="%PADB_DEPOT%"></param>
+	<param name="SCHEMA_NAME" value="PARACCEL"></param>
+	<!--will spool ALL records if LAME_DUCK=0-->
+	<param name="LAME_DUCK" value='0'></param>
+	<param name="ARRAYSIZE" value="5000"></param>
+	<param name="COPYCOMMIT" value="4"></param>
+	<!--sqlp attribute-->
+
+	
+	<param name="IF_TOSS_CACHE" value="0"></param>
+	
+	<param name="IF_ASYNC_LOG" value="1"></param>	
+
+	<param name="CLIENT_LOC" value="pa_test/oct6"></param>	
+	
+	<param name="HOME_LOC" value="/home/paraccel/data_spooler"></param>	
+	
+	<param name="PIPELINE_SPEC" value="pa_pipeline_spec"></param>
+	
+	
+</globals>
+
+
+<worker name="CMD_2FA_0">
+  <exec_cmd>
+    <bash 	method="%PA_BASH_TEST%" >
+	<param name="PIPELINE_CLIENT" value="pa_2fA_base"></param>
+
+	<cmd_template>
+        <![CDATA[
+		cd %HOME_LOC%
+		pwd
+		time python %HOME_LOC%/data_spooler.py --pipeline_spec=%HOME_LOC%/pipeline/posix/%PIPELINE_SPEC%.xml --pipeline=%HOME_LOC%/clients/%CLIENT_LOC%/%PIPELINE_CLIENT%.xml
+		]]>
+      </cmd_template>
+    </bash>
+  </exec_cmd>
+</worker>
+
+
+<worker name="CMD_6QS_1">
+  <exec_cmd>
+    <bash 	method="%PA_BASH_TEST%" >
+	<param name="PIPELINE_CLIENT" value="pa_6qA_base"></param>
+
+      <cmd_template>
+        <![CDATA[
+		cd %HOME_LOC%
+		pwd
+		time python %HOME_LOC%/data_spooler.py --pipeline_spec=%HOME_LOC%/pipeline/posix/%PIPELINE_SPEC%.xml --pipeline=%HOME_LOC%/clients/%CLIENT_LOC%/%PIPELINE_CLIENT%.xml
+		]]>
+      </cmd_template>
+    </bash>
+  </exec_cmd>
+</worker>
+
+
+</etldataflow>

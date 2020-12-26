@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="RAP_ETL_DATA_STAT">
+<globals> 
+ 
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="#|"></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+	  
+  
+	  <param name="FROM_DB" value="%LG_GMAP1B%"></param>
+	  <param name="FROM_SCHEMA" value="C164758RAP"></param>
+	  
+	  <param name="TO_DB" value="%C164758RAP_GMAD1%"></param>
+	  <param name="TO_SCHEMA" value="C164758RAP"></param>	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+	  <param name="IF_TRUNCATE" value="0"></param>
+	  
+	  <param name="IF_SHOW_SERVEROUTPUT" value="1"></param>
+</globals>
+
+
+<worker name="Q">
+  <exec_query_copy>
+    <table_utils 	method="%QUERY_COPY_METHOD%" >
+	<param name="TO_TABLE" value="RAP_ETL_DATA_STAT"></param>	
+	<param name="IF_CREATE_TARGET_TABLE" value="0"></param>		 
+      <sql_template>
+        <![CDATA[select * from C164758RAP.RAP_ETL_DATA_STAT where (src_file like 'SimpliDEPOTFOX.PAA.%' OR src_file like 'FOX.PAA.FX.%') and bus_dt between '01-JUL-2014' and '10-JUL-2014']]>
+      </sql_template>
+    </table_utils>
+  </exec_query_copy>
+  
+</worker>
+</etldataflow>

@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="SMC_SPOOL">
+<globals>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="ASYNC"></param>	
+
+	  <param name="FIELD_TERMINATOR" value="|"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+  
+	  <param name="FROM_DB" value="%DL_GMAU%"></param>
+	  <param name="FROM_DB1" value="%AB_SMARTP1B%"></param>
+	  <param name="FROM_SCHEMA" value="DLROGMARWSMART"></param>
+	  <param name="DB_CONNECTOR1" value="%DL_GMAU%"></param>
+	  
+	  
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+		
+		
+	  <param name="SOURCE_FILE" value="--replaced from command line"></param>	
+	  <param name="COB_YEAR" value="--replaced from command line"></param>
+
+</globals>
+
+--4 min
+<worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_r_io
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+
+insert --+append parallel(rio,4)
+into del_r_io rio
+select /*+parallel(r,4) */ r.* from REF_SMC r --, STG_REF_SMC_ISSUER_ab i
+ where --R.SMC_ISSUER_ID=i.SMC_ISSUER_ID and 
+ r.rowid in (select /*+parallel(io,4)*/ r_rid from del_rp_id_io partition(p_0) io)
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+ 
+</worker1>
+
+
+
+<worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_r_io
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+
+insert --+append parallel(rio,4)
+into del_r_io rio
+select /*+parallel(r,4) */ r.* from REF_SMC r, STG_REF_SMC_ISSUER_ab i
+ where R.SMC_ISSUER_ID=i.SMC_ISSUER_ID and r.rowid in (select /*+parallel(io,4)*/ r_rid from del_rp_id_io partition(p_1) io)
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+ 
+</worker1>
+
+--1 min
+<worker name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_rp_id_io_2
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert --+append parallel(ri,4)
+into del_rp_id_io_2 ri
+select --+parallel(p,4)
+R.SMC_PROD_ID R_SMCP , r_rid, P.SMC_PROD_ID P_SMCP , p.rowid p_rid,substr(reverse(nvl(R.SMC_PROD_ID,P.SMC_PROD_ID)),1,1) rev,
+ DECODE(R.SMC_PROD_ID,P.SMC_PROD_ID,1,0)   from (
+(select /*+parallel(r,4) */ rowid r_rid, R.SMC_PROD_ID from REF_SMC_TMP_PART r --where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ'
+      ) R
+      full outer join  DEL_P_I_S P
+      on( R.SMC_PROD_ID =P.SMC_PROD_ID))
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker>
+
+
+
+<worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_rp_id_io
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert --+append parallel(ri,4)
+into del_rp_id_io ri
+select --+parallel(p,4)
+R.SMC_PROD_ID R_SMCP , r_rid, P.SMC_PROD_ID P_SMCP , p.rowid p_rid,substr(reverse(nvl(R.SMC_PROD_ID,P.SMC_PROD_ID)),1,1) rev,
+ DECODE(R.SMC_PROD_ID,P.SMC_PROD_ID,1,0)   from (
+(SELECT r_rid, R.SMC_PROD_ID --, P.SMC_PROD_ID
+       FROM STG_REF_SMC_ISSUER_ab I ,
+      (select /*+parallel(r,4) */ rowid r_rid, r.* from REF_SMC r --where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ'
+      ) R
+      where R.SMC_ISSUER_ID=I.SMC_ISSUER_ID(+)
+      ) R
+      full outer join  DEL_P_I_S P
+      on( R.SMC_PROD_ID =P.SMC_PROD_ID))
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+<worker1 name="REF_SMC_TMP">
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+  ownname => user,
+  tabname => 'DEL_RP_ID_IO',
+  method_opt => 'FOR COLUMNS R_SMCP P_SMCP REV IN_OUT',
+  granularity => 'ALL',
+  cascade => TRUE,
+  degree => 8);
+end;
+/
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+
+ <worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_rp_id
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+alter session set PARALLEL_MIN_PERCENT=50
+/
+
+insert --+append parallel(ri,4)
+into del_rp_id ri
+select --+parallel(p,4)
+R.SMC_PROD_ID R_SMCP , r_rid, P.SMC_PROD_ID P_SMCP , p.rowid p_rid,substr(reverse(nvl(R.SMC_PROD_ID,P.SMC_PROD_ID)),1,1) rev from (
+(SELECT r_rid, R.SMC_PROD_ID --, P.SMC_PROD_ID
+       FROM STG_REF_SMC_ISSUER_ab I ,
+      (select /*+parallel(r,4) */ rowid r_rid, r.* from REF_SMC r --where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ'
+      ) R
+      where R.SMC_ISSUER_ID=I.SMC_ISSUER_ID(+)
+      ) R
+      full outer join  DEL_P_I_S P
+      on( R.SMC_PROD_ID =P.SMC_PROD_ID))
+/
+
+commit
+/
+
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+
+
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+  <exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+
+
+
+begin
+ DBMS_STATS.GATHER_TABLE_STATS(
+  ownname => user,
+  tabname => 'DEL_RP_ID',
+  method_opt => 'FOR ALL COLUMNS',
+  granularity => 'ALL',
+  cascade => TRUE,
+  degree => 4);
+end;
+/
+
+set line 300
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+
+
+--17 sec
+ <worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table del_rp_id
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+alter session set COMMIT_LOGGING =BATCH
+/
+
+alter session set COMMIT_WAIT=NOWAIT
+/
+
+
+insert --+append parallel(ri)
+into del_rp_id ri
+select --+parallel(P) 
+R.SMC_PROD_ID R_SMCP , P.SMC_PROD_ID P_SMCP from (
+(SELECT R.SMC_PROD_ID --, P.SMC_PROD_ID
+       FROM STG_REF_SMC_ISSUER_ab I ,
+      (select /*+parallel(r) */ * from REF_SMC r --where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ'
+      ) R
+      where R.SMC_ISSUER_ID=I.SMC_ISSUER_ID(+)
+      ) R
+      full outer join  DEL_P_I_S P
+      on( R.SMC_PROD_ID =P.SMC_PROD_ID)
+      )
+/
+
+commit
+/
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+--45 sec
+ <worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table DEL_REF_I
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+insert --+append parallel(ri)
+into DEL_REF_I_P ri
+select r.SMC_PROD_ID R_SMC_PROD_ID, r.SMC_ISSUER_ID R_SMC_ISSUER_ID, p.smc_prod_id p_SMC_PROD_ID,p.issuersmci p_SMC_ISSUER_ID from 
+(SELECT T.SMC_PROD_ID AS SMC_PROD_ID,
+      T.SMC_SCR_KEY      AS SMC_SCR_KEY,
+      T.SMC_MSD_KEY      AS SMC_MSD_KEY,
+      T.PROD_SHRT_DESC   AS PROD_SHRT_DESC,
+      T.PROD_LNG_DESC    AS PROD_LNG_DESC,
+      CAST(T.OPER_IND AS      CHAR(1)) OPER_IND,
+      CAST(T.IS_DUMMY_PROD AS CHAR(1)) IS_DUMMY_PROD,
+      T.MKT_SECT_DESC   AS MKT_SECT_DESC,
+      T.SCR_TYP_LVL_1   AS SCR_TYP_LVL_1,
+      T.SCR_TYP_LVL_2   AS SCR_TYP_LVL_2,
+      T.SERIES          AS SERIES,
+      R.ISS_CTRY        AS ISS_CTRY,
+      T.ISS_CCY         AS ISS_CCY,
+      T.INSM_LSTG_LVL   AS INSM_LSTG_LVL,
+      T.MKT             AS MKT,
+      T.CON_TYP         AS CON_TYP,
+      T.MKT_SEG         AS MKT_SEG,
+      T.GMI_TKR         AS GMI_TKR,
+      T.MAT_MO          AS MAT_MO,
+      T.MAT_YR          AS MAT_YR,
+      T.CUSIP           AS CUSIP,
+      T.ISIN            AS ISIN,
+      T.RIC             AS RIC,
+      T.SEDOL           AS SEDOL,
+      T.COM_CD          AS COM_CD,
+      T.BLMBRG_PK       AS BLMBRG_PK,
+      T.BLMBRG_UNIQ_KEY AS BLMBRG_UNIQ_KEY,
+      CAST(T.NASD_TRCE_FLAG AS CHAR(1)) NASD_TRCE_FLAG,
+      CAST(T.IS_IN_DFLT AS     CHAR(1)) IS_IN_DFLT,
+      R.CRTD_BY                 AS CRTD_BY,
+      R.CRTD_TS                 AS CRTD_TS,
+      R.LST_UPDT_BY             AS LST_UPDT_BY,
+      R.LST_UPDT_TS             AS LST_UPDT_TS,
+      T.SCR_CUSIP               AS SCR_CUSIP,
+      T.BLMBRG_CUSIP            AS BLMBRG_CUSIP,
+      R.ORIG_ISS_CTRY           AS ORIG_ISS_CTRY,
+      'U'                       AS IND_KEY,
+      R.SMC_ISSUER_ID           AS SMC_ISSUER_ID,
+      R.ISSUER_CTRY_OF_INCORP   AS ISSUER_CTRY_OF_INCORP,
+      R.SMC_ISSUER_NAM          AS SMC_ISSUER_NAM,
+      T.PROD_ISSUE_STA          AS PROD_ISSUE_STA,
+      T.SCR_TYP_LVL_3           AS SCR_TYP_LVL_3,
+      T.GLBL_LCK_IND            AS GLBL_LCK_IND,
+      T.CHILLED_STATUS          AS CHILLED_STATUS,
+      T.COUPON_DIV_RT           AS COUPON_DIV_RT,
+      T.COUPON_DIV_TYP          AS COUPON_DIV_TYP,
+      T.DAYS_TO_SETL            AS DAYS_TO_SETL,
+      T.ISS_DT                  AS ISS_DT,
+      T.BLMBRG_TCKR             AS BLMBRG_TCKR,
+      T.MSD_SMBOL               AS MSD_SMBOL,
+      T.IRIC                    AS IRIC,
+      T.REC_SRC                 AS REC_SRC,
+      T.IS_WTFAST               AS IS_WTFAST,
+      T.IS_3C7                  AS IS_3C7,
+      T.IS_CEDEL                AS IS_CEDEL,
+      T.IS_PLEDGECHILL          AS IS_PLEDGECHILL,
+      T.IS_SEGREGATIONCHILL     AS IS_SEGREGATIONCHILL,
+      T.IS_FEDBOOKENTRY         AS IS_FEDBOOKENTRY,
+      T.IS_DEPOSITCHIL          AS IS_DEPOSITCHIL,
+      T.Is_DTCCDelete           AS Is_DTCCDelete,
+      T.Is_NSCC                 AS Is_NSCC,
+      T.Is_Reorg                AS Is_Reorg,
+      T.Is_Seg100               AS Is_Seg100,
+      T.Is_CODFast              AS Is_CODFast,
+      T.Is_CNSEligible          AS Is_CNSEligible,
+      T.Is_WTchill              AS Is_WTchill,
+      T.Is_interDepositoryChill AS Is_interDepositoryChill,
+      T.PTMLevy_Indicator       AS PTMLevy_Indicator,
+      T.Is_DTCRegistered        AS Is_DTCRegistered,
+      T.IS_DTC                  AS IS_DTC,
+      T.IS_DTCCinterimStatus    AS IS_DTCCinterimStatus,
+      T.Is_CodChill             AS Is_CodChill,
+      T.Is_Communication        AS Is_Communication,
+      T.Is_Dochill              AS Is_Dochill,
+      T.Is_CustodyService       AS Is_CustodyService,
+      T.Is_Euroclear            AS Is_Euroclear,
+      T.Is_Salomon              AS Is_Salomon,
+      T.Is_ReorgDeposit         AS Is_ReorgDeposit,
+      T.UKStampDuty_Market      AS UKStampDuty_Market,
+      T.Is_DTCFrozen            AS Is_DTCFrozen,
+      T.Is_FedFund              AS Is_FedFund,
+      T.Is_BookEntry            AS Is_BookEntry,
+      T.Is_EDSEligible          AS Is_EDSEligible,
+      --Release 4.1
+      T.GRIC             AS GRIC,
+      T.IS_GLOBALPRIMARY AS IS_GLOBALPRIMARY FROM STG_REF_SMC_ISSUER_ab R 
+      full outer JOIN (select /*+parallel(r) */ * from REF_SMC r where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ') T 
+      ON (R.SMC_ISSUER_ID=T.SMC_ISSUER_ID)) r
+      full outer join
+      (select --+parallel(x) parallel(p) parallel(m)
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s --partition(rev_0)
+  x, DEL_P_I_S --partition(rev_0)
+  p, smc_mr_ii_c_e_p --partition(rev_0)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp) p
+on (r.smc_prod_id=p.smc_prod_id)
+/
+
+commit
+/
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+--8.38
+ <worker1 name="REF_SMC_TMP">
+<exec_select>
+    <table_utils   method="%DML_METHOD%" >
+		<param name="DB_CONNECTOR" value="%CSMARTREF_SMARTQ1%"></param>
+		<param name="SCHEMA_NAME" value="CSMARTREF"></param>
+      <sql_template>
+        <![CDATA[
+truncate table DEL_REF_I
+/
+
+ALTER SESSION ENABLE PARALLEL DML
+/
+
+insert --+append parallel(ri)
+into DEL_REF_I ri
+select r.* from (SELECT T.SMC_PROD_ID AS SMC_PROD_ID,
+      T.SMC_SCR_KEY      AS SMC_SCR_KEY,
+      T.SMC_MSD_KEY      AS SMC_MSD_KEY,
+      T.PROD_SHRT_DESC   AS PROD_SHRT_DESC,
+      T.PROD_LNG_DESC    AS PROD_LNG_DESC,
+      CAST(T.OPER_IND AS      CHAR(1)) OPER_IND,
+      CAST(T.IS_DUMMY_PROD AS CHAR(1)) IS_DUMMY_PROD,
+      T.MKT_SECT_DESC   AS MKT_SECT_DESC,
+      T.SCR_TYP_LVL_1   AS SCR_TYP_LVL_1,
+      T.SCR_TYP_LVL_2   AS SCR_TYP_LVL_2,
+      T.SERIES          AS SERIES,
+      R.ISS_CTRY        AS ISS_CTRY,
+      T.ISS_CCY         AS ISS_CCY,
+      T.INSM_LSTG_LVL   AS INSM_LSTG_LVL,
+      T.MKT             AS MKT,
+      T.CON_TYP         AS CON_TYP,
+      T.MKT_SEG         AS MKT_SEG,
+      T.GMI_TKR         AS GMI_TKR,
+      T.MAT_MO          AS MAT_MO,
+      T.MAT_YR          AS MAT_YR,
+      T.CUSIP           AS CUSIP,
+      T.ISIN            AS ISIN,
+      T.RIC             AS RIC,
+      T.SEDOL           AS SEDOL,
+      T.COM_CD          AS COM_CD,
+      T.BLMBRG_PK       AS BLMBRG_PK,
+      T.BLMBRG_UNIQ_KEY AS BLMBRG_UNIQ_KEY,
+      CAST(T.NASD_TRCE_FLAG AS CHAR(1)) NASD_TRCE_FLAG,
+      CAST(T.IS_IN_DFLT AS     CHAR(1)) IS_IN_DFLT,
+      R.CRTD_BY                 AS CRTD_BY,
+      R.CRTD_TS                 AS CRTD_TS,
+      R.LST_UPDT_BY             AS LST_UPDT_BY,
+      R.LST_UPDT_TS             AS LST_UPDT_TS,
+      T.SCR_CUSIP               AS SCR_CUSIP,
+      T.BLMBRG_CUSIP            AS BLMBRG_CUSIP,
+      R.ORIG_ISS_CTRY           AS ORIG_ISS_CTRY,
+      'U'                       AS IND_KEY,
+      R.SMC_ISSUER_ID           AS SMC_ISSUER_ID,
+      R.ISSUER_CTRY_OF_INCORP   AS ISSUER_CTRY_OF_INCORP,
+      R.SMC_ISSUER_NAM          AS SMC_ISSUER_NAM,
+      T.PROD_ISSUE_STA          AS PROD_ISSUE_STA,
+      T.SCR_TYP_LVL_3           AS SCR_TYP_LVL_3,
+      T.GLBL_LCK_IND            AS GLBL_LCK_IND,
+      T.CHILLED_STATUS          AS CHILLED_STATUS,
+      T.COUPON_DIV_RT           AS COUPON_DIV_RT,
+      T.COUPON_DIV_TYP          AS COUPON_DIV_TYP,
+      T.DAYS_TO_SETL            AS DAYS_TO_SETL,
+      T.ISS_DT                  AS ISS_DT,
+      T.BLMBRG_TCKR             AS BLMBRG_TCKR,
+      T.MSD_SMBOL               AS MSD_SMBOL,
+      T.IRIC                    AS IRIC,
+      T.REC_SRC                 AS REC_SRC,
+      T.IS_WTFAST               AS IS_WTFAST,
+      T.IS_3C7                  AS IS_3C7,
+      T.IS_CEDEL                AS IS_CEDEL,
+      T.IS_PLEDGECHILL          AS IS_PLEDGECHILL,
+      T.IS_SEGREGATIONCHILL     AS IS_SEGREGATIONCHILL,
+      T.IS_FEDBOOKENTRY         AS IS_FEDBOOKENTRY,
+      T.IS_DEPOSITCHIL          AS IS_DEPOSITCHIL,
+      T.Is_DTCCDelete           AS Is_DTCCDelete,
+      T.Is_NSCC                 AS Is_NSCC,
+      T.Is_Reorg                AS Is_Reorg,
+      T.Is_Seg100               AS Is_Seg100,
+      T.Is_CODFast              AS Is_CODFast,
+      T.Is_CNSEligible          AS Is_CNSEligible,
+      T.Is_WTchill              AS Is_WTchill,
+      T.Is_interDepositoryChill AS Is_interDepositoryChill,
+      T.PTMLevy_Indicator       AS PTMLevy_Indicator,
+      T.Is_DTCRegistered        AS Is_DTCRegistered,
+      T.IS_DTC                  AS IS_DTC,
+      T.IS_DTCCinterimStatus    AS IS_DTCCinterimStatus,
+      T.Is_CodChill             AS Is_CodChill,
+      T.Is_Communication        AS Is_Communication,
+      T.Is_Dochill              AS Is_Dochill,
+      T.Is_CustodyService       AS Is_CustodyService,
+      T.Is_Euroclear            AS Is_Euroclear,
+      T.Is_Salomon              AS Is_Salomon,
+      T.Is_ReorgDeposit         AS Is_ReorgDeposit,
+      T.UKStampDuty_Market      AS UKStampDuty_Market,
+      T.Is_DTCFrozen            AS Is_DTCFrozen,
+      T.Is_FedFund              AS Is_FedFund,
+      T.Is_BookEntry            AS Is_BookEntry,
+      T.Is_EDSEligible          AS Is_EDSEligible,
+      --Release 4.1
+      T.GRIC             AS GRIC,
+      T.IS_GLOBALPRIMARY AS IS_GLOBALPRIMARY FROM STG_REF_SMC_ISSUER_ab R 
+      full outer JOIN (select /*+parallel(r) */ * from REF_SMC r where r.ROWID between 'AAPNQ8AA1AAAAMAAAA' and 'AAPNQ8AA2AAACL/CcQ') T 
+      ON (R.SMC_ISSUER_ID=T.SMC_ISSUER_ID)) r
+      full outer join
+      (select --+parallel(x) parallel(p) parallel(m)
+x.*, currentmaturitydate    ,
+  nasdtraceflag          ,
+  coupondividendrate     ,
+  coupondividendtype     ,
+  contracttype           ,
+  instrumentlistinglevel ,
+  isglobalprimary ,
+  smc_prod_id                 ,
+  issuersmci                   ,
+  country                      ,
+  prod_shrt_desc              ,
+  prod_lng_desc                ,
+  oper_ind                    ,
+  is_dummy_prod                ,
+  mkt_sect_desc                ,
+  scr_typ_lvl_1                ,
+  scr_typ_lvl_2                ,
+  series                       ,
+  iss_ccy                     ,
+  mkt                          ,
+  mkt_seg                      ,
+  is_in_dflt                   ,
+  iss_ctry                     ,
+  issuercountry               ,
+  smci                        ,
+  issuercountryofincorporation ,
+  issuername
+  from del_cx_x_s --partition(rev_0)
+  x, DEL_P_I_S --partition(rev_0)
+  p, smc_mr_ii_c_e_p --partition(rev_0)
+  m
+where x.smcp=p.smc_prod_id and p.smc_prod_id=m.smcp) p
+on (r.smc_prod_id=p.smc_prod_id)
+/
+
+commit
+/
+
+SELECT   dfo_number, tq_id, server_Type, MIN (num_rows),
+               MAX (num_rows), COUNT ( * ) dop
+        FROM   v$pq_tqstat
+    GROUP BY   dfo_number, tq_id, server_Type
+    ORDER BY   dfo_number, tq_id, server_type DESC
+/
+	
+]]>
+      </sql_template>
+    </table_utils>
+  </exec_select>
+
+</worker1>
+
+
+</etldataflow>

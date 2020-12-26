@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2011 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="BASIC_NZ_TEST">
+<globals>
+	  <param name="ETLFLOW_DESCR" value="Filter on one or more fields and sort by any field - Retrieve specific subset of data from query using limit and offset"></param>
+
+	<!-- PIPELINE execution type
+		 SYNC - synchronous, ANYNC - asynchronous 
+	-->
+	  <param name="FLOW_TYPE" value="SYNC"></param>	  
+
+	  <param name="FIELD_TERMINATOR" value="'|'"></param>
+	  <param name="LINE_TERMINATOR" value="''"></param>
+	  
+	  <param name="DB_CONNECTOR" value="%PADB_MAP%"></param>
+	  <param name="SCHEMA_NAME" value="AB95022"></param>
+	   <!--will spool ALL records if LAME_DUCK=0-->
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <!--sqlp attribute-->
+
+
+	  <param name="TABLE_NAME" value="TRD_VOL_UNION"></param>
+	  <param name="IF_TOSS_CACHE" value="1"></param>
+	  <param name="IF_ASYNC_LOG" value="1"></param>	
+
+</globals>
+
+
+<worker1 name="BUY_CURR_TMLSALO_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Basic NZ test."></param>
+      <sql_template>
+        <![CDATA[SELECT now();]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+
+<worker1 name="BUY_CURR_TMLSALO_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+	<param name="DESCR" value="Count first to know offset."></param>
+      <sql_template>
+        <![CDATA[SELECT count(*)||'|cnt' FROM %TABLE_NAME% WHERE src_file_cd='TMLSALO';]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker1>
+
+<worker name="21_TVU_TMLSALO_79_0">
+  <exec_pa_dml>
+    <psql 	method="%PA_DML_TEST%" >
+      <sql_template>
+        <![CDATA[select feed_src_sys,trd_tran_dt,trd_eff_dt,con_setl_dt,con_setl_open_leg_dt 
+		from  trd_vol_union 
+		where trd_vol_sid=101652 ORDER BY COB_DT offset 1000 limit 500;]]>
+      </sql_template>
+    </psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+</etldataflow>

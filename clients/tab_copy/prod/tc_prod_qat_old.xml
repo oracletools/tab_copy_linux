@@ -1,0 +1,64 @@
+<worker name="CSMARTBSER.GMRS_FACT.2012">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+                 <param name="FIELD_TERMINATOR" value='^^'></param>
+                <param name="TO_DB" value="%CSMARTBSER_SMARTD1%"></param>
+                <param name="PARTITION" value="PART_2012[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT.2009">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+                 <param name="FIELD_TERMINATOR" value='~~'></param>
+                <param name="TO_DB" value="%CSMARTBSER_SMARTD1%"></param>
+                <param name="PARTITION" value="PART_2009[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT.2010">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+                <param name="FIELD_TERMINATOR" value='^^'></param>
+                <param name="TO_DB" value="%CSMARTBSER_SMARTD1%"></param>
+                <param name="PARTITION" value="PART_2010[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+
+<worker name="CSMARTBSER.GMRS_FACT.2011">
+  <exec_copy>
+    <sqlp   method="%COPY_METHOD%" >
+        <!--DATE_RANGE_DELTA - there's a RANGE partiton on DATE field -->
+                <param name="FIELD_TERMINATOR" value='^^'></param>
+                <param name="TO_DB" value="%CSMARTBSER_SMARTD1%"></param>
+                <param name="PARTITION" value="PART_2011[\d]+"></param>
+      <sql_template>
+        <![CDATA[
+CSMARTBSER.GMRS_FACT
+]]>
+      </sql_template>
+    </sqlp>
+  </exec_copy>
+</worker>
+

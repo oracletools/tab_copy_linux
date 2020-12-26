@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2010 . All rights reserved.
+     Author: AlexBuzunov@gmail.com (Alex Buzunov)
+     Python Implementation of ETL pipeline
+-->
+<etldataflow name="PADB_CONV_UPDATE_TEST" type="sync">
+<globals>
+
+
+	  <param name="FIELD_TERMINATOR" value='|'></param>
+	  <param name="LINE_TERMINATOR" value="~"></param>
+
+	  <param name="LAME_DUCK" value='0'></param>
+	  <param name="ARRAYSIZE" value="5000"></param>
+	  <param name="COPYCOMMIT" value="4"></param>
+	  <param name="BAZEL_TABLE" value="BASEL_MSTR"></param>
+	  <param name="EXCHANGE_BAZEL_TABLE" value="BASEL_MSTR_MONTH"></param>
+	  <param name="EXCHANGE_PARTITION" value="P_BASEL_MSTR_2011_SP_01"></param>
+	  <!--PADB attributes-->
+	  <param1 name="DB_CONNECTOR" value="%PA_DEPOT%"></param1>
+	  <param name="SCHEMA_NAME" value="public"></param>	  
+
+</globals>
+
+
+
+
+<worker name="CONV_UPDATE_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+update /*+ PARALLEL(a) */ CVA  set
+    INTER_COMPANY_FLAG = 'N',
+    grr_flag = 'N',
+    NEW_GMA_MATCH_FLAG = NULL,
+    new_gma_join_cd = null,
+    BASEL_MST_GOC = null,
+    BASEL_MST_FDL_CCY_ADJBAL = NULL,
+    RULE_NUM = NULL,
+    pc_rule_num = null,
+    BAL_TYP_NUM = decode(BAL_TYP_CD, 'Current Mark to Market Amount', 6, null, 6, 'Current Market Value Amount', 17,0),
+    CVA_DUP_FLAG = 'N',
+    NEW_TRAN_FLAG = 'N'
+where PROC_YEAR = 2011
+  and PROC_MNTH = 1;
+  
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+
+
+<worker name="CONV_UPDATE_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+update /*+ PARALLEL(a) */ CVA  set
+    INTER_COMPANY_FLAG = 'N',
+    grr_flag = 'N',
+    NEW_GMA_MATCH_FLAG = NULL,
+    new_gma_join_cd = null,
+    BASEL_MST_GOC = null,
+    BASEL_MST_FDL_CCY_ADJBAL = NULL,
+    RULE_NUM = NULL,
+    pc_rule_num = null,
+    BAL_TYP_NUM = decode(BAL_TYP_CD, 'Current Mark to Market Amount', 6, null, 6, 'Current Market Value Amount', 17,0),
+    CVA_DUP_FLAG = 'N',
+    NEW_TRAN_FLAG = 'N'
+where PROC_YEAR = 2011
+  and PROC_MNTH = 1;
+  
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+<worker name="CONV_UPDATE_TVU2010">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+update /*+ PARALLEL(a) */ CVA  set
+    INTER_COMPANY_FLAG = 'N',
+    grr_flag = 'N',
+    NEW_GMA_MATCH_FLAG = NULL,
+    new_gma_join_cd = null,
+    BASEL_MST_GOC = null,
+    BASEL_MST_FDL_CCY_ADJBAL = NULL,
+    RULE_NUM = NULL,
+    pc_rule_num = null,
+    BAL_TYP_NUM = decode(BAL_TYP_CD, 'Current Mark to Market Amount', 6, null, 6, 'Current Market Value Amount', 17,0),
+    CVA_DUP_FLAG = 'N',
+    NEW_TRAN_FLAG = 'N'
+where PROC_YEAR = 2010
+  and PROC_MNTH = 1;
+  
+COMMIT;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker>
+
+<worker1 name="CONV_INSERT_TVU">
+  <exec_pa_dml>
+	<psql 	method="%TEST_METHOD%" >
+	  <sql_template>
+		<![CDATA[
+		
+
+SELECT COUNT(*) FROM CVA;
+
+]]>
+	  </sql_template>
+	</psql>
+  </exec_pa_dml>
+</worker1>
+
+
+
+
+</etldataflow>

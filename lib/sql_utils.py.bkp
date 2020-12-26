@@ -1,0 +1,2863 @@
+#!/usr/bin/python2.4
+#
+# Copyright 2009 .  All Rights Reserved.
+# 
+# Original author AlexBuzunov@gmail.com (Alex Buzunov)
+
+"""This module contains all data access/extraction routines for Oracle db.
+"""
+
+__author__ = 'AlexBuzunov@gmail.com (Alex Buzunov)'
+
+import sys, os
+if os.name == 'nt':
+	import clr
+	from ctypes import * 
+import string
+import re
+import timeit
+import traceback,time
+import StringIO
+from pprint import pprint
+from copy import Copy
+#import fcntl, shlex, subprocess
+from subprocess import Popen, PIPE
+import shlex
+from threading import Thread,activeCount
+from datetime import date, timedelta
+import types, pickle
+from lib.app_utils import app_utils
+from lib.thread_pool import  ThreadPool
+#import Queue
+from random import randrange
+
+STACKTRACE_MAX_DEPTH = 2
+
+		
+	
+
+class sqlp(app_utils):
+	"""A class for extracting dimension data from csv file."""
+
+	def __init__(self, pipelinemeta, extract_logger, environment):
+		"""Initializes the extracter.  See also Extracter.__init__.
+
+		Args:
+		  extract_logger: An object supporting the methods info(message),
+			warning(message), and error(message) where message is a string.
+			The intent of course is that we wish to log messages using the
+			provided logger.
+		"""
+		#Copy.__init__(self, pipelinemeta, None, extract_logger)
+		self._result=[]
+		#self._gwc={} # global worker cache
+		self._wc={} # worker cache
+		#self._global_result=[]
+		self._process_meta= pipelinemeta["process_spec"]
+		self._pipeline_flags=environment._pipeline_flags
+		self._FLAGS=environment._FLAGS
+		self._connector= pipelinemeta["connector"]
+		self._output_files = {}
+		self._environment=environment
+		self._logger = extract_logger
+		self._pipeline= self._environment.pipeline()
+		#pprint (self._pipeline)
+		#sys.exit(1)		
+		self._globals=self._pipeline['globals']
+		self._env_default=self._environment.env_default()
+		#sys.exit(1)
+		#if self._pipeline.has_key('FIELD_TERMINATOR'):
+
+		self._ci={} #column index
+		self._ci_nots={} #column index, no timestamps
+		self._cci={} #common column index
+		self._cci_nots={} #common column index, no timestamps		
+		self._etl_object=None
+		self._pp={} #parsed params
+		self._p ={} #unparsed params
+		self._default_login =''
+		self.pool_cntr=[]
+		if os.name == 'nt':
+			self.dllh = cdll.LoadLibrary(self.dllPath) 
+		else:
+			#self._logger.warning("cdll.LoadLibrary is not supported")
+			pass
+		#read shell template
+		f=open("%s/sh_template.txt" % self._process_meta['template_path'],"r")
+		self.sh_tmpl=f.read()
+		f.close()
+		
+		#pprint(pipelinemeta)
+		
+		#sys.exit(0)
+		#threading.Thread.__init__ ( self )	
+		
+	def set(self, etl_object):
+		#print 'setting params'
+		self._etl_object=etl_object
+		if len(self._pp)==0:
+			self.set_params(etl_object, self._logger)
+	def get_spec(self, key):
+		return self._environment.get_process_spec(key)
+	
+	def publish_ddl(self, etl_object, logger):
+		"""Executing DDL publisher"""
+		self.set_params(etl_object, logger)
+		assert len(self._gwc['DDL_LOC'])>0, 'There''s nothing to publish'
+		
+		for dfn in self._gwc['DDL_LOC']:
+			logger.info('#### START of publish for %s.' % dfn)
+			#print dfn
+			assert os.path.exists(dfn),"File does not exsits."
+			assert os.access(dfn, os.R_OK), "Cannot read file."
+			f=open(dfn,"r")
+			tmpl=f.read()
+			f.close()
+			#remove ALTER INDEX UNUSABLE
+ 			rx= re.compile( r'(ALTER\sINDEX\s[\w\d\.\"\_]+\s+UNUSABLE)')		
+			atmpl = rx.sub( ' ', tmpl)
+			if atmpl==tmpl:
+				logger.info('There''s no ALTER statement.')
+			#remove ALTER INDEX UNUSABLE
+			if self.p_if('IF_CLONE_UNCOMPRESSED'):
+				atmpl = atmpl.replace(' COMPRESS ', ' ')
+			
+			#fix PK name	
+			atmpl = re.sub( r'CONSTRAINT \"([\w\d\_\.]+)\" PRIMARY KEY', 'CONSTRAINT "\\1_2" PRIMARY KEY', atmpl)
+				
+				 
+			
+			#print tmpl
+			#fetch object name from log file name
+			m = re.match( r'.*\.([\w]+)\.([\w]+)\.ddl',dfn)		
+			objn=None
+			objt=to_obj=btmpl=None
+			pprint(m.groups())
+			if m:
+				objt=m.groups()[0]
+				objn=m.groups()[1]
+				print 'Object type: %s' % objt
+				print 'Object name: %s' % objn
+			#print dfn
+			assert objn,'Could not identify object name.'
+			assert objt,'Could not identify object type.'
+			#sys.exit(1)
+			rx= re.compile( r'(\.ddl)$')		
+			out_dfn = rx.sub( '.to_ddl', dfn)
+			if objt=='TABLE':				
+				#out_dfn =out_dfn.replace(self._pp['FROM_TABLE'],self._pp['TO_TABLE'])
+				print out_dfn
+				out_dfn =out_dfn.replace("TABLE.%s.to_ddl" %self._pp['FROM_TABLE'],"TABLE.%s.%s.to_ddl" % (self._pp.get('SCHEMA_NAME'),self._pp['TO_TABLE']))
+				print out_dfn
+				#sys.exit(1)
+				btmpl = "%s\n/\n" % atmpl.replace('"%s"' % self._pp['FROM_TABLE'],'"%s"' % self._pp['TO_TABLE'])
+				
+			if objt=='INDEX':
+				
+				btmpl = atmpl.replace(self._pp['FROM_TABLE'],self._pp['TO_TABLE'])
+				out_dfn =out_dfn.replace(self._pp['FROM_TABLE'],self._pp['TO_TABLE'])
+				#fix index names which do not contain table names
+				suff=''
+				
+				m= re.match( r'.*(\_[A-Z\d]+)$', objn)
+				if m:
+					suff=m.groups()[0]
+				to_obj= "IDX_%s%s" % (logger.get_ts() , suff)
+				print 'New index name: %s' % objn
+				out_dfn =out_dfn.replace(objn,to_obj)
+				btmpl = "%s\n/\n" % btmpl.replace(objn,to_obj)
+				assert to_obj,'Could not create out object name.'
+			assert out_dfn,'Could not create out file name.'
+			
+			#print atmpl
+			print atmpl[:100]
+			print self._pp.get('SCHEMA_NAME')
+			print btmpl[:100]
+			#pprint(self._pp)
+			#sys.exit(1)
+			assert btmpl[:100]!=atmpl[:100] ,'Name replace failed.'
+			assert ".%s" % self._pp['FROM_TABLE'] not in btmpl ,'Name replace failed.'
+			
+			#pprint(out_dfn)
+			#out_dfn =out_dfn.replace("TABLE.%s.to_ddl" %self._pp['FROM_TABLE'],"TABLE.%s.to_ddl" % self._pp['TO_TABLE'])
+			#print out_dfn
+			#sys.exit(1)
+			fout=open(out_dfn,"w")
+			fout.write(btmpl)
+			fout.close()
+			#print(out_dfn)
+			#fout=open(dfn,"r")
+			#tmpl=f.read()
+			self.set_p('TEMPLATE_LOC',out_dfn)
+			self.set_template(etl_object,None)
+			#pprint(etl_object)
+			#sys.exit(1)
+			
+			self.dml(etl_object, logger)
+			logger.info('#### END of publish')
+		return 0
+	
+	def run_depr(self):
+		"""Start the extraction job.
+
+		Note that this class requires that we had already set the
+		output_pipe attribute via the set_output_pipe simple setter.
+		The output_pipe attribute is inherited from the Worker class
+		via the Extracter class.
+
+		Args:
+		  etl_object: table XML object from etlmeta
+		"""
+		#pprint(self._etl_object)
+		#sys.exit(1)
+		assert  self._etl_object['attr'].has_key('method'),\
+				'copy method is not defined in %s.%s' %( __name__,self.__class__.__name__)
+		method = self._environment.get_env_attr(string.strip(self._etl_object['attr']['method'], '%'))
+		#method = self._environment.get_env_attr(self._etl_object['attr']['method'])
+
+		_exec = 'self.%s(self._etl_object,self._logger)' % (method)
+		#print 'before exec'
+		#print _exec
+		#try:
+		if 1:
+			exec _exec
+
+
+		#except Exception, e:
+			#pprint(dir(e))
+			#print e.strerror
+			#self._logger.error(dir(e))
+			#self._logger.error(sys.exc_info())
+			#self.PrintException(self._logger) 
+			#print 'worker exception=',e
+			#print sys.exc_info()
+		#			raise e
+
+	def PrintException(self,logger, email=0):
+		tb = sys.exc_info()[2]
+		stack = []
+
+		while tb:
+				stack.append(tb.tb_frame)
+				tb = tb.tb_next
+
+		output = None
+		try:
+				try:
+						output = StringIO.StringIO()
+						traceback.print_exc(STACKTRACE_MAX_DEPTH, output)
+						output.write("Locals by frame, innermost last\n")
+						for frame in stack:
+								output.write("\n")
+								output.write("Frame %s in %s at line %s\n" % (frame.f_code.co_name,
+																			  frame.f_code.co_filename,
+																			  frame.f_lineno))
+								for key, value in frame.f_locals.items():
+										try:
+											#print key
+											if key=='conn':
+												#val=str(value)
+												for key in value.keys():
+													value[key]['pword']='***'
+											if key=='to_db' or key=='from_db' or key=='login' or key=='args' or key=='pp' or key=='to_key' or key=='col_key' or key=='from_key':
+												#val=str(value)
+												value= re.sub("\/(.*)\@","/***@",str(value))
+										
+											output.write('\t%s=%s\r\n' % (key, str(value)))
+										except:
+												
+												output.write('[UNPRINTABLE VALUE]\n')
+				except Exception:
+						traceback.print_exc()
+
+		finally:
+				if output:
+						#sys.stderr.write(output.getvalue())
+						if logger:
+							logger.error(output.getvalue())
+						output.close()
+
+	def get_dml(self,etl_object):
+		return etl_object['node']['sql_template']['data']
+	def set_dml(self,etl_object, dml):
+		etl_object['node']['sql_template']['data'] =dml
+		
+	def sql_plus_dml(self, etl_object, logger):
+		""" Executes DML using SQL*Plus """
+		self.set_params(etl_object, logger)
+		q="""--%%WORKER_NAME%%
+set timing on serveroutput on
+DECLARE v_row_cnt INT;	
+time1 NUMBER;
+v_elapsed NUMBER;
+BEGIN	
+time1:=dbms_utility.get_time;
+BEGIN
+%s
+v_elapsed:=(dbms_utility.get_time-time1) /100;
+v_row_cnt:=SQL%%ROWCOUNT;
+p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%') ;
+
+EXCEPTION
+	WHEN OTHERS THEN
+		v_elapsed:=(dbms_utility.get_time-time1) /100;
+		v_row_cnt:=SQL%%ROWCOUNT;
+		p(SQLCODE);
+		p(SQLERRM);		
+		p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%', SQLCODE, SQLERRM) ;
+END;		
+DBMS_OUTPUT.PUT_LINE('time elapsed: ' || (dbms_utility.get_time-time1) /100);
+DBMS_OUTPUT.PUT_LINE('rows updated: ' || v_row_cnt);
+--COMMIT;
+END;
+/
+
+exit;
+			"""	% self.get_dml(etl_object)	
+		self.set_dml(etl_object,q)
+		template = self.get_template(etl_object, logger)
+		#(tmpl_batch, status) = self.get_tmpl_batch(etl_object, logger)
+
+		#assert  len(tmpl_batch)>0 & (not status), 'Template batch is missing or misconfigured.')
+		#pprint((self._pp))
+		assert self._pp.has_key('DB_CONNECTOR'),"'DB_CONNECTOR' is not set!"
+		self._default_login=self._pp['DB_CONNECTOR']
+		#pprint(etl_object)
+		#sys.exit(0)
+		if 0:
+			pass
+		else:
+			#self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			schema_name=self._pp['SCHEMA_NAME']
+			#to_db= self._pp['TO_DB'] 
+
+			logger.info('#### START of dml %s.' % etl_object['name'])
+			regexp=re.compile(r'((\d+) rows updated\.)|(Elapsed: (\d+:\d+:\d+\.\d+))')
+			(out,status) = self.do_query(self._default_login, template,0,regexp)
+			#pprint(out)
+			#print out[0][1],out[1][3]
+			logger.info('#### END of dml %s.' % etl_object['name'])
+			if len(out)>1:
+				logger.sql("#### Updated: %s, Elapsed: %s #### " %(out[0][1],out[1][3]))
+			if status==0:
+				logger.info("#### SQL*Plus DML of %s finished successfully." % etl_object['name'])
+			else:
+				logger.warning('SQL*Plus DML failed for %s.' % etl_object['name'])
+
+
+			self.cleanup()		
+			#sys.exit(0)
+		if self._pp.has_key('EMAIL_TO') and 0:
+			#assert  self._process_meta[string.strip(self._pp['EMAIL_TO'],'%')], '%s is not defined in process_spec.' % self._pp['EMAIL_TO'])
+			self.mail(self._pp['EMAIL_TO'],tab )
+
+		return status
+
+	def sql_plus_ddl(self, etl_object, logger):
+		""" Executes DML using SQL*Plus """
+		self.set_params(etl_object, logger)
+		stmpl = self.get_dml(etl_object)
+		logger.sql(stmpl)
+		regexp=re.compile(r'\;')
+		m = re.split(regexp, stmpl.strip())
+		sql=[]
+		if m:
+			#pprint(m)
+			for t in m:
+				#logger.info(">>%s||%d" % (t, len(t)))
+				if len(t):
+					sql.append("EXECUTE IMMEDIATE '%s'" % t.strip('\n').strip().replace("'","''"))
+		#pprint(sql)
+
+		q="""--%%WORKER_NAME%%
+set timing on serveroutput on
+DECLARE v_row_cnt INT;	
+time1 NUMBER;
+v_elapsed NUMBER;
+	BEGIN	
+	time1:=dbms_utility.get_time;
+	BEGIN
+	%s;
+	v_elapsed:=(dbms_utility.get_time-time1) /100;
+	v_row_cnt:=SQL%%ROWCOUNT;
+	p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%') ;
+	EXCEPTION
+	WHEN OTHERS THEN
+		v_elapsed:=(dbms_utility.get_time-time1) /100;
+		v_row_cnt:=SQL%%ROWCOUNT;
+		p('ERROR: '||SQLCODE||'; '||SQLERRM);
+		p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%', SQLCODE, SQLERRM) ;
+		RAISE;
+	END;
+p('time elapsed: ' || (dbms_utility.get_time-time1) /100||'; rows updated: ' || v_row_cnt);
+COMMIT;
+END;
+/
+			"""	% string.join(sql,';\n')
+		#pprint(q)
+		#sys.exit(0)
+		self.set_dml(etl_object,q)
+		template = self.get_template(etl_object, logger)
+		#(tmpl_batch, status) = self.get_tmpl_batch(etl_object, logger)
+
+		#assert  len(tmpl_batch)>0 & (not status), 'Template batch is missing or misconfigured.')
+		#pprint((self._pp))
+		
+		assert self._pp.has_key('DB_CONNECTOR'),"'DB_CONNECTOR' is not set!"
+		self._default_login=self._pp['DB_CONNECTOR']
+		#pprint(etl_object)
+		#sys.exit(0)
+		if 0:
+			pass
+		else:
+			#self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			schema_name=self._pp['SCHEMA_NAME']
+			#to_db= self._pp['TO_DB'] 
+
+			logger.info('#### START of dml %s.' % etl_object['name'])
+			regexp=re.compile(r'((\d+) rows updated\.)|(Elapsed: (\d+:\d+:\d+\.\d+))')
+			(out,status) = self.do_query(self._default_login, template,0,regexp)
+			#pprint(out)
+			#print out[0][1],out[1][3]
+			logger.info('#### END of dml %s.' % etl_object['name'])
+			if len(out)>1:
+				logger.sql("#### Updated: %s, Elapsed: %s #### " %(out[0][1],out[1][3]))
+			if status==0:
+				logger.info("#### SQL*Plus DML of %s finished successfully." % etl_object['name'])
+			else:
+				logger.warning('SQL*Plus DML failed for %s.' % etl_object['name'])
+
+
+			self.cleanup()		
+			#sys.exit(0)
+		if self._pp.has_key('EMAIL_TO') and 0:
+			#assert  self._process_meta[string.strip(self._pp['EMAIL_TO'],'%')], '%s is not defined in process_spec.' % self._pp['EMAIL_TO'])
+			self.mail(self._pp['EMAIL_TO'],tab )
+
+		return status
+
+	def show_ddl(self, etl_object, logger):
+		""" Executes DML using SQL*Plus """
+		#pprint(etl_object)
+		#sys.exit(0)
+		onerror ='RAISE;'
+		if etl_object['attr'].has_key('onerror'):
+			if etl_object['attr']['onerror'] !='RAISE':
+				onerror ="p(v_worker||'Passing the error.');"
+		self.set_params(etl_object, logger)
+		stmpl = self.get_dml(etl_object)
+		stmpl= re.sub(r'= 2011', '= vyear_num', stmpl, re.IGNORECASE)
+		stmpl= re.sub(r'= 2', '= vmnth_num', stmpl, re.IGNORECASE)
+		stmpl= re.sub(r'WAIT 100', 'WAIT vwait_sec', stmpl, re.IGNORECASE)
+		
+		#stmpl=stmpl.replace('proc_year = 2011','proc_year = vyear_num').replace('proc_mnth = 2','proc_mnth = vmnth_num').replace('fisc_yr = 2011','fisc_yr = vyear_num').replace('actg_prd = 2','actg_prd = vmnth_num')
+		logger.sql(stmpl)
+		if 1:
+			#update cva_basel_rules_ab
+			qo= etl_object['name'][:3]
+			colid = None
+			if 'DROP' in etl_object['name'] or 'UPDATE' in etl_object['name']:
+				colid ='1'
+			if 'CREATE' in etl_object['name']:
+				colid = '3'				
+			if 'LOCK' in etl_object['name']:
+				colid = '4'
+			u=""" 
+UPDATE CVA_BASEL_RULES_AB SET DML_QUERY_%s='%s' 
+ WHERE  proc_year = 2011
+		and proc_mnth = 2
+		and rule_category like 'BASEL%%'
+		and RULE_STATUS = 'A'
+		and query_order is not null
+		and query_order=%s;
+COMMIT;			""" % (colid,stmpl.strip().rstrip('/').replace("'","''"),qo)
+			print(u)
+			#print('LOCK' in etl_object['name'])
+			self.set_dml(etl_object,u)
+			status = self.sql_plus_dml(etl_object,logger)
+			print "update status: %s" % status
+			
+		regexp=re.compile(r'\;')
+		m = re.split(regexp, stmpl.strip())
+		sql=[]
+		if m:
+			#pprint(m)
+			for t in m:
+				#logger.info(">>%s||%d" % (t, len(t)))
+				if len(t):
+					sql.append("EXECUTE IMMEDIATE '%s'" % t.strip('\n').strip().replace("'","''"))	
+
+
+		plq="""/*%%WORKER_NAME%% test*/
+DECLARE v_row_cnt INT;	
+time1 NUMBER;
+v_elapsed NUMBER;
+v_worker VARCHAR2(128):='%%PROJECT_NAME%%:%%PIPELINE_NAME%%:%%WORKER_NAME%%: ';
+BEGIN	
+	DBMS_OUTPUT.ENABLE(1000);
+	p(v_worker||'Started.');
+	time1:=dbms_utility.get_time;
+	BEGIN
+		%s;
+		v_elapsed:=(dbms_utility.get_time-time1) /100;
+		v_row_cnt:=SQL%%ROWCOUNT;
+		p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%') ;
+	EXCEPTION
+		WHEN OTHERS THEN
+			p(lpad('*',60,'*'));
+			v_elapsed:=(dbms_utility.get_time-time1) /100;
+			v_row_cnt:=SQL%%ROWCOUNT;
+			p('ERROR: '||SQLCODE||'; '||SQLERRM);
+			p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%', SQLCODE, SQLERRM) ;
+			p(lpad('*',60,'*'));
+		%s
+	END;
+	p(v_worker||'elapsed: ' || (dbms_utility.get_time-time1) /100||'; rows: ' || v_row_cnt);
+	COMMIT;
+	p(v_worker||'Finished.');
+END;
+/
+
+"""	% (string.join(sql,';\n'),  onerror)
+		self.set_dml(etl_object,plq)
+		pl_template = self.get_template(etl_object, logger)
+		pl_fname= 'log/codelog/pl_%s.sql' % self._environment._pipeline['etldataflow']['name'] #etl_object['name'].replace("/","_")
+		print pl_fname
+		if 1:
+			plf = open(pl_fname, 'a')
+			pl_status = plf.write(pl_template)
+			if pl_status!= None:
+				self._logger.error('Cannot write to %s.' % pl_fname)
+			if 0:
+				pl_status = plf.write('/*EXEC compatible*/\n%s' % pl_template.replace("'","''"))
+				if pl_status!= None:
+					self._logger.error('Cannot write to %s.' % pl_fname)
+				plf.close()
+		if 0:
+			#update cva_basel_rules_ab
+			qo= etl_object['name'][:3]
+			colid = None
+			if 'DROP' in etl_object['name'] or 'UPDATE' in etl_object['name']:
+				colid ='1'
+			if 'CREATE' in etl_object['name']:
+				colid = '3'				
+			if 'LOCK' in etl_object['name']:
+				colid = '4'
+			u=""" 
+UPDATE CVA_BASEL_RULES_AB SET DML_QUERY_%s='%s' 
+ WHERE  proc_year = 2011
+		and proc_mnth = 2
+		and rule_category like 'BASEL%%'
+		and RULE_STATUS = 'A'
+		and query_order is not null
+		and query_order=%s;
+COMMIT;			""" % (colid,pl_template.strip().rstrip('/').replace("'","''"),qo)
+			print(u)
+			#print('LOCK' in etl_object['name'])
+			self.set_dml(etl_object,u)
+			status = self.sql_plus_dml(etl_object,logger)
+			print "update status: %s" % status
+		sql=[]					
+		if m:
+			#pprint(m)
+			for t in m:
+				#logger.info(">>%s||%d" % (t, len(t)))
+				if len(t):
+					sql.append(t)
+		if 0:
+			q= """/*%s*/
+
+%s;
+			
+			 
+""" % (etl_object['name'],string.join(sql,';\n'))
+			#pprint(q)
+			#sys.exit(0)
+			self.set_dml(etl_object,q)
+			template = self.get_template(etl_object, logger)
+			#logger.info(template)
+			fname= 'log/codelog/%s.sql' % self._environment._pipeline['etldataflow']['name'] #etl_object['name'].replace("/","_")
+			print fname
+			if 1:
+				f = open(fname, 'a')
+				status = f.write(template)
+				if status!= None:
+					self._logger.error('Cannot write to %s.' % fname)
+				f.close()			
+		assert self._pp.has_key('DB_CONNECTOR'),"'DB_CONNECTOR' is not set!"
+		self._default_login=self._pp['DB_CONNECTOR']
+		self.cleanup()
+
+		return 0
+		
+	def sql_plus_proc(self, etl_object, logger):
+		""" Executes DML using SQL*Plus """
+		self.set_params(etl_object, logger)
+		stmpl = self.get_dml(etl_object)
+		logger.sql(stmpl)
+
+
+		q="""--%%WORKER_NAME%%
+set timing on serveroutput on
+DECLARE v_row_cnt INT;	
+time1 NUMBER;
+v_elapsed NUMBER;
+BEGIN	
+time1:=dbms_utility.get_time;
+BEGIN
+%s;
+v_elapsed:=(dbms_utility.get_time-time1) /100;
+v_row_cnt:=SQL%%ROWCOUNT;
+p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%') ;
+EXCEPTION
+	WHEN OTHERS THEN
+		v_elapsed:=(dbms_utility.get_time-time1) /100;
+		v_row_cnt:=SQL%%ROWCOUNT;
+			p('ERROR: '||SQLCODE||'; '||SQLERRM);
+			p_log_stats(v_row_cnt,v_elapsed,'%%PROJECT_NAME%%','%%PIPELINE_NAME%%', '%%WORKER_NAME%%', SQLCODE, SQLERRM) ;
+		RAISE;
+	END;
+DBMS_OUTPUT.PUT_LINE('time elapsed: ' || (dbms_utility.get_time-time1) /100);
+DBMS_OUTPUT.PUT_LINE('rows updated: ' || v_row_cnt);
+COMMIT;
+END;
+/
+			"""	% ("EXECUTE IMMEDIATE '%s'" % stmpl.replace("'","''").replace("\n"," "))
+		#pprint(q)
+		#sys.exit(0)
+		self.set_dml(etl_object,q)
+		template = self.get_template(etl_object, logger)
+		#(tmpl_batch, status) = self.get_tmpl_batch(etl_object, logger)
+
+		#assert  len(tmpl_batch)>0 & (not status), 'Template batch is missing or misconfigured.')
+		#pprint((self._pp))
+		assert self._pp.has_key('DB_CONNECTOR'),"'DB_CONNECTOR' is not set!"
+		self._default_login=self._pp['DB_CONNECTOR']
+		#pprint(etl_object)
+		#sys.exit(0)
+		if 0:
+			pass
+		else:
+			#self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			schema_name=self._pp['SCHEMA_NAME']
+			#to_db= self._pp['TO_DB'] 
+
+			logger.info('#### START of dml %s.' % etl_object['name'])
+			regexp=re.compile(r'((\d+) rows updated\.)|(Elapsed: (\d+:\d+:\d+\.\d+))')
+			(out,status) = self.do_query(self._default_login, template,0,regexp)
+			#pprint(out)
+			#print out[0][1],out[1][3]
+			logger.info('#### END of dml %s.' % etl_object['name'])
+			if len(out)>1:
+				logger.sql("#### Updated: %s, Elapsed: %s #### " %(out[0][1],out[1][3]))
+			if status==0:
+				logger.info("#### SQL*Plus DML of %s finished successfully." % etl_object['name'])
+			else:
+				logger.warning('SQL*Plus DML failed for %s.' % etl_object['name'])
+
+
+			self.cleanup()		
+			#sys.exit(0)
+		if self._pp.has_key('EMAIL_TO') and 0:
+			#assert  self._process_meta[string.strip(self._pp['EMAIL_TO'],'%')], '%s is not defined in process_spec.' % self._pp['EMAIL_TO'])
+			self.mail(self._pp['EMAIL_TO'],tab )
+
+		return status
+
+		
+	def ddl(self, etl_object, logger):
+		""" Executes DDL using SQL*Plus """
+		#template = self.get_template(etl_object, logger)
+		status=-1
+		self.set_params(etl_object, logger)
+		template = self.get_template(etl_object, logger)
+		assert self._pp.has_key('DB_CONNECTOR'),"'DB_CONNECTOR' is not set!"
+		self._default_login=self._pp['DB_CONNECTOR']
+
+		if 0:
+			pass
+		else:
+			#self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			schema_name=self._pp['SCHEMA_NAME']
+			#to_db= self._pp['TO_DB'] 
+
+			logger.info('#### START of DDL %s.' % etl_object['name'])
+			regexp=re.compile(r'(Elapsed: (\d+:\d+:\d+\.\d+))')
+			(out,status) = self.do_query(self._default_login, template,0,regexp)
+			#pprint(out)
+			#print out[0][1],out[1][3]
+			logger.info('#### END of DDL %s.' % etl_object['name'])
+			#if len(out)>1:
+				#logger.sql("#### Elapsed: %s #### " %(out[0][3]))
+			if status==0:
+				logger.info("#### SQL*Plus DDL of %s finished successfully." % etl_object['name'])
+			else:
+				logger.warning('SQL*Plus DDL failed for %s.' % etl_object['name'])
+			self.cleanup()
+		return status
+
+	def select(self, etl_object, logger):
+		""" Executes DDL using SQL*Plus """
+		#template = self.get_template(etl_object, logger)
+		status=-1
+		self.set_params(etl_object, logger)
+		template = self.get_template(etl_object, logger)
+		assert self._pp.has_key('DB_CONNECTOR'),"'DB_CONNECTOR' is not set!"
+		self._default_login=self._pp['DB_CONNECTOR']
+
+		if 0:
+			pass
+		else:
+			#self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			schema_name=self._pp['SCHEMA_NAME']
+			#to_db= self._pp['TO_DB'] 
+
+			logger.info('#### START of DDL %s.' % etl_object['name'])
+			#regexp=re.compile(r'(Elapsed: (\d+:\d+:\d+\.\d+))')
+			regexp=re.compile(r'(\d+ row\w? selected\.|Elapsed\: \d+\:\d+\:\d+\.\d+)') #
+			if self.p_if('IF_DEBUG'):
+				regexp=re.compile(r'(.*|\d+ row\w? selected\.|Elapsed\: \d+\:\d+\:\d+\.\d+)') #
+				
+			
+			(out,status) = self.do_query(self._default_login, template,0,regexp, None, "set timing on feedback on ")
+			#pprint(out)
+			#print out[0][1],out[1][3]
+			logger.info('#### END of DDL %s.' % etl_object['name'])
+			#if len(out)>1:
+				#logger.sql("#### Elapsed: %s #### " %(out[0][3]))
+			if status==0:
+				logger.info("#### SQL*Plus DDL of %s finished successfully." % etl_object['name'])
+			else:
+				logger.warning('SQL*Plus DDL failed for %s.' % etl_object['name'])
+			self.cleanup()
+		return status
+		
+		
+	def mail(self, email, table):
+		SENDMAIL = "/usr/sbin/sendmail" # sendmail location
+		import os
+		p = os.popen("%s -t" % SENDMAIL, "w")
+		p.write("From: %s\n" % email)
+		p.write("To: %s\n" % email)
+		p.write("Subject: Copy log: %s\n" % table)
+		p.write("\n") # blank line separating headers from body
+		#p.write("Please, find log file attached.\n")
+		p.write("%s" % '#'*80)
+		p.write(" \n")
+		p.write("# %s\n" % self._logger.logfile_name())
+		p.write("%s" % '#'*80)
+		p.write(" \n")
+		f = open(self._logger.logfile_name(), "r")
+		p.write("%s\n" % f.read())
+		sts = p.close()
+		if sts != 0:
+		  print "Sendmail exit status", sts
+
+	def validate_tab_struct(self, etl_object, logger):
+		""" Parse template to list of tables """
+		tmpl = self.get_template(etl_object, logger)
+
+		regexp=re.compile(r'([\w\_]+)\.([\w\_]+)')
+		template={}
+		trunc_batch ={}
+		m = re.findall(regexp, tmpl)
+		#pprint(self._connector)
+		conn=self._connector
+		pp=self._pp
+		assert pp.has_key('FROM_DB'),'FROM_DB is not defined'
+		assert pp.has_key('TO_DB'),'TO_DB is not defined'
+		if m:
+			#pprint(m)
+			for t in m:
+				#print t
+				from_db = self.get_ora_login(conn[pp['FROM_DB']])
+				to_db= self.get_ora_login(conn[pp['TO_DB']]) 
+				to_tab= string.join(t,'.')
+				from_tab=string.join(t,'.')
+				(q,status)=self.get_select_nots(from_db,t)
+				#pprint(q)
+		return template	
+	def ok_to_copy(self, cfrom, cto, tab, logger):
+		out = 1
+		if len(cfrom)!=len(cto):
+			#s= cto.difference(cfrom)
+			#pprint(string.join(s,', '))
+			logger.warning('Number of columns differ in source and target databases for table %s.' % tab)
+		s= cto.difference(cfrom)
+		if len(s)>0:
+			#out=0
+			logger.warning('Column(s) %s missing in source table.' % string.join(s,', '))
+		s= cfrom.difference(cto)
+		if len(s)>0:
+			#out=0
+			logger.warning('Column(s) %s missing in arget table.' % string.join(s,', '))			
+		return out
+	def get_to_tab2(self,t):
+		if self._pp.has_key('TO_SCHEMA'):
+			t[0]=self._pp['TO_SCHEMA']
+		else:
+			
+			#sys.exit(1)
+			if self._globals.has_key('TO_SCHEMA'):
+				t[0]=self._globals['TO_SCHEMA']
+			else:
+				#print 'no TO_SCHEMA key'
+				pass
+				#pprint(self._pipeline)
+		#print 'returning ', t
+		if self._pp.has_key('TO_TABLE'):
+			t[1]=self._pp['TO_TABLE']
+		else:
+			
+			#sys.exit(1)
+			if self._pipeline.has_key('TO_TABLE'):
+				t[1]=self._pipeline['TO_TABLE']
+			else:
+				#print 'no TO_TABLE key'
+				pass		
+	def get_to_tab(self,t):
+		if self._pp.has_key('TO_SCHEMA'):
+			t[0]=self.p('TO_SCHEMA')
+		else:
+			pass
+			#sys.exit(1)
+			#if self._globals.has_key('TO_SCHEMA'):
+				#t[0]=self._globals['TO_SCHEMA']
+			#else:
+				#print 'no TO_SCHEMA key'
+				#pass
+				#pprint(self._pipeline)
+		#print 'returning ', t
+		if self._pp.has_key('TO_TABLE'):
+			t[1]=self.p('TO_TABLE')
+		else:
+			pass
+			#sys.exit(1)
+			#if self._pipeline.has_key('TO_TABLE'):
+		#t[1]=self._pipeline['TO_TABLE']
+			#else:
+				#print 'no TO_TABLE key'
+				#pass		
+		
+		return t
+	def get_from_tab(self,t):
+		if self._pp.has_key('FROM_SCHEMA'):
+			t[0]=self._pp['FROM_SCHEMA']
+		else:
+			if self._pipeline.has_key('FROM_SCHEMA'):
+				t[0]=self._pipeline['FROM_SCHEMA']			
+		return t
+
+				
+				
+	def is_inline(self, conn):
+		#pprint(conn)
+		if conn.has_key('type'):
+			if conn['type']=='inline':
+				return 1
+		return 0
+	def get_default_conn(self,from_conn,to_conn):
+		if self.is_inline(from_conn) &  self.is_inline(to_conn):
+			return (None, 1)
+		if self.is_inline(to_conn):
+			return (to_conn,0)
+		if self.is_inline(from_conn):
+			return (from_conn,0)
+		return (to_conn,0)
+	def sql_plus_copy(self, etl_object, logger):
+		""" Runs copy """
+		self.set_params(etl_object, logger)
+		(tmpl_batch, status) = self.get_tmpl_batch(etl_object, logger)
+
+		assert len(tmpl_batch)>0 & (not status), 'Template batch is missing or misconfigured.'
+		(def_conn,status)=self.get_default_conn(self.get_connector(self._p['FROM_DB']),self.get_connector(self._p['TO_DB']))
+		#pprint(etl_object)
+		#sys.exit(0)
+		if status:
+			logger.error('Dual inline connectors are not supported by SQL*Plus COPY.')
+			logger.warning('#### Skipping batch processing.')
+
+			logger.info("COPY of batch %s has failed." % etl_object['name'])
+		else:
+			self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			from_db = self._pp['FROM_DB']
+			to_db= self._pp['TO_DB'] 
+			for tab in tmpl_batch:
+				
+				if 1:
+
+					to_tab= self.get_to_tab(string.split(tab,'.'))
+					from_tab=self.get_from_tab(string.split(tab,'.'))
+
+					if 1:
+						status=0
+						if self.p_if('IF_CREATE_VIEW') or 1:
+							logger.info('#### START CREATE VIEW of %s.' % etl_object['name'])
+							(out,status) = self.do_query(to_db, tmpl_batch[tab]['VIEW'],0)
+							logger.info('#### END CREATE VIEW of %s.' % etl_object['name'])
+						if status==0:
+							
+							if self.p_if('IF_TRUNCATE'):
+								logger.info('#### START truncate of %s.' % etl_object['name'])
+								(out,status) = self.do_query(to_db, tmpl_batch[tab]['TRUNCATE'],0)
+								logger.info('#### END truncate of %s.' % etl_object['name'])
+							#status=0
+							if status==0:
+								logger.info('#### START copy of %s.' % etl_object['name'])
+								(out,status) = self.do_query(self._default_login, tmpl_batch[tab]['INSERT'],0)
+								logger.info('#### END copy of %s.' % etl_object['name'])
+								if status==0:
+									logger.info("#### SQL*Plus COPY of %s finished successfully." % tab)
+								else:
+									logger.warning('SQL*Plus COPY failed for %s.' % tab)
+							else:
+								logger.warning('Truncate table failed for %s.' % tab)
+						else: 
+							logger.warning('CREATE VIEW failed for %s.' % tab ) #etl_object['name']
+
+			self.cleanup()
+			#sys.exit(0)
+		if self._pp.has_key('EMAIL_TO') and 0:
+			#assert  self._process_meta[string.strip(self._pp['EMAIL_TO'],'%')], '%s is not defined in process_spec.' % self._pp['EMAIL_TO'])
+			self.mail(self._pp['EMAIL_TO'],tab )
+
+		return 0
+	def get_line_length(self, r):
+		l=0
+		regexp=re.compile(r'\:(\d+)\)')
+		m = re.findall(regexp, r[len(r)-1])
+		return int(m[0])+20
+		
+	def do_load_fixed(self, from_db, from_t, to_db, to_t,tmpl):
+		f = ""
+		out=[]
+		err=[]
+		assert len(from_db)>0, 'Source login is not set.'
+		assert len(to_db)>0, 'Target login is not set.'
+		(r_cc, status)=self.get_common_cols(from_db, from_t, to_db, to_t)
+		#print 'common cols'
+		#r_cc.sort()
+		#pprint(r_cc)
+		#sys.exit(1)
+		cl =  string.join(r_cc,",")
+		(r_cp, status)=self.get_col_position(((from_db, from_t),(to_db, to_t)))
+		#pprint(r_int)
+		#sys.exit(1) 
+		llen=5000
+		if not status:
+			llen = self.get_line_length(r_cp)
+			to_tab= string.join(self.get_to_tab(to_t),'.')
+			#cl = "'\"'||%s||'\"'" % string.join(r_int,"||'\",\"'||")
+			
+			ctl=self.get_ctl_fixed(string.join(self.get_to_tab(to_t),'.'),r_cp)
+			#pprint(ctl)
+			fname= 'sqlloader/%s.ctl' % to_tab
+			f = open(fname, 'w')
+			status = f.write(ctl)
+			if status!= None:
+				self._logger.error('Cannot write to %s.' % fname)
+			f.close()
+	
+			# get col formats
+			(r, status) =self.get_col_format(((from_db,from_t),(to_db, to_t)))
+			#pprint(r)
+			#sys.exit(1)
+			col_format = string.join(r,'\n')
+			q= "%s\nset head off line %s pages 0 echo off feedback off space 0 tab off arraysize 5000\n\nalter session set NLS_DATE_FORMAT='yyyy/mm/dd HH.MI.SS AM'\n/\n\nalter session set NLS_TIMESTAMP_FORMAT='yyyy/mm/dd hh24:mi:ss'\n/\nSELECT %s FROM %s %s;\nexit;\n" % (col_format, llen, cl , string.join(self.get_from_tab(from_t),'.'), self.get_q_options(self._pp,{'_PARTITION':self._pp.get('PARTITION',None)}))
+			self._logger.sql(q)
+			#print q
+			#sys.exit(1)
+			p1 = Popen(['echo', q], stdout=PIPE)
+			p2 = Popen([ 'sqlplus', '-S',from_db], stdin=p1.stdout, stdout=PIPE)
+			if 1:
+				#READSIZE=200000, ROWS=5000, BINDSIZE=200000, PARALLEL=false, direct=false, columnarrayrows=5000
+				p3 = Popen(['sqlldr', 'control=%s' % fname, 'userid=%s' % to_db, 'rows=5000',
+				'COLUMNARRAYROWS=5000','STREAMSIZE=200000','readsize=200000',' parallel=FALSE','bindsize=200000','direct=TRUE', 
+				"data=\'-\'",
+				'LOG=sqlloader/%s.log' % to_tab, 'BAD=sqlloader/%s.bad' % to_tab,'DISCARD=sqlloader/%s.dsc' % to_tab,'ERRORS=10'], stdin=p2.stdout, stdout=PIPE)
+				output=' '
+				while output:
+					output = p3.stdout.readline()
+					err.append(output)
+					#print output
+					self._logger.info(output.rstrip())
+				status=p3.wait()
+			else:
+				output=' '
+				while output:
+					output = p2.stdout.readline()
+					err.append(output)
+					#print output
+					self._logger.info(output.rstrip())
+				status=p2.wait()			
+			self._logger.info( 'SQL*Loader status =%s' % status)
+			if status==1:
+				self._logger.error(string.join(err,'\n'))
+			#else: 
+				#self._logger.info(string.join(err,'\n'))
+		else:
+			self._logger.error('Cannot fetch common columns.')
+		return (out,status)	
+
+
+	def spool_ddl(self, etl_object, logger):
+		""" Runs copy using SQL*Plus and SQL*Loader"""
+		self.set_params(etl_object, logger)
+		#(tmpl_batch, status) = self.get_tmpl_batch_fixed(etl_object, logger)
+		template = self.get_template(etl_object, logger)
+		#pprint(template)
+		#sys.exit(1)
+		assert len(template)>0, 'Template batch is missing or misconfigured.'
+		def_conn=self.get_connector(self._p['FROM_DB'])
+		status=0
+		#pprint(template)
+		if 1:
+			self._default_login=self.get_ora_login(def_conn)
+			assert len(self._default_login)>0, 'Cannot set default login.'
+			from_db = self._pp['FROM_DB']
+			workn =string.strip(self._pp['WORKER_NAME'])
+			if template:
+				#get object list
+				logger.info('#### START Getting object list.' )												
+				#pprint(template)
+				regexp=re.compile(r'[\s|\ ]?(\w+)[\s|\ ]+(\w+)[\s|\ ]+(\w+)[\s|\ ]?')
+				(r, status) = self.do_query(from_db, "set heading off pagesize 0 line 300 echo off termout off show off feedback off\n%s" % template,0,regexp)
+				#pprint(r)
+				#sys.exit(1)
+				logger.info('#### END Getting object list.' )
+				for obj in r:
+					#pprint(obj)
+					if 1:
+						#to_tab= self.get_to_tab(string.split(tab,'.'))
+						from_obj=obj[0]
+						#print from_tab
+						if 1:
+							#(r, status) = self.do_query(to_db, tmpl_batch[tab]['TRUNCATE'],0)
+							if 1:
+								#loop all partitions
+
+								if  0: #self.is_set('PARTITION'):
+									pts = self.get_prt_set(from_db, from_tab, self._p['PARTITION'])
+									#pprint(pts)
+									#sys.exit(1)
+									assert len(pts)>0, 'Could not find partitions for table  %s [%s]' % (obj, self._p['PARTITION'])
+									for pt in pts:
+										
+										if pt:
+											self._p['PARTITION']=pt
+											self._pp['PARTITION']=pt
+											status=0
+											logger.info('#### START spool of %s[%s][%s]' % (workn,obj,pt))												
+											#(r, status) = self.do_spool(from_db, from_tab)
+											logger.info('#### END spool of %s[%s][%s].' % (workn,obj,pt))
+										#sys.exit(1)
+								else:
+									status=0
+									logger.info('#### START spool of %s[%s] no partiton ' % (workn,obj))												
+									(r, status) = self.do_spool_ddl(from_db, obj)
+									logger.info('#### END spool of %s[%s] no partition.' % (workn,obj))
+		
+		
+
+								if status==0:
+									logger.info('Spool of %s[%s] completed successfully.' % (workn,obj))
+							else:
+								logger.warning('#### Skipping spool of %s[%s].' % (workn,obj))
+								#logger.warning("Truncate of table %s failed." % tab)
+						else:
+							logger.warning('#### Skipping spool of %s[%s].' % (workn,obj))
+							
+					self.cleanup()
+		if self._pp.has_key('EMAIL_TO') and 0:
+			self.mail(self._pp['EMAIL_TO'],obj )
+		
+		return 0	
+	def export(self):
+		return ('DDL_LOC',self._result)
+	def do_spool_ddl(self, from_db, from_t):
+		f = ""
+		out=[]
+		err=[]
+		assert len(from_db)>0, 'Source login is not set.'
+		status=0
+		drop_dml=''
+		if self.is_set('IF_ADD_DROP_DML'):
+			drop_dml= """SELECT 'DROP %s %s.%s' OBJ_DDL FROM DUAL\n/\nSELECT '/' OBJ_DDL FROM DUAL\n/\n""" % (from_t[1],from_t[0], from_t[2])
+			#print drop_dml
+		if not status:
+			q='SELECT '
+			if 1: #column word_wraapped
+				
+				wwp = "COLUMN OBJ_DDL format a121 WORD_WRAPPED\n"
+				q= """%s\n set head off line 32766 long 3000000 pages 0 newpage 0 echo off feedback off define off
+set serveroutput off	
+%s
+select dbms_metadata.get_ddl(
+  object_type =>'%s',
+  name=>'%s',
+  schema=>'%s') OBJ_DDL
+from dual;\nexit;\n""" % (wwp,drop_dml,from_t[1],from_t[2], from_t[0])
+			self._logger.sql(q)
+			obj= string.join(from_t,'.')
+			if 1:
+				sqdir= '%s/sql' % self._logger.get_logdir()
+				sqfn='%s/%s.%s.sql' % (sqdir,self._pp['WORKER_NAME'],obj)
+				if not os.path.isdir(sqdir):
+					try:
+						os.mkdir(sqdir) 
+					except Exception, e:
+						print 'Created in other thread.', e.strerror
+				sqf = open(sqfn, "w")
+				sqf.write(q)
+				sqf.close()
+			ddldir= '%s/ddl' % self._logger.get_logdir()
+			if not os.path.isdir(ddldir):
+				os.mkdir(ddldir) 
+			ext='ddl'
+			if self.p_if('IF_COMPRESSED_SPOOL'):
+				ext='gz'
+			gzfn = '%s/%s.%s.%s' % (ddldir,self._pp['WORKER_NAME'],obj,ext)
+			if self.is_set('PARTITION'):
+				gzfn = '%s/%s.%s.%s.%s' % (ddldir,self._pp['WORKER_NAME'],obj,self._pp['PARTITION'],ext)
+			log = open(gzfn, "w")
+			self._result.append(gzfn)
+			#self._result.append(gzfn)
+			self._wc['DDL_LOC'] = self._result
+			self._gwc['DDL_LOC'] = self._result
+			#print q
+			#sys.exit(1)
+			p1 = Popen(['echo', '@%s' % sqfn], stdout=PIPE, stderr=PIPE)
+			#print from_db
+			#IF_COMPRESSED_SPOOL
+			if self.p_if('IF_COMPRESSED_SPOOL'):
+				p2 = Popen([ 'sqlplus', '-S', from_db], stdin=p1.stdout, stdout=PIPE , stderr=PIPE
+				)
+				status =0
+				out=[]
+				err=[]
+				if 1:				
+					p3 = Popen(['gzip', '-c'], 
+					stdin=p2.stdout, stdout=log, stderr=PIPE)
+					p3.wait()
+					output=' '
+					#while output:
+						#output = p3.stdout.readline()
+						#out.append(output)
+						#print output
+						#self._logger.info(output.rstrip())
+					status=p3.wait()
+					if status==0:
+						self._logger.info('gzip status =%s' % status)
+					if status==1:
+						self._logger.error('gzip status =%s' % status)
+						output=' '
+						while output:
+							output = p3.stderr.readline()
+							err.append(output)
+							print output
+							self._logger.warning(output.rstrip())
+						status=p3.wait()
+						if status==1:
+							self._logger.error(string.join(err,'\n'))						
+					if status==2:
+						self._logger.warning('gzip status =%s' % status)
+					
+
+				else:
+					output=' '
+					
+					while output:
+						output = p2.stdout.readline()
+						out.append(output)
+						print output
+						self._logger.info(output.rstrip())
+					
+					status=p2.wait()
+					if status==0:
+						self._logger.info('SQL*Plus status =%s' % status)
+					else:
+						if status==1:
+							self._logger.warning('SQL*Plus status =%s' % status)
+							output=' '
+							while output:
+								output = p2.stderr.readline()
+								err.append(output)
+								#print output
+								self._logger.error(output.rstrip())
+							status=p2.wait()
+							if status==1:
+								self._logger.error(string.join(err,'\n'))							
+						else:
+							self._logger.error('SQL*Plus status =%s' % status)
+			else:
+				self._logger.info('Starting UNCOMPRESSED spool')
+				p2 = Popen([ 'sqlplus',  '-S', from_db], stdin=p1.stdout, stdout=log , stderr=PIPE
+				)
+				status =0
+				out=[]
+				err=[]
+				if 1:
+					status=p2.wait()
+					if status==0:
+						self._logger.info('spool status =%s' % status)
+					if status==1:
+						self._logger.error('spool status =%s' % status)
+						output=' '
+						while output:
+							output = p2.stderr.readline()
+							err.append(output)
+							print output
+							self._logger.warning(output.rstrip())
+						status=p2.wait()
+						if status==1:
+							self._logger.error(string.join(err,'\n'))						
+					if status==2:
+						self._logger.warning('spool status =%s' % status)
+					
+
+				else:
+					output=' '
+					
+					while output:
+						output = p2.stdout.readline()
+						out.append(output)
+						print output
+						self._logger.info(output.rstrip())
+					
+					status=p2.wait()
+					if status==0:
+						self._logger.info('SQL*Plus status =%s' % status)
+					else:
+						if status==1:
+							self._logger.warning('SQL*Plus status =%s' % status)
+							output=' '
+							while output:
+								output = p2.stderr.readline()
+								err.append(output)
+								#print output
+								self._logger.error(output.rstrip())
+							status=p2.wait()
+							if status==1:
+								self._logger.error(string.join(err,'\n'))							
+						else:
+							self._logger.error('SQL*Plus status =%s' % status)				
+		else:
+			self._logger.warning('Cannot fetch common columns.')
+		return (out,status)
+
+		
+		
+		
+	def get_pts(self, pts):
+		""" get partition names from parttion range """
+	def get_range(self,range):
+		regexp=re.compile('(\d+):(\d+)')		
+		m = re.match(regexp, range)
+		assert  m,'Invalid range format'
+		return m.groups()
+	def get_latest_meta_columns(self,tab):
+		assert tab!='INPUT_FILE', 'INPUT_FILE is not supported.'
+		assert  'LATEST' in self._gwc, 'LATEST is not set.'
+		assert  'COLUMNS' in self._gwc['LATEST'], 'COLUMNS are not set in LATEST.'
+		#tab=self._gwc['LATEST']['TABLE'][i]
+		#print tab
+		#pprint(self._gwc['LATEST']['COLUMNS'][tab])
+		#sys.exit(1)
+		
+		return self._gwc['LATEST']['COLUMNS'][tab]
+
+	def get_latest_output_fn(self,from_file_table):
+		assert from_file_table!='INPUT_FILE', 'INPUT_FILE is not supported.'
+		assert  'LATEST' in self._gwc, 'LATEST is not set.'
+		assert  'OUTPUT_FILE' in self._gwc['LATEST'], 'COLUMNS are not set in LATEST.'
+		#tab=self._gwc['LATEST']['TABLE'][i]
+		#print tab
+		#pprint(self._gwc['LATEST']['COLUMNS'][tab])
+		#sys.exit(1)
+		
+		return self._gwc['LATEST']['OUTPUT_FILE'][from_file_table]
+		
+		
+	def get_file2db_common_cols(self, from_file_table, to_db, to_t):
+		"""common cols between file and DB table"""
+		from_key = from_file_table #self.get_cc_key((from_db, from_t))
+		#print 'from_key=%s' % from_key
+		to_key = self.get_cc_key( (to_db, to_t))
+		
+		#print 'to_key= %s'% to_key
+		
+		if not self._cci.has_key(from_key):
+			self._cci[from_key]={}
+			self._cci[from_key][to_key]={}
+		if not self._cci.has_key(to_key):
+			self._cci[to_key]={}	
+			self._cci[to_key][from_key]={}
+		#pprint (self._cci)
+		#sys.exit(1)
+		if len(self._cci[to_key][from_key])==0:	
+			#print 'getting columns for:',from_db, from_t
+			r_from = self.get_latest_meta_columns(from_file_table)
+			#r_col_from = map(lambda x: x.split(':')[0], r_from)
+			#pprint(r_col_from)
+			#sys.exit(1)
+			#print 'getting columns for:',to_db, to_t
+			(r_to,to_status) = self.get_columns(to_db, to_t)
+			#r_col_to = map(lambda x: x.split(':')[0], r_to)
+			#pprint(r_col_to)
+			#pprint(status)
+			#pprint(self._gwc['LATEST'])
+			#sys.exit(1)
+			#pprint(r_from)
+			if  not to_status:
+				r_int = list(set(r_from) & set(r_to))
+				r_int.sort()
+				self._cci[to_key][from_key]=r_int
+				self._cci[from_key][to_key]=r_int
+				#pprint(r_int)
+				#sys.exit(1)
+				return (r_int, 0)
+			else:
+				self._logger.error('Cannot get column lists.')
+			
+			return (None, 1)	
+		else:
+			#print 'cc exists'
+			return (self._cci[to_key][from_key], 0)	
+
+			
+	def do_load_file2db(self, from_file_table,  to_db, to_t, ptin=None):
+		f = ""
+		out=[]
+		err=[]
+		assert  len(from_file_table)>0, 'Source file table name is not set.'
+		#assert  len(from_meta)>0, 'Source metadata is not set.')
+		assert  len(to_db)>0, 'Target login is not set.'
+		#(r_int, status)=self.get_common_cols(from_db, from_t, to_db, to_t)
+		(r_int, status)=self.get_file2db_common_cols(from_file_table, to_db, to_t)
+		#pprint(r_int)
+		#print from_file_table, to_db, to_t
+		#print from_file_table, to_db, to_t
+		assert len(r_int)>0, 'Bad clumn count %d .' % len(r_int)
+		#sys.exit(1)
+		
+		if not status:
+			ft = self.p('FIELD_TERMINATOR') 
+			lt = self.p('LINE_TERMINATOR') 
+			if_dpl_parallel='TRUE'
+			if self.p_if('IF_DPL_SERIAL'):
+				if_dpl_parallel='FALSE'	
+				
+			dpl_mode='APPEND'
+			if self.is_set('DPL_MODE'):
+				if 'APPEND' in self._pp['DPL_MODE']:
+					dpl_mode='APPEND'	
+				else:
+					if if_dpl_parallel=='TRUE':
+						self._logger.fatal('Cannot use DPL mode %s with parallel enabled (use IF_DPL_SERIAL=1).' % self._pp['DPL_MODE'])
+					else:
+						if 'INSERT' in self._pp['DPL_MODE']:
+							dpl_mode='INSERT'	
+						else:
+							if 'REPLACE' in self._pp['DPL_MODE']:
+								dpl_mode='REPLACE'	
+							else:
+								if 'TRUNCATE' in self._pp['DPL_MODE']:
+									dpl_mode='TRUNCATE'	
+								else:
+									self._logger.error('Unsupproted Direct Path Load mode %s.' % self._pp['DPL_MODE'])
+									
+			to_tab= string.join(self.get_to_tab(to_t),'.')
+			#cl = "'\"'||%s||'\"'" % string.join(r_int,"||'\",\"'||")
+			#print "'%s'||||'~'" % ft,"||'%'||" % ft
+			r_col = map(lambda x: x.split(':')[0], r_int)
+			
+			#r_cl = r_col 
+			r_cl = map(self.coldef, r_int)
+			
+			#pprint(r_cl)
+			#sys.exit(1)
+			#r_cl = [line.split()[2] for col in r_int:if ]
+			cl =  "'%s'||%s||'%s'" % (ft,string.join(r_col,"||'%s'||\n" % ft),lt)
+			#print cl
+			ctl=self.get_ctl(string.join(self.get_to_tab(to_t),'.'),r_cl,dpl_mode,{})
+			#pprint(ctl)
+			#sys.exit(1)
+			self._logger.log(ctl)
+			#ptn = ''
+			#print ctl
+			#fname= 'sqlloader/%s.ctl' % to_tab
+			if_direct='TRUE'
+			#if self.is_set('PARTITION'):
+			ptn = "_%s" % ptin
+			#pprint(ptn)
+			#sys.exit(1)
+
+
+
+			if self.p_if('IF_CONVENTIONAL'):
+				if_direct='FALSE'	
+				
+			dpl_rows =10000
+			if self.is_set('DPL_ROWS'):
+				dpl_rows = int(self._pp['DPL_ROWS'])
+				if if_dpl_parallel=='TRUE':
+					self._logger.warn('DPL_ROWS is ignored in parallel mode.')
+			dpl_bindsize = 100000
+			if self.is_set('DPL_BINDSIZE'):
+				dpl_bindsize = int(self._pp['DPL_BINDSIZE'])
+			dpl_readsize = 100000
+			if self.is_set('DPL_READSIZE'):
+				dpl_readsize = int(self._pp['DPL_READSIZE'])
+			dpl_streamsize = 100000
+			if self.is_set('DPL_STREAMSIZE'):
+				dpl_streamsize = int(self._pp['DPL_STREAMSIZE'])
+			dpl_columnarrayrows = 10000
+			if self.is_set('DPL_COLUMNARRAYROWS'):
+				dpl_columnarrayrows = int(self._pp['DPL_COLUMNARRAYROWS'])				
+			dpl_skip_index_maintenance = 'TRUE'
+			if self.is_set('SKIP_INDEX_MAINTENANCE'):
+				dpl_skip_index_maintenance = self._pp['SKIP_INDEX_MAINTENANCE']
+			dpl_skip_unusable_indexes = 'TRUE'
+			if self.is_set('SKIP_UNUSABLE_INDEXES'):
+				dpl_skip_unusable_indexes = self._pp['SKIP_UNUSABLE_INDEXES']
+			loader_errors = 10
+			if self.is_set('LOADER_ERRORS'):
+				loader_errors = int(self._pp['LOADER_ERRORS'])
+			skip=0
+			if not self.p_if('IF_SKIP_HEADER'):
+				skip = 1				
+
+			fname= 'sqlloader/%s%s.ctl' % (to_tab, ptn)
+			import codecs
+			f = codecs.open(fname, 'w',"utf-8")
+			status = f.write(unicode(ctl))
+			
+			if status!= None:
+				self._logger.error('Cannot write to %s.' % fname)
+			f.close()
+			#fname= 'sqlloader/%s%s_2.ctl' % (to_tab, ptn)
+			#(r,status) = self.get_line_len(((from_db, from_t),(to_db, to_t)))
+			#maxlen=32767
+			#pprint(r)
+			#sys.exit(1)
+			#if len(r)==0:
+			#	self._logger.error("Cannot find line length.")
+			#llen=int(r[0]); # +20
+			#if llen>maxlen:
+			#	llen=maxlen
+			#q= "set head off line %s pages 0 echo off feedback off termout off  feed off newpage 0 arraysize 5000\nalter session set NLS_DATE_FORMAT='DD-MON-YY'\n/\n\nalter session set NLS_TIMESTAMP_FORMAT='DD-MON-RR HH.MI.SSXFF AM'\n/\n\nSELECT %s FROM  %s  %s;\nexit;\n" % (llen,   cl , string.join(self.get_from_tab(from_t),'.'), self.get_q_options(self._pp))
+			#/*WHERE  account_id='1427826'%/
+			#self._logger.sql(q)
+			#pprint(q) 
+			from_file = self.get_latest_output_fn(from_file_table)
+			p1 = Popen("""cat %s | while read LINE ; do echo "|$LINE"; done""" % from_file, shell=True, stdout=PIPE, stderr=PIPE)
+			#p2 = Popen([ 'sqlplus', '-S',from_db], stdin=p1.stdout, stdout=PIPE , stderr=PIPE)
+			#print """cat %s | while read LINE ; do echo "|$LINE"; done'""" % from_file
+			status =0
+			out=[]
+			err=[]
+			#print to_db
+			#sys.exit(1)
+			slconf=['sqlldr', 'control=%s' % fname, # 'userid=%s' % to_db, 
+			'ROWS=%s' % dpl_rows,
+				'COLUMNARRAYROWS=%s' % dpl_columnarrayrows,#'size=10000',
+				'STREAMSIZE=%s' % dpl_streamsize,'READSIZE=%s' % dpl_readsize,
+				'PARALLEL=%s' % if_dpl_parallel,
+				'BINDSIZE=%s' % dpl_bindsize, #' UNRECOVERABLE=Y ', 
+				'SKIP_INDEX_MAINTENANCE=%s' % dpl_skip_index_maintenance, 'SKIP_UNUSABLE_INDEXES=%s' % dpl_skip_unusable_indexes,
+				'DIRECT=%s' % if_direct, #"data=\'-\'",
+				'MULTITHREADING=TRUE',
+				'LOG=sqlloader/%s%s.log' % (to_tab, ptn), 'BAD=sqlloader/%s%s.bad' % (to_tab, ptn),
+				'DISCARD=sqlloader/%s%s.dsc' % (to_tab, ptn),
+				'ERRORS=%s' % loader_errors,
+				'skip=%d' %skip]
+			self._logger.log(slconf)
+			pprint(slconf)
+			#sys.exit(1)
+			if 1:
+				p3 = Popen(['sqlldr', 'control=%s' % fname, 'userid=%s' % to_db, 'ROWS=%s' % dpl_rows,
+				'COLUMNARRAYROWS=%s' % dpl_columnarrayrows,#'size=10000',
+				'STREAMSIZE=%s' % dpl_streamsize,'READSIZE=%s' % dpl_readsize,
+				'PARALLEL=%s' % if_dpl_parallel,
+				'BINDSIZE=%s' % dpl_bindsize, #' UNRECOVERABLE=Y ', 
+				'SKIP_INDEX_MAINTENANCE=%s' % dpl_skip_index_maintenance, 'SKIP_UNUSABLE_INDEXES=%s' % dpl_skip_unusable_indexes,
+				'DIRECT=%s' % if_direct, #"data=\'-\'",
+				'MULTITHREADING=TRUE',
+				'LOG=sqlloader/%s%s.log' % (to_tab, ptn), 'BAD=sqlloader/%s%s.bad' % (to_tab, ptn),
+				'DISCARD=sqlloader/%s%s.dsc' % (to_tab, ptn),
+				'ERRORS=%s' % loader_errors,
+				'skip=%d' %skip], 
+				stdin=p1.stdout, stdout=PIPE, stderr=PIPE)
+				output=' '
+				#pprint(dir(p3.stderr))
+				while output:
+					output = p3.stdout.readline()
+					out.append(output)
+					#print output
+					self._logger.info(output.rstrip())
+				status=p3.wait()
+				#sys.exit(1)
+				if status==0:
+					self._logger.info('SQL*Loader status =%s' % status)
+				if status==1:
+					self._logger.error('SQL*Loader status =%s' % status)
+					output=' '
+					while output:
+						output = p3.stderr.readline()
+						err.append(output)
+						#print output
+						self._logger.warning(output.rstrip())
+					status=p3.wait()
+					if status==1:
+						self._logger.error(string.join(err,'\n'))						
+				if status==2:
+					self._logger.warning('SQL*Loader status =%s' % status)
+				
+
+			else:
+				output=' '
+				
+				while output:
+					output = p1.stdout.readline()
+					out.append(output)
+					#print output
+					self._logger.info(output.rstrip())
+				
+				status=p1.wait()
+				if status==0:
+					self._logger.info('SQL*Plus status =%s' % status)
+				else:
+					if status==1:
+						self._logger.warning('SQL*Plus status =%s' % status)
+						output=' '
+						while output:
+							output = p1.stderr.readline()
+							err.append(output)
+							#print output
+							self._logger.error(output.rstrip())
+						status=p1.wait()
+						if status==1:
+							self._logger.error(string.join(err,'\n'))							
+					else:
+						self._logger.error('SQL*Plus status =%s' % status)
+
+		else:
+			self._logger.warning('Cannot fetch common columns.')
+		return (out,status)		
+
+		
+	
+	def file2db(self, etl_object, logger):
+		""" Does copy from file to db using SQL*Loader"""
+		
+		self.set_params(etl_object, logger)
+		
+		tmpl_batch = self.get_template(etl_object, logger)
+		#(tmpl_batch, status) = self.get_tmpl_batch_fixed(etl_object, logger)
+		#pprint(self._cci)
+		#sys.exit(1)
+
+		#(tmpl_batch) = self.get_template(etl_object, logger)
+		out=[]
+		#pprint(tmpl_batch)
+		#pprint(self._gwc)
+		#sys.exit(1)
+
+		#assert  'OUTPUT_FILE' in self._gwc, 'INPUT_FILE is not set.')
+		#from_file = self._gwc['OUTPUT_FILE'][0]
+		latest_tabs=[]
+		if 'INPUT_FILE' not in self._pp:
+			#from_file_dic= self.get_latest_output_files()
+			latest_tabs=self.get_latest_tables()
+		else:
+			latest_tabs.append(self._pp['INPUT_FILE'])
+		#assert  len(from_file)>0, 'INPUT_FILE name is undefined.')
+		#from_meta={}
+		assert  len(tmpl_batch)>0, 'File2db Template batch is missing or misconfigured.'
+		#(def_conn,status)=self.get_default_conn(self.get_connector(self._p['FROM_DB']),self.get_connector(self._p['TO_DB']))
+		if 0:
+			logger.error('Dual inline connectors are not supported by SQL*Plus COPY.')
+			logger.warning('#### Skipping batch processing.')
+			logger.info("COPY of batch %s has failed." % etl_object['name'])
+		else:
+			assert 'TO_DB' in self._pp, 'TO_DB is not set'
+			self._default_login=self.get_ora_login(self.get_connector(self._p['TO_DB']))
+			assert  len(self._default_login)>0, 'Cannot set default login.'
+			#from_db = self._pp['FROM_DB'].strip(' ').replace(' ','')
+			#print self._default_login
+			to_db= self._pp['TO_DB'].strip(' ').replace(' ','')
+			#sys.exit(1)
+			#pprint(tmpl_batch)
+			tabs=string.split(tmpl_batch.strip(),'\n')
+			#pprint(tmpl_batch)
+			#pprint(tabs)
+			#pprint(from_file_dic)
+			assert len(tabs)==len(latest_tabs), 'Counts for Files and Tables do not match.'
+			#from_file_path_dic=from_file_dic.values()
+			
+			for i in range(len(tabs)):
+				tab=tabs[i].strip()
+				if 1:
+					
+					
+					#assert tab in from_file_dic,'Cannot locate source file for table %s' % tab)
+					#from_file=from_file_path_dic[i]	
+					from_file_table=latest_tabs[i]
+					#print from_file, tab
+					#sys.exit(1)
+					batch='TRUNCATE TABLE %s;\n' %tab;
+					#sys.exit(1)
+					to_tab= self.get_to_tab(string.split(tab,'.'))
+					#from_tab=self.get_from_tab(string.split(tab,'.'))
+					if 1:
+
+						status=0
+						print to_db, batch
+						if status==0:
+							delta='DATE_RANGE_DELTA'
+							if 1:
+								#ptn =
+								if 1:
+									status=0
+									if self.p_if('IF_TRUNCATE'):
+										t=batch
+										#print t
+										#sys.exit(1)
+										if 1:
+											logger.info('#### START truncate of %s.' % tab)
+											(r, status) = self.do_query(to_db, t,0)
+											logger.info('#### END truncate of %s.' % tab)						
+											if status!=0:
+												logger.info('#### TRUNCATE of %s failed.' % etl_object['name'])
+									if status==0:
+										if 1:
+											logger.info('#### START file2db load of %s.' % tab)							
+											(r, status) = self.do_load_file2db(from_file_table, to_db, to_tab)
+											logger.info('#### END file2db load of %s.' % tab)
+										
+
+							if status==0:
+								logger.info('Load of %s completed successfully.' % tab)
+						else:
+							logger.warning('#### Skipping load of %s.' % tab)
+							logger.warning("Truncate of table %s failed." % tab)
+					else:
+						logger.warning('#### Skipping truncate of %s.' % tab)
+				self.cleanup()
+		if self._pp.has_key('EMAIL_TO') and 0:
+			self.mail(self._pp['EMAIL_TO'],tab )
+		
+		return 0		
+	def get_part_q(self, tab, delta):
+		ts=[]
+		rng=delta.split(':')
+		#pprint(rng)
+		#sys.exit()
+		min=0
+		
+		if len(rng)>1:
+			if rng[0]:
+				min=int(rng[0])
+			if rng[1]:
+				max=int(rng[1])
+			else:
+				max=750
+		else:
+			max=int(delta)
+		for days in range(min,max):
+			t=  date.today() - timedelta(days)
+			ts.append( "%s-%s %s" % (t.strftime('%Y-%m'),  t.strftime('%d'), t.strftime('%H:%M:%S') ))
+		#pprint(ts)
+		tsl=["SELECT dbms_rowid.rowid_object(ROWID) obj_id  FROM %s.%s partition for (to_date('%s','SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) WHERE rownum=1" % (tab[0],tab[1], t) for t in ts]
+		tsq=string.join(tsl,' UNION ALL\n')
+		#pprint(tsq)
+		#sys.exit(1) 
+		return """select distinct owner,object_name, subobject_name from (
+%s   ), all_objects where owner= '%s' and object_id=obj_id;""" % (tsq, tab[0])
+
+		
+	def get_tab_shards(self,nosh,from_db,from_t,options):
+		p= options.get('_PARTITION')
+		#pprint(p)
+		#sys.exit(1)
+		prtn =''
+		if p:
+			prtn = "AND SUBOBJECT_NAME = '%s'" % p
+		#sys.exit(1)
+		q="""
+		select distinct grp||'||'||min_rid||'||'||max_rid||'||'||SUBOBJECT_NAME cln
+FROM (
+SELECT DBMS_ROWID.rowid_create (1,
+                                data_object_id,
+                                lo_fno,
+                                lo_block,
+                                0
+                               ) min_rid,
+       DBMS_ROWID.rowid_create (1,
+                                data_object_id,
+                                hi_fno,
+                                hi_block,
+                                100
+                               ) max_rid,grp,SUBOBJECT_NAME
+  FROM (SELECT DISTINCT grp,
+                        FIRST_VALUE (relative_fno) OVER (PARTITION BY grp ORDER BY relative_fno,
+                         block_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                                                       lo_fno,
+                        FIRST_VALUE (block_id) OVER (PARTITION BY grp ORDER BY relative_fno,
+                         block_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                                                     lo_block,
+                        LAST_VALUE (relative_fno) OVER (PARTITION BY grp ORDER BY relative_fno,
+                         block_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                                                       hi_fno,
+                        LAST_VALUE (block_id + blocks - 1) OVER (PARTITION BY grp ORDER BY relative_fno,
+                         block_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                                                                     hi_block,
+                        SUM (blocks) OVER (PARTITION BY grp) sum_blocks
+                   FROM (SELECT   segment_name, relative_fno, block_id,
+                                  blocks,
+                                  TRUNC
+                                      (  (  SUM (blocks) OVER (ORDER BY relative_fno,
+                                             block_id)
+                                          - 0.01
+                                         )
+                                       / (SUM (blocks) OVER () / %d)
+                                      ) grp
+                             FROM dba_extents
+                            WHERE segment_name =
+                                             UPPER ('%s')
+                              AND owner = '%s'
+                         ORDER BY block_id)),
+       (SELECT data_object_id, SUBOBJECT_NAME
+          FROM all_objects
+         WHERE object_name = UPPER ('%s') and owner='%s' and data_object_id is not null  %s)
+);
+		""" % (nosh,from_t[1],from_t[0],from_t[1],from_t[0],prtn)
+		#print q
+		#sys.exit(1)
+		regexp=re.compile(r'(.*)')
+		#self._pp['FROM_DB'] =self._pp['TO_DB']
+		assert from_db, 'TO_DB is not set.'
+		(r, status) = self.do_query(from_db, "set heading off  pagesize 0 serveroutput off feedback off echo off\n%s"  % q,0,regexp)
+		#print from_db
+		#pprint(r)
+		#t= 
+		#sys.exit(1)
+		return (r, status)
+
+	def load_test(self,from_db, from_t, to_db, to_t,options={}):
+		import time
+		time.sleep(1)
+		#assert shid==int(self._pp['_SHARD'][0]), 'Shard changed.')
+		print 'args:', from_db, from_t, to_db
+		shard=options['_SHARD']
+		print 'processing>> ' ,  shard
+			# Sample task 1: given a start and end value, shuffle integers,
+			# then sort them
+		return shard[0]
+
+	def sortTask(self,data):
+		print "SortTask starting for ", data
+		numbers = range(data[0], data[1])
+		for a in numbers:
+			rnd = randrange(0, len(numbers) - 1)
+			a, numbers[rnd] = numbers[rnd], a
+		print "SortTask sorting for ", data
+		numbers.sort()
+		print "SortTask done for ", data
+		return "Sorter ", data
+
+	# Sample task 2: just sleep for a number of seconds.
+
+	def waitTask(self,data):
+		print "WaitTask starting for ", data
+		print "WaitTask sleeping for %d seconds" % data
+		time.sleep(data)
+		return "Waiter", data
+
+	# Both tasks use the same callback
+
+	def taskCallback(self,data):
+		self.pool_cntr.append(data)
+		print "Callback called for", data		
+	def do_sharded_load(self, from_db, from_t, to_db, to_t, options):
+		#from threading import Thread
+		r=None
+		
+		status=1		
+		assert self.is_set('SKIP_INDEX_MAINTENANCE') == 'TRUE', 'Cannot shard without SKIP_INDEX_MAINTENANCE = TRUE'
+		assert self.is_set('IF_DPL_SERIAL') == '0', 'Cannot shard without IF_DPL_SERIAL = 0'
+		#(r, status) =self.do_load(from_db, from_t, to_db, to_t, ptin)
+		nosh = self.is_set('NUM_OF_SHARDS')
+		assert nosh, 'NUM_OF_SHARDS is undefined.'
+		nosh=int(nosh)
+		maxt=20
+		sharded_part={}
+		if nosh:
+			pprint(to_t)
+			self._logger.info('Sharding table %s.%s' % tuple(to_t) )
+			if 1: #optimize
+				(r_int, status)=self.get_common_cols(from_db, from_t, to_db, to_t)
+			(shards, status)=self.get_tab_shards(nosh, from_db, from_t,options)
+			#pprint(shards)
+			#print status
+			#sys.exit(1)
+			assert status==0,'Cannot fetch shards.'
+			start = time.time()
+			#queue = Queue.Queue()
+			# Create a pool with three worker threads
+			prev_count=activeCount()
+			pool_size = len(shards)
+			if pool_size>maxt:
+				pool_size=maxt
+			if pool_size<1:
+				pool_size=3
+			pool = ThreadPool(pool_size)
+
+			# Insert tasks into the queue and let them run
+			i =0
+			self.pool_cntr=[]
+			
+			for ln in shards:
+				shard = ln[0].split('||')
+				#print shard
+				#time.sleep(1)
+				#options['_SHARD']=shard
+				#pprint(options)
+				#sys.exit(1)
+				shpart=shard[3]
+				if shpart:
+					sharded_part[shpart]=1
+				pool.queueTask(self.do_load, (from_db, from_t, to_db, to_t,{'_PARTITION':options.get('_PARTITION'),'_SHARD':shard}), self.taskCallback)
+				#del options['_SHARD']
+				if i==0  and 0:
+					break
+				i +=1
+			# When all tasks are finished, allow the threads to terminate
+			pool.joinAll()
+			
+			#print 'pool.__threads',pool.__threads
+			#print 'threads left ==============', len(self.pool_cntr)
+			#time.sleep(1)
+			#import threading
+			while activeCount()>1: #pool.getThreadCount()>0:
+				print '%s: Waiting for tpool %s' % (self._logger.getElapsedSec() , activeCount() - prev_count)
+				#print activeCount()
+				if len(shards)==len(self.pool_cntr):
+					break
+				time.sleep(1)
+			
+			#print 'threads left ==============', len(self.pool_cntr)
+			print "Elapsed Time: %s" % (time.time() - start)
+			start = time.time()
+			if self.p_if("IF_REBUILD_UNUSABLE_INDEXES") and len(shards)>0: #logging indexes for rebuild
+				part=options.get('_PARTITION')
+				if part:
+					print 'Index partition', part
+					self.rebuild_tab_indexes(to_db,('.'.join(to_t),to_t),{'_PARTITION':part})
+				else:
+					pprint(sharded_part)
+					#sys.exit(1)
+					if sharded_part:
+						for part in sharded_part.keys():
+							print 'Sharded index partition', part
+							self.rebuild_tab_indexes(to_db,('.'.join(to_t),to_t),{'_PARTITION':part})
+					else:
+						self.rebuild_tab_indexes(to_db,('.'.join(to_t),to_t),{})
+				print "Elapsed Time: %s" % (time.time() - start)
+			
+
+		else:
+			self._logger.warn('Passing sharded load. NUM_OF_SHARDS = %s' % nosh)
+		#sys.exit(1)
+		return (r, status) 
+
+	def rebuild_tab_indexes(self,to_db,tt,options):
+		(tab, to_tab)=tt
+		#print tab, to_tab
+		regexp=re.compile(r'INDEX:([\w\d\_]+)')
+		#self._pp['FROM_DB'] =self._pp['TO_DB']
+		assert to_db, 'TO_DB is not set.'
+		
+		
+		q="""set heading off pagesize 0
+		select 'INDEX:'||index_name from 
+		user_indexes where status='UNUSABLE' and table_name='%s';""" %to_tab[1]
+		
+		pt = options.get('_PARTITION')
+		
+		if pt:
+			q="""set heading off pagesize 0
+			select 'INDEX:'||index_name from 
+				all_ind_partitions where index_name in
+				(select index_name from all_indexes where table_name='%s')
+				and status='UNUSABLE' and partition_name='%s';""" % (to_tab[1],pt)
+		
+		#print q
+		(r, status) = self.do_query(to_db, q,0,regexp)
+		pprint(r)
+		#sys.exit(1)
+		
+		part=''
+		if pt:
+			part = ' PARTITION %s ' %  pt
+		if len(r):
+			self._logger.info('### Found %d unusable indexes for table %s.' % (len(r), tab))
+			for index in r:
+				idx=index[0].strip()
+				if len(idx):
+					self._logger.info('### START Rebuilding index %s.' % idx)
+					q = "ALTER INDEX %s REBUILD %s PARALLEL;" % (idx,part)
+					print q 
+					#sys.exit(1)
+					regexp=re.compile(r'.*')
+					(r, status) = self.do_query(to_db, q,0,regexp)
+					self._logger.info('### DONE Rebuilding index %s.' % idx)
+		else:
+			self._logger.info('### Passing, no unusable indexes for table %s.' % ( tab))
+						
+	def  spool_indexes(self):
+		self._pp['FROM_DB'] =self._pp['TO_DB']
+		self.set_template(etl_object,'CSMARTVOL.V_UNUSABLE_IDX')
+		self._pp['FILTER']= "table_name='TO_STG_TRD_VOL_FX_1'"
+		self._pp['OUTPUT_FILE']=self.get_log_fn('data','idx','CSMARTVOL.TO_STG_TRD_VOL_FX_1')[0]
+		pprint(self._pp)
+		self.spool( etl_object, logger)
+	def sql_echo_loader_1(self, etl_object, logger):
+		""" Runs copy using SQL*Plus and SQL*Loader"""
+		self.set_params(etl_object, logger)
+		(tmpl_batch, status) = self.get_tmpl_batch_fixed(etl_object, logger)
+		out=[]
+		assert  len(tmpl_batch)>0 & (not status), 'Template batch is missing or misconfigured.'
+		(def_conn,status)=self.get_default_conn(self.get_connector(self._p['FROM_DB']),self.get_connector(self._p['TO_DB']))
+		if status:
+			logger.error('Dual inline connectors are not supported by SQL*Plus COPY.')
+			logger.warning('#### Skipping batch processing.')
+			logger.info("COPY of batch %s has failed." % etl_object['name'])
+		else:
+			self._default_login=self.get_ora_login(def_conn)
+			assert  len(self._default_login)>0, 'Cannot set default login.'
+			from_db = self._pp['FROM_DB'].strip(' ').replace(' ','')
+			to_db= self._pp['TO_DB'].strip(' ').replace(' ','')
+			for tab in tmpl_batch:
+				if 1:
+
+					to_tab= self.get_to_tab(string.split(tab,'.'))
+					from_tab=self.get_from_tab(string.split(tab,'.'))
+					if 1:
+
+						status=0
+						if self.p_if('IF_TRUNCATE') and 0:
+							logger.info('#### START truncate of %s.' % etl_object['name'])
+							(r, status) = self.do_query(to_db, tmpl_batch[tab]['TRUNCATE'],0)
+							logger.info('#### END truncate of %s.' % etl_object['name'])						
+						if status==0:
+							delta='DATE_RANGE_DELTA'
+							if self.is_set(delta):
+								delta_type="PARTITON_RANGE" 
+								partition_interval_type="BIWEEKLY" 
+								#truncate target partition
+								logger.info('#### START truncate of %s.' % etl_object['name'])
+
+								regexp=re.compile(r'[\s|\ ]?(\w+)[\s|\ ]+(\w+)[\s|\ ]+(\w+)')
+								pq="""set heading off line %s echo off feedback off termout off colsep | feed off newpage 0 pagesize 99 serveroutput off show off trim on
+								%s""" % (200,self.get_part_q(from_tab, self.p(delta)))
+								(out, status) = self.do_query(from_db, pq,0,regexp)
+								#pprint(out)
+								print len(out)
+								gpts={}
+								for i in out:
+									if gpts.has_key(i[0]):
+										pass
+									else:
+										gpts[i[0]]={}
+									if gpts[i[0]].has_key(i[1]):
+										pass
+									else:
+										gpts[i[0]][i[1]]=[]										
+									gpts[i[0]][i[1]].append(i[2])										
+										
+								#pprint(gpts)
+								pts=gpts[str(from_tab[0])][str(from_tab[1])]
+								#pprint(pts)
+								range=self.p(delta)
+
+								#ptns=self.get_pts(pts)	
+								for ptsn in pts:
+									t="ALTER TABLE %s TRUNCATE PARTITION (%s);" % (string.join(to_tab,'.'),ptsn)	
+									print t								
+									
+									logger.info('#### START truncate of %s PARTITION (%s).' % (tab,ptsn))
+									(r, status) = self.do_query(to_db, t,0)
+									logger.info('#### END truncate of %s PARTITION (%s).' % (tab,ptsn))						
+									self.set_p('PARTITION',ptsn)
+									logger.info('#### START copy of %s PARTITION (%s).' % (tab,ptsn))		
+									(r, status) = self.do_load(from_db, from_tab, to_db, to_tab)
+									logger.info('#### END copy of %s PARTITION (%s).' % (tab,ptsn))
+									#sys.exit(1)
+
+							else: #full load
+								status=0
+								if self.p_if('IF_TRUNCATE'):
+									t=tmpl_batch[tab]['TRUNCATE']
+									#ptn =
+									if  self.p_if('PARTITION'):
+										if self._pp.has_key('TO_PARTITION'):
+											if self.is_set('TO_PARTITION'): 
+												t="ALTER TABLE %s TRUNCATE PARTITION (%s);" % (string.join(to_tab,'.'), self.p('TO_PARTITION'))
+										else:
+											t="ALTER TABLE %s TRUNCATE PARTITION (%s);" % (string.join(to_tab,'.'), self.p('PARTITION'))	
+										print t	
+									#sys.exit(1)
+									if 1:
+										logger.info('#### START truncate of %s.' % etl_object['name'])
+										(r, status) = self.do_query(to_db, t,0)
+										logger.info('#### END truncate of %s.' % etl_object['name'])						
+										if status!=0:
+											logger.info('#### TRUNCATE of %s failed.' % etl_object['name'])
+								if status==0:
+									
+										logger.info('#### START copy of %s.' % tab)							
+										(r, status) = self.do_load(from_db, from_tab, to_db, to_tab)
+										logger.info('#### END copy of %s.' % tab)
+							if status==0:
+								logger.info('Load of %s completed successfully.' % tab)
+						else:
+							logger.warning('#### Skipping load of %s.' % tab)
+							logger.warning("Truncate of table %s failed." % tab)
+					else:
+						logger.warning('#### Skipping truncate of %s.' % tab)
+			
+			#check if we need to spool unused index names
+
+			self.cleanup()
+		if self._pp.has_key('EMAIL_TO') and 0:
+			self.mail(self._pp['EMAIL_TO'],tab )
+		
+		return 0
+		
+	def sql_echo_loader_fixed(self, etl_object, logger):
+		""" Runs copy using SQL*Plus and SQL*Loader"""
+		self.set_params(etl_object, logger)
+		(tmpl_batch, status) = self.get_tmpl_batch_fixed(etl_object, logger)
+
+		assert  len(tmpl_batch)>0 & (not status), 'Template batch is missing or misconfigured.'
+		(def_conn,status)=self.get_default_conn(self.get_connector(self._p['FROM_DB']),self.get_connector(self._p['TO_DB']))
+		
+		if status:
+			logger.error('Dual inline connectors are not supported by SQL*Plus COPY.')
+			logger.warning('#### Skipping batch processing.')
+			#pprint(etl_object)
+			logger.info("COPY of batch %s has failed." % etl_object['name'])
+		else:
+			self._default_login=self.get_ora_login(def_conn)
+			#self._default_login=self.get_ora_login(self._connector[self._pp['TO_DB']])
+			assert  len(self._default_login)>0, 'Cannot set default login.'
+			from_db = self._pp['FROM_DB']
+			to_db= self._pp['TO_DB']
+			for tab in tmpl_batch:
+				if 1:
+					to_tab= self.get_to_tab(string.split(tab,'.'))
+					from_tab=self.get_from_tab(string.split(tab,'.'))
+					if 1:
+						logger.info('#### START copy of %s.' % tab)
+						(r, status) = self.do_load_fixed(from_db, from_tab, to_db, to_tab,tmpl_batch[tab])
+						if status==0:
+								logger.info('Fixed load of %s completed successfully.' % tab)
+						logger.info('#### END copy of %s.' % tab)
+					else:
+						logger.warning('#### Skipping %s.' % tab)
+						
+				self.cleanup()
+		if self._pp.has_key('EMAIL_TO') and 0:
+			#assert  self._process_meta[string.strip(self._pp['EMAIL_TO'],'%')], '%s is not defined in process_spec.' % self._pp['EMAIL_TO'])
+			self.mail(self._pp['EMAIL_TO'],tab )
+		
+		return 0	
+		
+
+
+	def  p(self,pname):
+		assert  self._pp.has_key(pname),'Parameter %s is not set' % pname
+		return self._pp[pname]
+		
+
+
+	def get_ctl_fixed_manual(self, to_tab, r_int):
+		#TRAILING NULLCOLS
+		#UNRECOVERABLE
+		#FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+		#INFILE '-'
+		tmpl="""UNRECOVERABLE
+LOAD DATA
+INFILE *
+APPEND
+INTO TABLE MDW.DELETE_REF_PRSNL_MGR_HIER
+(CRTD_TS POSITION(1:28),
+FTE_DIR_RPTS POSITION(29:40),
+NAM POSITION(41:219))
+BEGINDATA 
+10-DEC-10 04.17.57.102789 PM           0Dangot,Persio
+10-DEC-10 04.17.57.102789 PM           0Dangot,Persio
+10-DEC-10 04.17.57.102789 PM           0Manterola Rencher,Cristy
+10-DEC-10 04.17.57.102789 PM           0Manterola Rencher,Cristy
+10-DEC-10 04.17.57.102789 PM           0Devine,Dorothy K
+10-DEC-10 04.17.57.102789 PM           0Devine,Dorothy K""" #% (to_tab, string.join(r_int,',\n'))
+		return tmpl	
+	def get_ctl_fixed(self, to_tab, r_int):
+		#TRAILING NULLCOLS
+		#UNRECOVERABLE
+		#FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+		#INFILE '-'
+		tmpl="""OPTIONS (READSIZE=200000, ROWS=5000, BINDSIZE=200000, PARALLEL=false, direct=false, columnarrayrows=5000)
+UNRECOVERABLE
+LOAD DATA
+INFILE '-'
+APPEND
+INTO TABLE %s
+(%s)""" % (to_tab, string.join(r_int,',\n'))
+		return tmpl
+
+	def coldef_1 (self,x): 
+		#pprint(x)
+		#sys.exit(1)
+		sp= x.split(':')
+		print sp
+		if len(sp)>1:
+			if int(sp[1])>265:
+				row = x.split(':')
+				return '%s CHAR(%s) NULLIF %s=BLANKS ' % (row[0],row[1],row[0])
+			if 'COB_DT' in sp:
+				#return '%s DATE' % (sp[0])
+				return '%s "TO_DATE(:%s, \'DD-MON-RR HH.MI.SS AM\')" ' % (sp[0],sp[0])
+			if 'TRD_ENTR_TS' in sp:
+				#return '%s DATE' % (sp[0])
+				return '%s "TO_DATE(:%s, \'DD-MON-RR HH.MI.SS AM\')" ' % (sp[0],sp[0])
+		
+		
+		return sp[0] 
+		
+	def coldef (self,x): 
+		#pprint(x)
+		#sys.exit(1)
+		
+		(colname, colsize, coltype)= x.split(':')
+		#print sp
+		if colsize:
+			if int(colsize)>265:
+				row = x.split(':')
+				return '%s CHAR(%s) NULLIF %s=BLANKS ' % (colname,row[1],colname)
+			if 'DATE' ==  coltype:
+				#return '%s DATE' % (sp[0])
+				(nls_df,blah) = self.get_date_format()
+				if nls_df != self._default_df:
+					return '%s "TO_DATE(:%s, \'%s\')" ' % (colname,colname,nls_df)
+			#if 'TRD_ENTR_TS' in sp:
+			#	#return '%s DATE' % (sp[0])
+			#	#return '%s "TO_DATE(:%s, \'DD-MON-RR HH.MI.SS AM\')" ' % (sp[0],sp[0])
+		
+		
+		return colname 
+	def get_date_format (self):
+		nls_df = self._pp.get('NLS_DATE_FORMAT')
+		if not nls_df:
+			nls_df = self._default_df
+		nls_tf = self._pp.get('NLS_TIMESTAMP_FORMAT')
+		if not nls_tf:
+			nls_tf = 'DD-MON-RR HH.MI.SSXFF AM'	
+		return (nls_df,nls_tf)
+		
+	def do_load(self, from_db, from_t, to_db, to_t, options={} ):
+		f = ""
+		out=[]
+		err=[]
+		assert  len(from_db)>0, 'Source login is not set.'
+		assert  len(to_db)>0, 'Target login is not set.'
+		#pprint(options)
+		#sys.exit(1)
+		#(r_int, status)=self.get_common_cols(from_db, from_t, to_db, to_t)
+		(r_int, status)=self.get_common_cols(from_db, from_t, to_db, to_t)
+		
+		if not status:
+			ft = self.p('FIELD_TERMINATOR') 
+			lt = self.p('LINE_TERMINATOR') 
+			if_dpl_parallel='TRUE'
+			if self.p_if('IF_DPL_SERIAL'):
+				if_dpl_parallel='FALSE'	
+				
+			dpl_mode='APPEND'
+			if self.is_set('DPL_MODE'):
+				if 'APPEND' in self._pp['DPL_MODE']:
+					dpl_mode='APPEND'	
+				else:
+					if if_dpl_parallel=='TRUE':
+						self._logger.fatal('Cannot use DPL mode %s with parallel enabled (use IF_DPL_SERIAL=1).' % self._pp['DPL_MODE'])
+					else:
+						if 'INSERT' in self._pp['DPL_MODE']:
+							dpl_mode='INSERT'	
+						else:
+							if 'REPLACE' in self._pp['DPL_MODE']:
+								dpl_mode='REPLACE'	
+							else:
+								if 'TRUNCATE' in self._pp['DPL_MODE']:
+									dpl_mode='TRUNCATE'	
+								else:
+									self._logger.error('Unsupproted Direct Path Load mode %s.' % self._pp['DPL_MODE'])
+									
+			to_tab= string.join(self.get_to_tab(to_t),'.')
+			#cl = "'\"'||%s||'\"'" % string.join(r_int,"||'\",\"'||")
+			#print "'%s'||||'~'" % ft,"||'%'||" % ft
+			#print 'r_int:'
+			#pprint(r_int)
+			#sys.exit(1)
+			r_col = map(lambda x: x.split(':')[0], r_int)
+			#print 'r_col:'
+			#pprint(r_col)
+			#r_cl = r_col 
+			r_cl = map(self.coldef, r_int)
+			#print 'r_cl:'
+			#pprint(r_cl)
+			#sys.exit(1)
+			#r_cl = [line.split()[2] for col in r_int:if ]
+			cl =  "'%s'||%s||'%s'" % (ft,string.join(r_col,"||'%s'||\n" % ft),lt)
+			#print 'cl:'
+			#print cl
+			#sys.exit(1)
+			(nls_df,nls_tf) = self.get_date_format()
+			ctl=self.get_ctl(string.join(self.get_to_tab(to_t),'.'),r_cl,dpl_mode,
+							{'_NLS_DATE_FORMAT':nls_df,'_NLS_TIMESTAMP_FORMAT':nls_tf})
+			#self._logger.log(ctl)
+			#ptn = ''
+			#print ctl
+			#fname= 'sqlloader/%s.ctl' % to_tab
+			if_direct='TRUE'
+			#if self.is_set('PARTITION'):
+			ptn=options.get('_PARTITION')
+			if ptn:
+				ptn= "_%s" % options['_PARTITION']
+			else:
+				ptn=''
+			#else:
+			#ptn
+			
+			#pprint(ptn)
+			#sys.exit(1)
+			
+
+
+
+			if self.p_if('IF_CONVENTIONAL'):
+				if_direct='FALSE'	
+				
+			dpl_rows =10000
+			if self.is_set('DPL_ROWS'):
+				dpl_rows = int(self._pp['DPL_ROWS'])
+				if if_dpl_parallel=='TRUE':
+					self._logger.warn('DPL_ROWS is ignored in parallel mode.')
+			dpl_bindsize = 100000
+			if self.is_set('DPL_BINDSIZE'):
+				dpl_bindsize = int(self._pp['DPL_BINDSIZE'])
+			dpl_readsize = 100000
+			if self.is_set('DPL_READSIZE'):
+				dpl_readsize = int(self._pp['DPL_READSIZE'])
+			dpl_streamsize = 100000
+			if self.is_set('DPL_STREAMSIZE'):
+				dpl_streamsize = int(self._pp['DPL_STREAMSIZE'])
+			dpl_columnarrayrows = 10000
+			if self.is_set('DPL_COLUMNARRAYROWS'):
+				dpl_columnarrayrows = int(self._pp['DPL_COLUMNARRAYROWS'])				
+			dpl_skip_index_maintenance = 'TRUE'
+			if self.is_set('SKIP_INDEX_MAINTENANCE'):
+				dpl_skip_index_maintenance = self._pp['SKIP_INDEX_MAINTENANCE']
+			dpl_skip_unusable_indexes = 'TRUE'
+			if self.is_set('SKIP_UNUSABLE_INDEXES'):
+				dpl_skip_unusable_indexes = self._pp['SKIP_UNUSABLE_INDEXES']
+			loader_errors = 10
+			if self.is_set('LOADER_ERRORS'):
+				loader_errors = int(self._pp['LOADER_ERRORS'])
+			shard=''
+			#pprint(options)
+			if '_SHARD' in options:
+				if not ptn and options['_SHARD'][3]:
+					shard="_%s_%s" % (options['_SHARD'][0],options['_SHARD'][3])
+				else:
+					shard="_%s" % options['_SHARD'][0]
+			#print ptn, options['_SHARD'][3]	
+			fname= 'sqlloader/%s%s%s.ctl' % (to_tab, ptn,shard)
+			print fname
+			#sys.exit(1)
+			import codecs
+			f = codecs.open(fname, 'w',"utf-8")
+			status = f.write(unicode(ctl))
+			
+			if status!= None:
+				self._logger.error('Cannot write to %s.' % fname)
+			f.close()
+			#fname= 'sqlloader/%s%s_2.ctl' % (to_tab, ptn)
+			(r,status) = self.get_line_len(((from_db, from_t),(to_db, to_t)))
+			maxlen=32767
+			#pprint(r)
+			#sys.exit(1)
+			#if len(r)==0:
+			#	self._logger.error("Cannot find line length.")
+			llen=int(r[0]); # +20
+			if llen>maxlen:
+				llen=maxlen
+			q= """set head off line %s pages 0 echo off feedback off termout off  feed off newpage 0 arraysize 5000
+			alter session set NLS_DATE_FORMAT='%s'\n/\n\nalter session set NLS_TIMESTAMP_FORMAT='%s'\n/\n
+			SELECT %s FROM  %s  %s;\nexit;\n""" % \
+			(llen, nls_df, nls_tf, cl , string.join(self.get_from_tab(from_t),'.'), self.get_q_options(self._pp,options))
+			#/*WHERE  account_id='1427826'%/
+			self._logger.sql(q)
+			self.export_sql((q, to_tab))
+			#pprint(q) 
+			#pprint(options)
+			#sys.exit(1)
+			p1 = Popen(['echo', q], stdout=PIPE, stderr=PIPE)
+			p2 = Popen([ 'sqlplus', '-S',from_db], stdin=p1.stdout, stdout=PIPE , stderr=PIPE
+			)
+			status =0
+			out=[]
+			err=[]
+			#print to_db
+			#sys.exit(1)
+			slconf=['sqlldr', 'control=%s' % fname, # 'userid=%s' % to_db, 
+			'ROWS=%s' % dpl_rows,
+				'COLUMNARRAYROWS=%s' % dpl_columnarrayrows,#'size=10000',
+				'STREAMSIZE=%s' % dpl_streamsize,'READSIZE=%s' % dpl_readsize,
+				'PARALLEL=%s' % if_dpl_parallel,
+				'BINDSIZE=%s' % dpl_bindsize, #' UNRECOVERABLE=Y ', 
+				'SKIP_INDEX_MAINTENANCE=%s' % dpl_skip_index_maintenance, 'SKIP_UNUSABLE_INDEXES=%s' % dpl_skip_unusable_indexes,
+				'DIRECT=%s' % if_direct, #"data=\'-\'",
+				'MULTITHREADING=TRUE',
+				'LOG=sqlloader/%s%s%s.log' % (to_tab, ptn,shard), 'BAD=sqlloader/%s%s%s.bad' % (to_tab, ptn,shard),
+				'DISCARD=sqlloader/%s%s%s.dsc' % (to_tab, ptn,shard),
+				'ERRORS=%s' % loader_errors]
+			self._logger.log(slconf)
+			pprint(slconf)
+			if 1:
+				p3 = Popen(['sqlldr', 'control=%s' % fname, 'userid=%s' % to_db, #'ROWS=%s' % dpl_rows,
+				'COLUMNARRAYROWS=%s' % dpl_columnarrayrows,#'size=10000',
+				'STREAMSIZE=%s' % dpl_streamsize,'READSIZE=%s' % dpl_readsize,
+				'PARALLEL=%s' % if_dpl_parallel,
+				'BINDSIZE=%s' % dpl_bindsize, #' UNRECOVERABLE=Y ', 
+				'SKIP_INDEX_MAINTENANCE=%s' % dpl_skip_index_maintenance, 'SKIP_UNUSABLE_INDEXES=%s' % dpl_skip_unusable_indexes,
+				'DIRECT=%s' % if_direct, #"data=\'-\'",
+				'MULTITHREADING=TRUE',
+				'LOG=sqlloader/%s%s%s.log' % (to_tab, ptn,shard), 'BAD=sqlloader/%s%s%s.bad' % (to_tab, ptn,shard),
+				'DISCARD=sqlloader/%s%s%s.dsc' % (to_tab, ptn,shard),
+				'ERRORS=%s' % loader_errors], 
+				stdin=p2.stdout, stdout=PIPE, stderr=PIPE)
+				output=' '
+				#pprint(dir(p3.stderr))
+				while output:
+					output = p3.stdout.readline()
+					out.append(output)
+					#print output
+					self._logger.info(output.rstrip())
+				status=p3.wait()
+				
+				if status==0:
+					self._logger.info('SQL*Loader status =%s' % status)
+				if status==1:
+					self._logger.error('SQL*Loader status =%s' % status)
+					output=' '
+					while output:
+						output = p3.stderr.readline()
+						err.append(output)
+						#print output
+						self._logger.warning(output.rstrip())
+					status=p3.wait()
+					if status==1:
+						self._logger.error(string.join(err,'\n'))						
+				if status==2:
+					self._logger.warning('SQL*Loader status =%s' % status)
+				
+
+			else:
+				output=' '
+				
+				while output:
+					output = p2.stdout.readline()
+					out.append(output)
+					#print output
+					self._logger.info(output.rstrip())
+				
+				status=p2.wait()
+				if status==0:
+					self._logger.info('SQL*Plus status =%s' % status)
+				else:
+					if status==1:
+						self._logger.warning('SQL*Plus status =%s' % status)
+						output=' '
+						while output:
+							output = p2.stderr.readline()
+							err.append(output)
+							#print output
+							self._logger.error(output.rstrip())
+						status=p2.wait()
+						if status==1:
+							self._logger.error(string.join(err,'\n'))							
+					else:
+						self._logger.error('SQL*Plus status =%s' % status)
+
+		else:
+			self._logger.warning('Cannot fetch common columns.')
+		return (out,status)		
+
+	
+	def load_metadata(self,from_db,from_t):
+		ext='meta'
+		metadir= '%s/meta' % self._logger.get_logdir()
+		tab= string.join(from_t,'.')
+		if not os.path.isdir(metadir):
+			os.mkdir(metadir) 
+		metafn = '%s/%s.%s.%s' % (metadir,self._pp['WORKER_NAME'],tab,ext)
+		if self.is_set('PARTITION'):
+			metafn = '%s/%s.%s.%s.%s' % (metadir,self._pp['WORKER_NAME'],tab,self._pp['PARTITION'],ext)	
+		output = open(metafn, 'wb')	
+		pickle.dump({'CONFIG':self._p,'COLUMNS':self.get_columns(from_db, from_t),'TABLE':from_t}, output)
+		output.close()
+		
+		pkl_file = open(metafn, 'rb')
+		data1 = pickle.load(pkl_file)
+		#pprint(data1)		
+
+	def get_source_path(self, etl_object, logger):
+		""" Gets path to a source csv file """
+		regexp=re.compile(r'((%)([\w\_]+)(%))')
+		source_file =''
+		pp={}
+		for param in etl_object['node']['param']:
+			pp[param] = etl_object['node']['param'][param]['value']
+			m = re.match(regexp, etl_object['node']['param'][param]['value'])
+			if m:
+				if (self._process_meta.has_key(m.groups()[2])):
+					pp[param]=pp[param].replace(m.groups()[0],self._process_meta[m.groups()[2]])
+				if (self._connector.has_key(m.groups()[2])):
+					pp[param]= pp[param].replace(m.groups()[0],'%s/%s@%s' % 
+												 (self._connector[m.groups()[2]]['schema'],self._connector[m.groups()[2]]['pword'],self._connector[m.groups()[2]]['sid']))
+		if pp.has_key('SOURCE_PATH'):
+		  source_file = pp['SOURCE_PATH']
+		#self._logger.info(source_file)
+		#sys.exit(1)
+		return source_file 
+
+
+
+	def get_columns_nots1(self, login, t):
+		col_key = self.get_cc_key((login, t))
+		if not self._ci_nots.has_key(col_key):
+			self._ci_nots[col_key]={}
+			
+		if len(self._ci_nots[col_key])==0:
+			q="select  'COLUMN.'||column_name from all_tab_columns t where table_name =UPPER('%s') and owner='%s' AND data_type IN ('VARCHAR2','CHAR','DATE','LONG','NUMBER') order by column_name;" % (t[1],t[0])
+		
+			regexp=re.compile(r'.*\.([\w\_]+)\n')
+			(r,status) = self.do_query(login, "set echo off pagesize 0 serveroutput off feedback off termout off\n%s" % q,0,regexp,1)
+
+			if status!=0:
+				if len(r)==0:
+					status=2
+					self._logger.fatal('Table %s doesn\'t exist in %s.' % (string.join(t,'.'), re.sub('\/(.*)\@', '/***@', login)))
+			
+			self._ci_nots[col_key]=r
+			return (r,status)
+		else:
+			return (self._ci_nots[col_key],0)
+
+	def get_columns(self, login, t):
+		col_key = self.get_cc_key((login, t))
+		#print 'col_key = ',col_key
+		if not self._ci.has_key(col_key):
+			self._ci[col_key]={}
+		#pprint(self._ci)
+		if len(self._ci[col_key])==0:
+			#AND data_type IN ('VARCHAR2','CHAR','DATE','LONG','NUMBER')
+			#q="select  'COLUMN.'||column_name from all_tab_columns t where table_name =UPPER('%s') and owner='%s'  order by column_id;" % (t[1],t[0])
+			q="select  'COLUMN.'||column_name||':'||data_length||':'||data_type from all_tab_columns t where table_name =UPPER('%s') and owner='%s'  order by column_id;" % (t[1],t[0])
+			regexp=re.compile(r'.*\.([\w\_\:\(\)\d]+)\n')
+			(r,status) = self.do_query(login, "set echo off pagesize 0 serveroutput off feedback off termout off\n%s" % q,0,regexp,1)
+			#pprint(r)
+			if not status:
+				if len(r)==0:
+					status=2
+					self._logger.fatal('Table %s doesn\'t exist in %s.' % (string.join(t,'.'), re.sub('\/(.*)\@', '/***@', login)))
+			r.sort()
+			self._ci[col_key]=r	
+			#pprint(r)
+			#sys.exit(1)
+			return (r,status)
+		else:
+			return (self._ci[col_key],0)
+
+	def get_ctl_columns(self, login, t):
+		col_key = self.get_cc_key((login, t))
+		print 'get_ctl_columns.col_key = ',col_key
+		sys.exit(1)
+		if not self._ci.has_key(col_key):
+			self._ci[col_key]={}
+		#pprint(self._ci)
+		if len(self._ci[col_key])==0:
+			#AND data_type IN ('VARCHAR2','CHAR','DATE','LONG','NUMBER')
+			q="select  'COLUMN.'||column_name||':'||data_length from all_tab_columns t where table_name =UPPER('%s') and owner='%s'  order by column_id;" % (t[1],t[0])
+
+			regexp=re.compile(r'.*\.([\w\_]+)\n')
+			(r,status) = self.do_query(login, "set echo off pagesize 0 serveroutput off feedback off termout off\n%s" % q,0,regexp,1)
+			if not status:
+				if len(r)==0:
+					status=2
+					self._logger.fatal('Table %s doesn\'t exist in %s.' % (string.join(t,'.'), re.sub('\/(.*)\@', '/***@', login)))
+			self._ci[col_key]=r	
+			return (r,status)
+		else:
+			return (self._ci[col_key],0)
+			
+	def get_col_format(self, tab_tt):
+
+		tab_key=(self.get_cc_key(tab_tt[0]),self.get_cc_key(tab_tt[1]))
+		(login, t) = tab_tt[0]
+		ci = " AND COLUMN_NAME IN ('%s') " % string.join(self._cci[tab_key[0]][tab_key[1]],"','")
+		#print ci
+		q="select 'COL '||column_name||' FORMAT '||DECODE(data_type, 'VARCHAR2','a'||DATA_LENGTH, 'CHAR','a'||DATA_LENGTH, 'NUMBER','9999999999999999999999999999999','DATE','DATE', 'TIMESTAMP(6)','a28',  'UNDEFINED') fmt from all_tab_columns where table_name =UPPER('%s') and owner='%s' %s order by column_name;" % (t[1],t[0],ci)
+		self._logger.sql(q)
+		#print q
+		#sys.exit(1)
+		regexp=re.compile(r'[\ ]*(COL [\w \d\_]+)')
+		(r,status) = self.do_query(login, "set echo off pagesize 0 serveroutput off feedback off termout off HEADING OFF SHOW OFF PAGESIZE 0 VERIFY OFF DOCUMENT OFF NEWP NONE feed off\n%s" % q,0,regexp,1)
+		#pprint(r)
+		if status!=0:
+			if len(r)==0:
+				status=2
+				self._logger.fatal('Table %s doesn\'t exist in %s.' % (string.join(t,'.'), re.sub('\/(.*),\@', '/***@', login)))
+		return (r,status)
+
+
+	def get_col_position(self, tab_tt):
+		(login, t) = tab_tt[0]
+		tab_key=(self.get_cc_key(tab_tt[0]),self.get_cc_key(tab_tt[1]))
+		#column index
+		ci = " AND COLUMN_NAME IN ('%s') " % string.join(self._cci[tab_key[0]][tab_key[1]],"','")
+		q="select COLUMN_NAME ||' POSITION('||(len-data_length+1)||':'||len||') ' q FROM (select COLUMN_NAME, data_type,sum(data_length) OVER (PARTITION BY table_name ORDER BY column_name   ROWS UNBOUNDED PRECEDING) len, data_length from ( select column_name, data_type,DECODE(data_type,'NUMBER',32,'TIMESTAMP(6)',28, data_length) data_length, table_name, owner from all_tab_columns) where table_name =UPPER('%s') and owner='%s' %s order by column_name);" % (t[1],t[0], ci)		
+		self._logger.sql(q)
+		regexp=re.compile(r'[\ ]*([\w\d\_]+\ POSITION\(\d+\:\d+\))')
+		(r,status) = self.do_query(login, "set echo off pagesize 0 serveroutput off feedback off termout off HEADING OFF SHOW OFF PAGESIZE 0 VERIFY OFF DOCUMENT OFF NEWP NONE feed off\n%s" % q,0,regexp,1)
+		#pprint(r)
+		if status!=0:
+			if len(r)==0:
+				status=2
+				self._logger.fatal('Table %s doesn\'t exist in %s.' % (string.join(t,'.'), re.sub('\/(.*),\@', '/***@', login)))
+		return (r,status)
+		
+	def get_select(self, login, from_t):
+		(r,status) = self.get_columns(login, from_t)
+		select_from = from_t
+		#if to_t:
+			#select_from=to_t
+		out="SELECT %s FROM %s " % (string.join(r,','), string.join(select_from,'.'))
+		return (out, status)
+	def get_select_nots(self, login, from_t):
+		(r,status) = self.get_columns_nots(login, from_t)
+		select_from = from_t
+		#if to_t:
+			#select_from=to_t
+		out="SELECT %s FROM %s " % (string.join(r,','), string.join(select_from,'.'))
+		return (out, status)		
+
+	def get_common_cols_nots(self, from_db, from_t, to_db, to_t):
+		from_key = self.get_cc_key((from_db, from_t))
+		to_key = self.get_cc_key( (to_db, to_t))
+		if not self._cci_nots.has_key(from_key):
+			self._cci_nots[from_key]={}
+			self._cci_nots[from_key][to_key]={}
+		if not self._cci_nots.has_key(to_key):
+			self._cci_nots[to_key]={}
+			self._cci_nots[to_key][from_key]={}			
+		if len(self._cci_nots[to_key][from_key])==0:
+			(r_from,s_from) = self.get_columns_nots(from_db, from_t)
+			assert  len(r_from)>0, 'Table %s does not exists in source db.' % from_t
+			(r_to,s_to) = self.get_columns_nots(to_db, to_t)
+			assert  len(r_to)>0, 'Table %s does not exists in target db.' % to_t
+			if not s_from and not s_to:
+				r_int = list(set(r_from) & set(r_to))
+				r_int.sort()
+				self._cci_nots[to_key][from_key]=r_int
+				self._cci_nots[from_key][to_key]=r_int
+				return (r_int, 0)
+			else:
+				self._logger.error('Cannot get column lists.')
+			return (None, 1)
+		else:
+			return (self._cci_nots[to_key][from_key], 0)
+	def get_cc_key (self, db_tab_t):
+		(db, tab_t) =db_tab_t
+		return "%s|%s" % (db, self.gt(tab_t))
+	def get_common_cols(self, from_db, from_t, to_db, to_t):
+		from_key = self.get_cc_key((from_db, from_t))
+		#print 'from_key=%s' % from_key
+		to_key = self.get_cc_key( (to_db, to_t))
+		#print 'to_key= %s'% to_key
+		#pprint (self._cci.keys())
+		if not self._cci.has_key(from_key):
+			self._cci[from_key]={}
+			self._cci[from_key][to_key]={}
+		if not self._cci.has_key(to_key):
+			self._cci[to_key]={}	
+			self._cci[to_key][from_key]={}
+		#pprint (self._cci.keys())
+		if len(self._cci[to_key][from_key])==0:	
+			#print 'getting columns for:',from_db, from_t
+			(r_from,s_from) = self.get_columns(from_db, from_t)
+			#print 'getting columns for:',to_db, to_t
+			(r_to,s_to) = self.get_columns(to_db, to_t)
+			
+			
+			if not s_from and not s_to:
+				r_int = list(set(r_from) & set(r_to))
+				r_int.sort()
+				self._cci[to_key][from_key]=r_int
+				self._cci[from_key][to_key]=r_int
+				return (r_int, 0)
+			else:
+				self._logger.error('Cannot get column lists.')
+			return (None, 1)	
+		else:
+			#print 'cc exists'
+			return (self._cci[to_key][from_key], 0)	
+
+	def get_ctl_cols(self, from_db, from_t, to_db, to_t):
+		from_key = self.get_cc_key((from_db, from_t))
+		#print 'from_key=%s' % from_key
+		to_key = self.get_cc_key( (to_db, to_t))
+		print 'to_key= %s'% to_key
+		#sys.exit(1)
+		#pprint (self._cci.keys())
+		if not self._cci.has_key(from_key):
+			self._cci[from_key]={}
+			self._cci[from_key][to_key]={}
+		if not self._cci.has_key(to_key):
+			self._cci[to_key]={}	
+			self._cci[to_key][from_key]={}
+		#pprint (self._cci.keys())
+		if len(self._cci[to_key][from_key])==0:	
+			#print 'getting columns for:',from_db, from_t
+			(r_from,s_from) = self.get_columns(from_db, from_t)
+			#print 'getting columns for:',to_db, to_t
+			(r_to,s_to) = self.get_columns(to_db, to_t)
+			
+			
+			if not s_from and not s_to:
+				r_int = list(set(r_from) & set(r_to))
+				r_int.sort()
+				self._cci[to_key][from_key]=r_int
+				self._cci[from_key][to_key]=r_int
+				return (r_int, 0)
+			else:
+				self._logger.error('Cannot get column lists.')
+			return (None, 1)	
+		else:
+			#print 'cc exists'
+			return (self._cci[to_key][from_key], 0)				
+			
+	def get_select_from_cols(self, l_cols, t_tab):
+		out="SELECT %s FROM %s " % (string.join(l_cols,', '), string.join(t_tab,'.'))
+		return out	
+
+	def get_select_p(self, login, from_t, to_t=None):
+		(r,status) = self.get_columns_nots(login, from_t)
+		select_from = from_t
+		if to_t:
+			select_from=to_t
+		out="SELECT %s FROM %s " % (string.join(r,','), string.join(select_from,'.'))
+		return (out, status)
+
+	def get_tmpl_batch(self, etl_object, logger):
+		""" Parse template to list of tables """
+		
+		tmpl = self.get_template(etl_object, logger)
+		#pprint(self._pp)
+		#pprint(tmpl)
+		regexp=re.compile(r'([\w\_]+)\.([\w\_]+)')
+		template={}
+		trunc_batch ={}
+		m = re.findall(regexp, tmpl)
+		#pprint(self._connector)
+		conn=self._connector
+		pp=self._pp
+		assert  pp.has_key('FROM_DB'),'FROM_DB is not defined'
+		assert  pp.has_key('TO_DB'),'TO_DB is not defined'
+		
+		#sys.exit(1)
+		if m:
+			#pprint(m)
+			for t in m:
+				from_t=list(t)
+				to_t=list(t)
+				to_t=self.get_to_tab(to_t)
+				from_t=self.get_from_tab(from_t)
+				#print to_t, from_t
+				
+				#pprint(pp)
+				#print(t)
+				#sys.exit(1)
+				from_db = pp['FROM_DB']
+				#pprint(from_db)
+				to_db= pp['TO_DB']
+				#print from_db, to_db
+				to_tab= string.join(to_t,'.')
+				to_view= string.join(to_t,'.v_')				
+				from_tab=string.join(from_t,'.')
+
+				if 0:
+					#(q_to,to_status)=self.get_select(to_db,from_t, to_t)
+					(q_to,to_status)=self.get_select_nots(to_db, to_t)
+					#print 'to ', q_to,to_status
+					(q_from,from_status)=self.get_select_nots(from_db,from_t)
+					#print 'from ', q_from,from_status
+				if 1:
+					(r_int, status)=self.get_common_cols_nots(from_db, from_t, to_db, to_t)
+					print 'got common cols',r_int
+
+					
+				if not status:
+					q_to = self.get_select_from_cols( r_int, to_t)
+					q_from = self.get_select_from_cols( r_int, from_t)
+					lame_duck= self.get_q_options(self._pp,{'_PARTITION':self._pp.get('PARTITION',None)})
+					part=''
+					if pp.has_key('PARTITION'):
+						part = " PARTITION (%s) " % pp['PARTITION']
+					else:
+						if pp.has_key('PARTITION'):
+							part = " PARTITION (%s) " % pp['PARTITION']
+						else:
+							if pp.has_key('SUBPARTITION'):
+								part = " SUBPARTITION (%s) " % pp['SUBPARTITION']
+						
+						
+					bucket=''
+					if pp.has_key('BUCKET_ID'):
+						bucket = " AND ora_hash(GFCID||CUST_NAM,2)=%s " % pp['BUCKET_ID']	
+					ins_mode=' APPEND '
+					#pprint(pp)
+					if pp.has_key('INSERT_MODE'):
+						ins_mode = " %s " % pp['INSERT_MODE']
+					cp_tmpl=  'set timing on echo on arraysize %s copycommit %s\nCOPY %s %s %s USING %s %s %s\n exit;' % (pp['ARRAYSIZE'],pp['COPYCOMMIT'],self.get_copy_q(self.get_connector(self._p['FROM_DB']),self.get_connector(self._p['TO_DB'])), ins_mode, to_view, q_from, part,lame_duck )
+					#cp_tmpl=  'set timing on echo on arraysize %s copycommit %s\nCOPY %s INSERT %s USING %s WHERE 1=1 %s \n exit;' % (pp['ARRAYSIZE'],pp['COPYCOMMIT'],self.get_copy_q(conn[pp['FROM_DB']],conn[pp['TO_DB']]), to_view, q_from, bucket)
+					#pprint(cp_tmpl)
+					#print re.sub('\/(.*)\@', '/***@', cp_tmpl)
+					template[from_tab]={}
+					template[from_tab]['INSERT'] = cp_tmpl
+					template[from_tab]['TRUNCATE'] ="TRUNCATE TABLE %s;\nexit;" % to_tab
+					template[from_tab]['VIEW'] ="CREATE OR REPLACE VIEW %s.v_%s AS %s;\nexit;" % (to_t[0],to_t[1], q_to)
+				else:
+					logger.error('Failed to create code templates.')
+
+		return (template, status)
+
+	def get_tmpl_batch_fixed(self, etl_object, logger):
+		""" Parse template to list of tables """
+		
+		tmpl = self.get_template(etl_object, logger)
+		#pprint(self._pp)
+		#pprint(tmpl)
+		regexp=re.compile(r'([\w\_]+)\.([\w\_]+)')
+		template={}
+		trunc_batch ={}
+		m = re.findall(regexp, tmpl)
+		#pprint(self._connector)
+		conn=self._connector
+		pp=self._pp
+		assert  pp.has_key('FROM_DB'),'FROM_DB is not defined'
+		assert  pp.has_key('TO_DB'),'TO_DB is not defined'
+		
+		#sys.exit(1)
+		if m:
+			#pprint(m)
+			for t in m:
+				from_t=list(t)
+				to_t=list(t)
+				to_t=self.get_to_tab(to_t)
+				from_t=self.get_from_tab(from_t)
+				#print to_t, from_t
+				
+				#pprint(pp)
+				#print(t)
+				#sys.exit(1)
+				from_db = pp['FROM_DB']
+				#pprint(from_db)
+				to_db= pp['TO_DB']
+				#print from_db, to_db
+				to_tab= string.join(to_t,'.')
+				to_view= string.join(to_t,'.v_')				
+				from_tab=string.join(from_t,'.')
+
+				if 0:
+					#(q_to,to_status)=self.get_select(to_db,from_t, to_t)
+					(q_to,to_status)=self.get_select(to_db, to_t)
+					#print 'to ', q_to,to_status
+					(q_from,from_status)=self.get_select(from_db,from_t)
+					#print 'from ', q_from,from_status
+				if 1:
+					(r_int, status)=self.get_common_cols(from_db, from_t, to_db, to_t)
+					#print 'got common colsfor ', from_db, from_t, to_db, to_t	
+					#pprint(r_int)
+					
+				if not status:
+					q_to = self.get_select_from_cols( r_int, to_t)
+					q_from = self.get_select_from_cols( r_int, from_t)
+					lame_duck=''
+					if pp.has_key('LAME_DUCK') and int(pp['LAME_DUCK'])>0:
+						lame_duck = "WHERE ROWNUM <= %s " % pp['LAME_DUCK']
+					part=''
+					if pp.has_key('PARTITION'):
+						part = " PARTITION (%s) " % pp['PARTITION']
+					else:
+						if pp.has_key('SUBPARTITION'):
+							part = " SUBPARTITION (%s) " % pp['SUBPARTITION']
+					bucket=''
+					if pp.has_key('BUCKET_ID'):
+						bucket = " AND ora_hash(GFCID||CUST_NAM,2)=%s " % pp['BUCKET_ID']							
+					cp_tmpl=  'set timing on echo on arraysize %s copycommit %s\n %s %s %s\n exit;' % (pp['ARRAYSIZE'],pp['COPYCOMMIT'], q_from, part,lame_duck )
+					#cp_tmpl=  'set timing on echo on arraysize %s copycommit %s\nCOPY %s INSERT %s USING %s WHERE 1=1 %s \n exit;' % (pp['ARRAYSIZE'],pp['COPYCOMMIT'],self.get_copy_q(conn[pp['FROM_DB']],conn[pp['TO_DB']]), to_view, q_from, bucket)
+					
+					#print re.sub('\/(.*)\@', '/***@', cp_tmpl)
+					template[from_tab]={}
+					template[from_tab]['SELECT'] = cp_tmpl
+					template[from_tab]['TRUNCATE'] ="TRUNCATE TABLE %s;\nexit;" % to_tab
+					#template[from_tab]['VIEW'] ="CREATE OR REPLACE VIEW %s.v_%s AS %s;\nexit;" % (to_t[0],to_t[1], q_to)
+				else:
+					logger.error('Failed to create fixed code templates.')
+
+		return (template, status)		
+	def get_copy_q(self, from_db, to_db):
+		if self.is_inline(to_db):
+			return 'FROM %s ' % (self.get_ora_login(from_db))
+		if self.is_inline(from_db):
+			return 'TO %s ' % (self.get_ora_login(to_db))
+		return 'FROM %s TO %s' % (self.get_ora_login(from_db),self.get_ora_login(to_db))
+	def save_sh_template(path):
+		f = open(path, 'w')
+	def get_sh_template(self, tmpl):
+		#pprint(tmpl)
+		for sql_tmpl_key in tmpl:
+			self.sh_tmpl=self.sh_tmpl.replace("$%s$" % sql_tmpl_key, tmpl[sql_tmpl_key])
+		return self.sh_tmpl
+	def save_sh_code(self,tmpl):
+		sh_path=tmpl['SH_PATH']
+		#print sh_path
+		f=open(sh_path,"w");
+		f.write(tmpl['SH_CODE'])
+		f.close()
+		
+

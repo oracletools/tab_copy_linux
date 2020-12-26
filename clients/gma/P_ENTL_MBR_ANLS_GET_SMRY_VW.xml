@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testplan name="gma_test_plan">
+	<test name="P_ENTL_MBR_ANLS_GET_SMRY_VW test">
+		<description>
+			set autoprint off
+			variable xs refcursor
+			variable xsr refcursor
+			exec P_ENTL_MBR_ANLS_GET_SMRY_VW_g(:xs, :xsr, 'MTHL_INCM_STMT','Pre-Outlook','ALL','ALL', IN_USER_SOE_ID=>'SR64878')
+		</description>
+		<config
+			connector="CUSER_GMAD"
+			log_dest="LOG_ROOT"	
+			file_ext="txt"
+			delim =","
+		/>
+		<procedure name="P_ENTL_MBR_ANLS_GET_SMRY_VW_G" param_source="sql">
+	   <sql descr="simple test">
+	   <![CDATA[
+			SELECT  'MTHL_INCM_STMT' IN_SUB_RPT_NAM,
+					'Pre-Outlook' IN_OUTL_TYP,
+					'ALL' IN_PROD,
+					'Total' IN_ROLLUP,
+					'ALL' IN_RPT_MO,
+					'ALL' IN_RPT_YR,
+					'DS11779'	IN_USER_SOE_ID,
+					 '902'	IN_USER_GRP_ID
+			FROM DUAL
+			UNION ALL
+			SELECT  'MTHL_INCM_STMT' IN_SUB_RPT_NAM,
+					'Post-Outlook' IN_OUTL_TYP,
+					'ALL' IN_PROD,
+					'Total' IN_ROLLUP,
+					'ALL' IN_RPT_MO,
+					'ALL' IN_RPT_YR,
+					'DS11779'	IN_USER_SOE_ID,
+					 '902'	IN_USER_GRP_ID
+			FROM DUAL
+		]]>
+		</sql>		
+			<param name="OUT_MBR_SMRY_VW" in_out="OUT" type="REF CURSOR" />
+			<param name="OUT_MBR_SMRY_RSDATA" in_out="OUT"  type="REF CURSOR" />
+			<param name="IN_SUB_RPT_NAM" in_out="IN" value="MTHL_INCM_STMT" type="VARCHAR2" />
+			<param name="IN_OUTL_TYP" in_out="IN" 	value="Pre-Outlook" type="VARCHAR2" />
+			<param name="IN_PROD" in_out="IN" 		value="ALL" 	type="VARCHAR2" />
+			<param name="IN_ROLLUP" in_out="IN" 	value="Total" 	type="VARCHAR2" />
+			<param name="IN_RPT_MO" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_RPT_YR" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_USER_SOE_ID" in_out="IN" value="DS11779" type="VARCHAR2" />
+			<param name="IN_USER_GRP_ID" in_out="IN" value="902" 	type="VARCHAR2" />
+		</procedure>
+	</test>
+
+	<test1 name="P_ENTL_MBR_ANLS_GET_SMRY_VW test">
+		<description>
+			set autoprint off
+			variable xs refcursor
+			variable xsr refcursor
+			exec P_ENTL_MBR_ANLS_GET_SMRY_VW_g(:xs, :xsr, 'MTHL_INCM_STMT','Pre-Outlook','ALL','ALL', IN_USER_SOE_ID=>'SR64878')
+		</description>
+		<config
+			connector="CUSER_GMAD"
+			log_dest="LOG_ROOT"	
+			file_ext="txt"
+			delim =","
+		/>
+		<procedure name="P_ENTL_MBR_ANLS_GET_SMRY_VW_G">
+		
+			<param name="OUT_MBR_SMRY_VW" in_out="OUT" type="REF CURSOR" />
+			<param name="OUT_MBR_SMRY_RSDATA" in_out="OUT"  type="REF CURSOR" />
+			<param name="IN_SUB_RPT_NAM" in_out="IN" value="MTHL_INCM_STMT" type="VARCHAR2" />
+			<param name="IN_OUTL_TYP" in_out="IN" 	value="Pre-Outlook" type="VARCHAR2" />
+			<param name="IN_PROD" in_out="IN" 		value="ALL" 	type="VARCHAR2" />
+			<param name="IN_ROLLUP" in_out="IN" 	value="Total" 	type="VARCHAR2" />
+			<param name="IN_RPT_MO" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_RPT_YR" in_out="IN" 	value="ALL" 	type="VARCHAR2" />
+			<param name="IN_USER_SOE_ID" in_out="IN" value="DS11779" type="VARCHAR2" />
+			<param name="IN_USER_GRP_ID" in_out="IN" value="902" 	type="VARCHAR2" />
+		</procedure>
+	</test1>	
+</testplan>
